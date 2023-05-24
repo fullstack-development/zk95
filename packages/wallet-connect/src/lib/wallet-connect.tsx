@@ -1,51 +1,85 @@
 import { useState } from 'react';
-import { Avatar, Button, MenuList } from 'react95';
-import { useProperty } from '@frp-ts/react';
+import { Avatar, Button } from 'react95';
+import { useProperties, useProperty } from '@frp-ts/react';
 import { Property } from '@frp-ts/core';
 
 import { WindowsIcon } from '@mixer/icons';
-import { Wallet } from '@meshsdk/core';
+import { BrowserWallet, Wallet } from '@meshsdk/core';
 
-import type { ViewModel } from './view-model'
-import { Root, Menu, MenuItem, MenuSideBar } from './styled'
+import type { ConnectWalletViewModel } from './view-model';
+import { Root, Menu, MenuItem, MenuSideBar } from './styled';
+import { ViewModel, useClickOutside, useViewModel } from '@mixer/utils';
 
-export function WalletConnect({ vm }: { vm: ViewModel }) {
+export function WalletConnect({
+  vm$,
+}: {
+  vm$: ViewModel<ConnectWalletViewModel>;
+}) {
   const [open, setOpen] = useState(false);
-
-  const address = useProperty(vm.address$)
+  const vm = useViewModel(vm$);
+  const address = useProperty(vm.address$);
 
   return (
     <Root>
-      <Button onClick={() => setOpen(!open)}
+      <Button
+        onClick={() => setOpen(!open)}
         active={open}
-        style={{ fontWeight: 'bold' }}>
+        style={{ fontWeight: 'bold' }}
+      >
         <img
           src={WindowsIcon}
           alt="react95 logo"
           style={{ height: '20px', marginRight: 4 }}
         />
-        {address ? address : 'Connect Wallet'}
+        {address
+          ? address.replace(/(_.{8})(.*)(.{4})/i, '$1...$3')
+          : 'Connect Wallet'}
       </Button>
-      {open && <WalletsList wallets$={vm.installedWallets$} onSelect={vm.connectWallet} onClose={() => setOpen(false)} />}
+      {open && (
+        <WalletsList
+          connectedWallet$={vm.wallet$}
+          wallets$={vm.walletsToConnect$}
+          onSelect={vm.connectWallet}
+          onClose={() => setOpen(false)}
+        />
+      )}
     </Root>
   );
 }
 
-const WalletsList = ({ wallets$, onSelect, onClose }: { wallets$: Property<Wallet[]>, onSelect: (walletName: string) => void, onClose: () => void }) => {
-  const wallets = useProperty(wallets$)
+type WalletsListProps = {
+  connectedWallet$: Property<{ api: BrowserWallet; name: string } | null>;
+  wallets$: Property<Wallet[]>;
+  onSelect: (walletName: string) => void;
+  onClose: () => void;
+};
+
+const WalletsList = ({
+  connectedWallet$,
+  wallets$,
+  onSelect,
+  onClose,
+}: WalletsListProps) => {
+  const [wallets, connectedWallet] = useProperties(wallets$, connectedWallet$);
+  const ref = useClickOutside<HTMLUListElement>(onClose);
 
   return (
-    <Menu>
+    <Menu ref={ref}>
       <MenuSideBar />
-      <div
-        onClick={onClose}
-      >
-        {wallets.map(w => (
+      <div onClick={onClose}>
+        {wallets.map((w) => (
           <MenuItem key={w.name} onClick={() => onSelect(w.name)}>
             <Avatar square src={w.icon} noBorder />
             {w.name}
           </MenuItem>
         ))}
+        {connectedWallet && (
+          <MenuItem primary disabled>
+            {/* 68                <Avatar square src={connectedWallet.icon} noBorder /> */}
+            {connectedWallet.name}
+          </MenuItem>
+        )}
       </div>
-    </Menu>)
-}
+    </Menu>
+  );
+};

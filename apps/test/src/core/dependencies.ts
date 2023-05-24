@@ -1,9 +1,7 @@
-import { mkViewModel as mkWalletConnectVM } from '@mixer/wallet-connect';
-
-export type Dependencies = {};
+import { mkConnectWalletViewModel } from '@mixer/wallet-connect';
 
 export const deps = (() => {
-  const walletConnect = mkWalletConnectVM();
+  const walletConnect = mkConnectWalletViewModel();
   return {
     walletConnect,
   };

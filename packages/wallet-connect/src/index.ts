@@ -1,2 +1,2 @@
 export { WalletConnect } from './lib/wallet-connect';
-export { ViewModel, mkViewModel } from './lib/view-model';
+export { mkConnectWalletViewModel } from './lib/view-model';

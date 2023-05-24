@@ -1,42 +1,104 @@
-import { Observable, defer, from, map, of, switchMap, tap } from 'rxjs';
-import { combine, newAtom, Property } from '@frp-ts/core';
+import {
+  EMPTY,
+  NEVER,
+  combineLatest,
+  defer,
+  filter,
+  first,
+  from,
+  map,
+  mergeAll,
+  of,
+  switchMap,
+  tap,
+} from 'rxjs';
+import { newAtom, Property } from '@frp-ts/core';
 import { Wallet, BrowserWallet } from '@meshsdk/core';
 
-import { fromObservable } from '@mixer/utils';
+import {
+  ViewModel,
+  fromObservable,
+  mapProperty,
+  mkViewModel,
+} from '@mixer/utils';
 
-export type ViewModel = {
+const SUPPORTED_WALLETS = [
+  'begin',
+  'eternl',
+  'flint',
+  'lace',
+  'nami',
+  'nufi',
+  'gerowallet',
+  'typhoncip30',
+];
+
+export type ConnectWalletViewModel = {
+  wallet$: Property<{ api: BrowserWallet; info: Wallet } | null>;
   address$: Property<string | null>;
-  installedWallets$: Property<Wallet[]>;
+  availableWallets$: Property<Wallet[]>;
   connectWallet: (walletName: string) => void;
 };
 
-export const mkViewModel = (): ViewModel => {
-  const wallet$ = newAtom<BrowserWallet | null>(null);
+export const mkConnectWalletViewModel =
+  (): ViewModel<ConnectWalletViewModel> => {
+    const wallet$ = newAtom<{ api: BrowserWallet; info: Wallet } | null>(null);
 
-  const installedWallets$ = fromObservable<Wallet[]>(
-    defer(() => of(BrowserWallet.getInstalledWallets())),
-    []
-  );
+    const installedWallets$ = defer(() =>
+      of(BrowserWallet.getInstalledWallets())
+    );
 
-  const address$ = fromObservable<string | null>(
-    from(wallet$).pipe(
+    const connectEnabledWalletEffect$ = from(
+      SUPPORTED_WALLETS.map((w) =>
+        window.cardano[w]
+          ? from(
+              window.cardano[w]
+                .isEnabled()
+                .then((enabled) => (enabled ? window.cardano[w] : undefined))
+            )
+          : EMPTY
+      )
+    ).pipe(
+      mergeAll(),
+      filter((w): w is (typeof window.cardano)[string] => !!w),
+      first(null, null),
+      switchMap((wallet) =>
+        wallet?.name
+          ? from(BrowserWallet.enable(wallet.name)).pipe(
+              tap((api) => wallet$.set({ api, info: wallet }))
+            )
+          : NEVER
+      )
+    );
+
+    const address$ = from(wallet$).pipe(
       switchMap(
         (wallet) =>
-          wallet?.getUsedAddress().then((addr) => addr.to_js_value()) ??
+          wallet?.api.getUsedAddress().then((addr) => addr.to_js_value()) ??
           of(null)
       )
-    ),
-    null
-  );
+    );
 
-  const connectWallet = async (walletName: string) => {
-    const wallet = await BrowserWallet.enable(walletName);
-    wallet$.set(wallet);
-  };
+    const connectWallet = async (name: string) => {
+      const installedWallets = BrowserWallet.getInstalledWallets();
+      const info = installedWallets.find((w) => w.name === name);
 
-  return {
-    address$,
-    installedWallets$,
-    connectWallet,
+      if (info) {
+        const api = await BrowserWallet.enable(name);
+        wallet$.set({ api, info });
+      }
+    };
+
+    return mkViewModel(
+      {
+        wallet$,
+        address$: fromObservable(address$, null),
+        availableWallets$: fromObservable(
+          defer(() => of(BrowserWallet.getInstalledWallets())),
+          []
+        ),
+        connectWallet,
+      },
+      connectEnabledWalletEffect$
+    );
   };
-};
