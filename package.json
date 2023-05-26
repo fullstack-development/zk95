@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "nx serve test"
+    "start": "nx serve test",
+    "build": "nx build test",
+    "deploy": "gh-pages -d dist/apps/test"
   },
   "private": true,
   "devDependencies": {
@@ -25,6 +27,7 @@
     "@types/node": "18.14.2",
     "@types/react": "18.0.28",
     "@types/react-dom": "18.0.11",
+    "@types/styled-react-modal": "^1.2.2",
     "@typescript-eslint/eslint-plugin": "^5.58.0",
     "@typescript-eslint/parser": "^5.58.0",
     "babel-jest": "^29.4.1",
@@ -55,13 +58,15 @@
     "@types/styled-components": "^5.1.26",
     "buffer": "^6.0.3",
     "frp-ts": "^0.0.1",
+    "gh-pages": "^5.0.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-modal": "^3.16.1",
+    "react-draggable": "^4.4.5",
     "react95": "^4.0.0",
     "rxjs": "^7.8.1",
     "stream": "^0.0.2",
     "styled-components": "^5.3.10",
+    "styled-react-modal": "^3.0.1",
     "tslib": "^2.3.0"
   }
 }

@@ -15,9 +15,13 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@mixer/mixer": ["packages/mixer/src/index.ts"],
+      "@mixer/components": ["packages/components/src/index.ts"],
+      "@mixer/customizer": ["packages/customizer/src/index.ts"],
+      "@mixer/desktop": ["packages/desktop/src/index.ts"],
       "@mixer/icons": ["packages/icons/src/index.ts"],
+      "@mixer/mixer": ["packages/mixer/src/index.ts"],
       "@mixer/offchain": ["packages/offchain/src/index.ts"],
+      "@mixer/react-injectable": ["packages/react-injectable/src/index.ts"],
       "@mixer/utils": ["packages/utils/src/index.ts"],
       "@mixer/wallet-connect": ["packages/wallet-connect/src/index.ts"]
     }

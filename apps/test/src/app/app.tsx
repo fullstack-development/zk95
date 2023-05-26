@@ -1,50 +1,45 @@
-import { PlutusScript, resolvePlutusScriptAddress } from '@meshsdk/core'
-import { useState } from 'react';
-import styled from 'styled-components';
-import { AppBar, Frame, Toolbar } from 'react95'
+import { useEffect, useState } from 'react';
+import { AppBar, Handle, Toolbar } from 'react95';
 
-import { Mixer } from '@mixer/mixer'
-import { WalletConnect } from '@mixer/wallet-connect'
-import { deps } from '../core/dependencies'
+import { runDeps } from '@mixer/react-injectable';
+import { Mixer } from '@mixer/mixer';
+import { WalletConnect, mkConnectWalletViewModel } from '@mixer/wallet-connect';
 
-const Root = styled.div`
-  display: grid;
-  grid-template-rows: 1fr 50px;
-  background-color: ${({ theme }) => theme.desktopBackground};
-  height: 100%;
-`
+import { Footer, InfoFrame, Main, Root } from './styled';
 
-const Main = styled.main`
-  display: grid;
-  justify-content: center;
-  align-items: center;
-`
-
-const Footer = styled.footer`
-  display: grid;
-`
-
-const script: PlutusScript = {
-  code: '4746010000222499',
-  version: 'V1'
-}
-
-const scriptAddress = resolvePlutusScriptAddress(script, 0);
-
-export function App() {
-  const [tab, setTab] = useState<number>(0);
-
+function AppComponent() {
   return (
     <Root>
       <Main>
+        {/* <div>
+          <StyledMonitor backgroundStyles={{ backgroundColor: 'blue' }}>
+            <ScrollView
+              style={{ width: '100%', height: '100%' }}
+              shadow={false}
+            >
+              {Object.keys(themes).map((theme) => (
+                <div>{theme}</div>
+              ))}
+            </ScrollView>
+          </StyledMonitor>
+        </div> */}
         <Mixer />
       </Main>
       <Footer>
-        <AppBar position="static" style={{ display: 'grid', gridTemplateColumns: 'max-content 1fr max-content' }}>
-          <WalletConnect vm$={deps.walletConnect} />
+        <AppBar
+          position="static"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'max-content 1fr min-content max-content',
+          }}
+        >
+          <WalletConnect />
           <div />
+          <Handle />
           <Toolbar>
-            <Frame variant="status">7:23 PM</Frame>
+            <InfoFrame variant="status">
+              <Clock />
+            </InfoFrame>
           </Toolbar>
         </AppBar>
       </Footer>
@@ -52,4 +47,27 @@ export function App() {
   );
 }
 
-export default App;
+const Clock = () => {
+  const now = () =>
+    new Date().toLocaleString('en-US', {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true,
+    });
+
+  const [time, setTime] = useState(now());
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      setTime(now());
+    }, 1000);
+
+    return () => {
+      window.clearInterval(id);
+    };
+  }, []);
+
+  return <>{time}</>;
+};
+
+export const App = runDeps(mkConnectWalletViewModel)(AppComponent);

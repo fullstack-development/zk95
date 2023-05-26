@@ -7,6 +7,7 @@ module.exports = composePlugins(withNx(), withReact(), (config) => {
     asyncWebAssembly: true,
     layers: true,
   };
+
   config.plugins = config.plugins ?? []
   config.resolve.fallback = config.resolve.fallback ?? {}
   config.module = config.module ?? {}

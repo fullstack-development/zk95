@@ -1,23 +1,18 @@
 import { useState } from 'react';
-import { Avatar, Button } from 'react95';
+import { Anchor, Avatar, Button, Hourglass, Separator } from 'react95';
 import { useProperties, useProperty } from '@frp-ts/react';
-import { Property } from '@frp-ts/core';
 
-import { WindowsIcon } from '@mixer/icons';
-import { BrowserWallet, Wallet } from '@meshsdk/core';
+import { WindowsIcon, UserIcon } from '@mixer/icons';
 
-import type { ConnectWalletViewModel } from './view-model';
-import { Root, Menu, MenuItem, MenuSideBar } from './styled';
-import { ViewModel, useClickOutside, useViewModel } from '@mixer/utils';
+import { useClickOutside } from '@mixer/utils';
+import { useDependency, token } from '@mixer/react-injectable';
+import { CONNECT_WALLET_KEY, ConnectWalletViewModel } from './view-model';
+import { Root, Menu, MenuItem, MenuSideBar, UserItem } from './styled';
 
-export function WalletConnect({
-  vm$,
-}: {
-  vm$: ViewModel<ConnectWalletViewModel>;
-}) {
+export function WalletConnect() {
   const [open, setOpen] = useState(false);
-  const vm = useViewModel(vm$);
-  const address = useProperty(vm.address$);
+  const vm = useDependency(token(CONNECT_WALLET_KEY)<ConnectWalletViewModel>());
+  const wallet = useProperty(vm.wallet$);
 
   return (
     <Root>
@@ -27,58 +22,86 @@ export function WalletConnect({
         style={{ fontWeight: 'bold' }}
       >
         <img
-          src={WindowsIcon}
+          src={wallet ? wallet.info.icon : WindowsIcon}
           alt="react95 logo"
           style={{ height: '20px', marginRight: 4 }}
         />
-        {address
-          ? address.replace(/(_.{8})(.*)(.{4})/i, '$1...$3')
-          : 'Connect Wallet'}
+        {wallet ? wallet.info.name : 'Connect Wallet'}
       </Button>
-      {open && (
-        <WalletsList
-          connectedWallet$={vm.wallet$}
-          wallets$={vm.walletsToConnect$}
-          onSelect={vm.connectWallet}
-          onClose={() => setOpen(false)}
-        />
-      )}
+      {open && <WalletsList vm={vm} onClose={() => setOpen(false)} />}
     </Root>
   );
 }
 
 type WalletsListProps = {
-  connectedWallet$: Property<{ api: BrowserWallet; name: string } | null>;
-  wallets$: Property<Wallet[]>;
-  onSelect: (walletName: string) => void;
+  vm: ConnectWalletViewModel;
   onClose: () => void;
 };
 
 const WalletsList = ({
-  connectedWallet$,
-  wallets$,
-  onSelect,
+  vm: { availableWallets$, wallet$, address$, adaBalance$, connectWallet },
   onClose,
 }: WalletsListProps) => {
-  const [wallets, connectedWallet] = useProperties(wallets$, connectedWallet$);
+  const [wallets, address, connectedWallet, adaBalance] = useProperties(
+    availableWallets$,
+    address$,
+    wallet$,
+    adaBalance$
+  );
   const ref = useClickOutside<HTMLUListElement>(onClose);
+  const isWalletConnected = (name: string) =>
+    connectedWallet?.info.name === name;
+
+  const handleMenuItemClick = (walletName: string) => {
+    connectWallet(walletName);
+    onClose();
+  };
 
   return (
     <Menu ref={ref}>
       <MenuSideBar />
-      <div onClick={onClose}>
+      <div>
+        {connectedWallet && (
+          <>
+            <UserItem>
+              <Avatar square noBorder src={UserIcon} />
+              {address ? (
+                <>
+                  <Anchor
+                    href={`https://preprod.cardanoscan.io/address/${address}`}
+                    target="_blank"
+                    style={{ marginRight: '5px' }}
+                  >
+                    {address?.replace(/^(.{4})(.*)(.{4})/i, '$1...$3')}
+                  </Anchor>
+                  ₳{adaBalance.toFixed(2)}
+                </>
+              ) : (
+                <Hourglass />
+              )}
+            </UserItem>
+            <Separator />
+          </>
+        )}
         {wallets.map((w) => (
-          <MenuItem key={w.name} onClick={() => onSelect(w.name)}>
-            <Avatar square src={w.icon} noBorder />
-            {w.name}
+          <MenuItem
+            key={w.name}
+            onClick={() => handleMenuItemClick(w.name)}
+            disabled={isWalletConnected(w.name)}
+          >
+            <Avatar
+              square
+              noBorder
+              src={w.icon}
+              style={
+                isWalletConnected(w.name)
+                  ? { filter: 'grayscale(1)' }
+                  : undefined
+              }
+            />
+            {w.name} {isWalletConnected(w.name) && '(Connected)'}
           </MenuItem>
         ))}
-        {connectedWallet && (
-          <MenuItem primary disabled>
-            {/* 68                <Avatar square src={connectedWallet.icon} noBorder /> */}
-            {connectedWallet.name}
-          </MenuItem>
-        )}
       </div>
     </Menu>
   );
