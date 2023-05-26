@@ -1,5 +1,5 @@
 import { FC, useContext, useEffect, useMemo } from 'react';
-import { concat, merge } from 'rxjs';
+import { concat } from 'rxjs';
 import { Injectable } from './injectable';
 import { UnknownDependencies, context } from './context';
 

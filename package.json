@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "nx serve test",
-    "build": "nx build test",
-    "deploy": "gh-pages -d dist/apps/test"
+    "start": "nx serve mixer",
+    "build": "nx build mixer",
+    "deploy": "gh-pages -d dist/apps/mixer"
   },
   "private": true,
   "devDependencies": {

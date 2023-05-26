@@ -67,7 +67,7 @@ const Clock = () => {
     };
   }, []);
 
-  return <>{time}</>;
+  return <span>{time}</span>;
 };
 
 export const App = runDeps(mkConnectWalletViewModel)(AppComponent);
