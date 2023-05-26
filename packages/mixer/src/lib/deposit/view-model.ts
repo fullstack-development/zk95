@@ -17,9 +17,12 @@ export const mkDepositViewModel = injectable(
   (connectWallet) => {
     const poolSize$ = newAtom<number>(10);
 
-    return makeModule({
-      poolSize$,
-      setPoolSize: poolSize$.set,
-    });
+    return makeModule(
+      {
+        poolSize$,
+        setPoolSize: poolSize$.set,
+      },
+      Promise.resolve().then(() => console.log('effect'))
+    );
   }
 );

@@ -4,6 +4,7 @@ import { AppBar, Handle, Toolbar } from 'react95';
 import { runDeps } from '@mixer/react-injectable';
 import { Mixer } from '@mixer/mixer';
 import { WalletConnect, mkConnectWalletViewModel } from '@mixer/wallet-connect';
+import { Customizer } from '@mixer/customizer';
 
 import { Footer, InfoFrame, Main, Root } from './styled';
 
@@ -11,18 +12,7 @@ function AppComponent() {
   return (
     <Root>
       <Main>
-        {/* <div>
-          <StyledMonitor backgroundStyles={{ backgroundColor: 'blue' }}>
-            <ScrollView
-              style={{ width: '100%', height: '100%' }}
-              shadow={false}
-            >
-              {Object.keys(themes).map((theme) => (
-                <div>{theme}</div>
-              ))}
-            </ScrollView>
-          </StyledMonitor>
-        </div> */}
+        <Customizer />
         <Mixer />
       </Main>
       <Footer>
