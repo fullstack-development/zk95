@@ -5,4 +5,4 @@ export {
   injectable,
   UnknownDependencyTree,
 } from './lib/injectable';
-export { TokenAccessor, token } from './lib/token';
+export { token } from './lib/token';

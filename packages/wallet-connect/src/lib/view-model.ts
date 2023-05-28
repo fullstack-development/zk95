@@ -51,11 +51,11 @@ export const mkConnectWalletViewModel = injectable(() => {
 
   const connectEnabledWalletEffect$ = from(
     SUPPORTED_WALLETS.map((w) =>
-      window?.cardano[w]
+      window?.cardano?.[w]
         ? from(
-            window?.cardano[w]
+            window.cardano[w]
               .isEnabled()
-              .then((enabled) => (enabled ? window?.cardano[w] : undefined))
+              .then((enabled) => (enabled ? window.cardano[w] : undefined))
           )
         : EMPTY
     )

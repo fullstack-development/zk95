@@ -1,12 +1,5 @@
 import { InjectableWithName } from './injectable';
 
-export interface TokenAccessor {
-  <Name extends PropertyKey, Dependencies extends Record<Name, unknown>>(
-    dependencies: Dependencies,
-    name: Name
-  ): Dependencies[Name];
-}
-
 export function token<Name extends PropertyKey>(name: Name) {
   return <Type = never>(): InjectableWithName<
     {
