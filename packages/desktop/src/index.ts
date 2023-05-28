@@ -1,2 +1,3 @@
 export * from './lib/desktop';
-export * from './lib/view-model';
+export * from './lib/widgets-bar';
+export * from './lib/model';

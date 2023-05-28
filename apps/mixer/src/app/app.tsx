@@ -3,7 +3,7 @@ import { AppBar, Handle, Toolbar } from 'react95';
 
 import { injectable } from '@mixer/injectable';
 import { mkWalletConnect } from '@mixer/wallet-connect';
-import { mkDesktop } from '@mixer/desktop';
+import { mkDesktop, mkWidgetBar } from '@mixer/desktop';
 
 import { Footer, InfoFrame, Main, Root } from './styled';
 import { mkWidgetsConfig } from './widgets';
@@ -12,7 +12,8 @@ export const mkApp = injectable(
   mkWidgetsConfig,
   mkDesktop,
   mkWalletConnect,
-  (WIDGETS_CONFIG, Desktop, WalletConnect) => () => {
+  mkWidgetBar,
+  (WIDGETS_CONFIG, Desktop, WalletConnect, WidgetsBar) => () => {
     return (
       <Root>
         <Main>
@@ -27,7 +28,7 @@ export const mkApp = injectable(
             }}
           >
             <WalletConnect />
-            <div />
+            <WidgetsBar />
             <Handle />
             <Toolbar>
               <InfoFrame variant="status">

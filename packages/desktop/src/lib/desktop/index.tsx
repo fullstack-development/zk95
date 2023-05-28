@@ -3,24 +3,23 @@ import { useProperties } from '@frp-ts/react';
 
 import { Window } from '@mixer/components';
 
-import { WidgetConfig, mkDesktopViewModel } from './view-model';
+import { WidgetConfig, mkDesktopModel } from '../model';
 import {
   DesktopDraggableArea,
   DesktopDraggableItem,
   DesktopGrid,
   DesktopManagerContent,
 } from './styled';
-import { WidgetIcon } from './widget-icon';
+import { WidgetIcon } from '../widget-icon';
 import Draggable from 'react-draggable';
-import { useViewModel } from '@mixer/utils';
 
 type Props = {
   widgetsConfig: WidgetConfig[];
 };
 
 export const mkDesktop = injectable(
-  mkDesktopViewModel,
-  (vm$) =>
+  mkDesktopModel,
+  (model) =>
     ({ widgetsConfig }: Props) => {
       const {
         activeWidgetId$,
@@ -28,7 +27,7 @@ export const mkDesktop = injectable(
         openWidget,
         closeWidget,
         makeWidgetActive,
-      } = useViewModel(vm$);
+      } = model;
       const [activeWidgetId, activeWidgets] = useProperties(
         activeWidgetId$,
         activeWidgets$

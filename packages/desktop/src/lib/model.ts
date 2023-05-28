@@ -1,7 +1,6 @@
 import { ComponentType } from 'react';
 import { injectable } from '@mixer/injectable';
 import { Property, newAtom, action } from '@frp-ts/core';
-import { makeViewModel } from '@mixer/utils';
 
 export type WidgetConfig = {
   id: string;
@@ -25,7 +24,7 @@ export type DesktopViewModel = {
   makeWidgetActive: (widgetId: string) => void;
 };
 
-export const mkDesktopViewModel = injectable(() => {
+export const mkDesktopModel = injectable(() => {
   const activeWidgets$ = newAtom<Record<string, Widget>>({});
   const activeWidgetId$ = newAtom<string | null>(null);
   const widgetsCount$ = newAtom<number>(0);
@@ -72,17 +71,19 @@ export const mkDesktopViewModel = injectable(() => {
 
   function makeWidgetActive(widgetId: string) {
     if (activeWidgetId$.get() !== widgetId) {
-      activeWidgetId$.set(widgetId);
-      const reorderedWidgets = reorderWidgets(widgetId);
-      activeWidgets$.set(reorderedWidgets);
+      action(() => {
+        activeWidgetId$.set(widgetId);
+        const reorderedWidgets = reorderWidgets(widgetId);
+        activeWidgets$.set(reorderedWidgets);
+      });
     }
   }
 
-  return makeViewModel<DesktopViewModel>({
+  return {
     activeWidgetId$,
     activeWidgets$,
     openWidget,
     closeWidget,
     makeWidgetActive,
-  });
+  };
 });
