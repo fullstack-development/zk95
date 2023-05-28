@@ -2,18 +2,17 @@ import { useEffect, useState } from 'react';
 import { AppBar, Handle, Toolbar } from 'react95';
 
 import { runDeps } from '@mixer/react-injectable';
-import { Mixer } from '@mixer/mixer';
 import { WalletConnect, mkConnectWalletViewModel } from '@mixer/wallet-connect';
-import { Customizer } from '@mixer/customizer';
+import { Desktop } from '@mixer/desktop';
 
 import { Footer, InfoFrame, Main, Root } from './styled';
+import { WIDGETS_CONFIG } from './widgets';
 
 function AppComponent() {
   return (
     <Root>
       <Main>
-        <Customizer />
-        <Mixer />
+        <Desktop widgetsConfig={WIDGETS_CONFIG} />
       </Main>
       <Footer>
         <AppBar

@@ -39,46 +39,44 @@ export function Customizer() {
   );
 
   return (
-    <Window title="Appearance">
-      <MainContent>
-        <Monitor>
-          <ThemeProvider theme={themes[selectedLocalTheme]}>
-            <MonitorContent>
-              <MonitorDesktop>
-                <MonitorWindow>
-                  <Window title="Title">Some Text</Window>
-                </MonitorWindow>
-              </MonitorDesktop>
-              <div>
-                <AppBar position="static">
-                  <Button>
-                    <img
-                      src={WindowsIcon}
-                      alt="start"
-                      style={{ height: '20px', marginRight: 4 }}
-                    />{' '}
-                    Start
-                  </Button>
-                </AppBar>
-              </div>
-            </MonitorContent>
-          </ThemeProvider>
-        </Monitor>
-        <ThemeSelectBox label="Theme">
-          <Select<ThemeKey>
-            value={selectedLocalTheme}
-            options={options}
-            onChange={({ value }) => setLocalTheme(value)}
-            menuMaxHeight={200}
-          />
-        </ThemeSelectBox>
-        <Footer>
-          <Button onClick={() => setTheme(selectedLocalTheme)}>
-            Apply Theme
-          </Button>
-        </Footer>
-      </MainContent>
-    </Window>
+    <MainContent>
+      <Monitor>
+        <ThemeProvider theme={themes[selectedLocalTheme]}>
+          <MonitorContent>
+            <MonitorDesktop>
+              <MonitorWindow>
+                <Window title="Title">Some Text</Window>
+              </MonitorWindow>
+            </MonitorDesktop>
+            <div>
+              <AppBar position="static">
+                <Button>
+                  <img
+                    src={WindowsIcon}
+                    alt="start"
+                    style={{ height: '20px', marginRight: 4 }}
+                  />{' '}
+                  Start
+                </Button>
+              </AppBar>
+            </div>
+          </MonitorContent>
+        </ThemeProvider>
+      </Monitor>
+      <ThemeSelectBox label="Theme">
+        <Select<ThemeKey>
+          value={selectedLocalTheme}
+          options={options}
+          onChange={({ value }) => setLocalTheme(value)}
+          menuMaxHeight={200}
+        />
+      </ThemeSelectBox>
+      <Footer>
+        <Button onClick={() => setTheme(selectedLocalTheme)}>
+          Apply Theme
+        </Button>
+      </Footer>
+    </MainContent>
   );
 }
 

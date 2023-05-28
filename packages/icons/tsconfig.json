@@ -9,7 +9,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
   },
-  "files": ["../../tools/global.d.ts"],
+  "files": [],
   "include": [],
   "references": [
     {

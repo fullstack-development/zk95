@@ -4,9 +4,10 @@ import { GroupBox, AppBar as React95AppBar } from 'react95';
 export const MainContent = styled.div`
   display: grid;
   row-gap: 30px;
+  grid-template-rows: max-content max-content 1fr;
+  align-content: stretch;
   justify-content: stretch;
   justify-items: center;
-  padding: 0 30px;
 `;
 
 export const MonitorContent = styled.div`
@@ -53,5 +54,6 @@ export const ThemeSelectBox = styled(GroupBox)`
 export const Footer = styled.footer`
   display: grid;
   justify-items: end;
+  align-items: end;
   width: 100%;
 `;

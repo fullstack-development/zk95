@@ -10,8 +10,8 @@ export const Root = styled.div`
 
 export const Main = styled.main`
   display: grid;
-  justify-content: center;
-  align-items: center;
+  justify-content: stretch;
+  align-content: stretch;
 `;
 
 export const Footer = styled.footer`
