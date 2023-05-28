@@ -1,6 +1,7 @@
 import { ComponentType } from 'react';
-import { injectable, makeModule, token } from '@mixer/react-injectable';
+import { injectable } from '@mixer/injectable';
 import { Property, newAtom, action } from '@frp-ts/core';
+import { makeViewModel } from '@mixer/utils';
 
 export type WidgetConfig = {
   id: string;
@@ -24,11 +25,7 @@ export type DesktopViewModel = {
   makeWidgetActive: (widgetId: string) => void;
 };
 
-export const DESKTOP_VIEW_MODEL_KEY = 'desktopViewModel';
-export const desktopViewModelToken = token(
-  DESKTOP_VIEW_MODEL_KEY
-)<DesktopViewModel>();
-export const mkDesktopViewModel = injectable(DESKTOP_VIEW_MODEL_KEY, () => {
+export const mkDesktopViewModel = injectable(() => {
   const activeWidgets$ = newAtom<Record<string, Widget>>({});
   const activeWidgetId$ = newAtom<string | null>(null);
   const widgetsCount$ = newAtom<number>(0);
@@ -74,12 +71,14 @@ export const mkDesktopViewModel = injectable(DESKTOP_VIEW_MODEL_KEY, () => {
   }
 
   function makeWidgetActive(widgetId: string) {
-    activeWidgetId$.set(widgetId);
-    const reorderedWidgets = reorderWidgets(widgetId);
-    activeWidgets$.set(reorderedWidgets);
+    if (activeWidgetId$.get() !== widgetId) {
+      activeWidgetId$.set(widgetId);
+      const reorderedWidgets = reorderWidgets(widgetId);
+      activeWidgets$.set(reorderedWidgets);
+    }
   }
 
-  return makeModule<DesktopViewModel>({
+  return makeViewModel<DesktopViewModel>({
     activeWidgetId$,
     activeWidgets$,
     openWidget,

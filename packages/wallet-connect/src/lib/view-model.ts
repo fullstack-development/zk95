@@ -13,9 +13,9 @@ import {
 } from 'rxjs';
 import { newAtom, Property } from '@frp-ts/core';
 import { Wallet, BrowserWallet } from '@meshsdk/core';
-import { Module, makeModule, injectable } from '@mixer/react-injectable';
+import { injectable } from '@mixer/injectable';
 
-import { fromObservable } from '@mixer/utils';
+import { fromObservable, makeViewModel } from '@mixer/utils';
 
 const SUPPORTED_WALLETS = [
   'begin',
@@ -36,88 +36,84 @@ export type ConnectWalletViewModel = {
   connectWallet: (walletName: string) => void;
 };
 
-export const CONNECT_WALLET_KEY = 'connectWalletViewModel';
-export const mkConnectWalletViewModel = injectable(
-  CONNECT_WALLET_KEY,
-  (): Module<ConnectWalletViewModel> => {
-    const wallet$ = newAtom<{ api: BrowserWallet; info: Wallet } | null>(null);
+export const mkConnectWalletViewModel = injectable(() => {
+  const wallet$ = newAtom<{ api: BrowserWallet; info: Wallet } | null>(null);
 
-    const adaBalance$ = from(wallet$).pipe(
-      switchMap((wallet) =>
-        wallet
-          ? from(wallet.api.getLovelace()).pipe(
-              map((lovelace) => Number(lovelace) / 1000000)
+  const adaBalance$ = from(wallet$).pipe(
+    switchMap((wallet) =>
+      wallet
+        ? from(wallet.api.getLovelace()).pipe(
+            map((lovelace) => Number(lovelace) / 1000000)
+          )
+        : of(0)
+    )
+  );
+
+  const connectEnabledWalletEffect$ = from(
+    SUPPORTED_WALLETS.map((w) =>
+      window?.cardano[w]
+        ? from(
+            window?.cardano[w]
+              .isEnabled()
+              .then((enabled) => (enabled ? window?.cardano[w] : undefined))
+          )
+        : EMPTY
+    )
+  ).pipe(
+    mergeAll(),
+    filter((w): w is (typeof window.cardano)[string] => !!w),
+    first(null, null),
+    switchMap((wallet) =>
+      wallet
+        ? from(BrowserWallet.enable(wallet.name)).pipe(
+            tap((api) =>
+              wallet$.set({
+                api,
+                info: {
+                  name: wallet.name,
+                  icon: wallet.icon,
+                  version: wallet.apiVersion,
+                },
+              })
             )
-          : of(0)
-      )
-    );
+          )
+        : NEVER
+    )
+  );
 
-    const connectEnabledWalletEffect$ = from(
-      SUPPORTED_WALLETS.map((w) =>
-        window?.cardano[w]
-          ? from(
-              window?.cardano[w]
-                .isEnabled()
-                .then((enabled) => (enabled ? window?.cardano[w] : undefined))
-            )
-          : EMPTY
-      )
-    ).pipe(
-      mergeAll(),
-      filter((w): w is (typeof window.cardano)[string] => !!w),
-      first(null, null),
-      switchMap((wallet) =>
-        wallet
-          ? from(BrowserWallet.enable(wallet.name)).pipe(
-              tap((api) =>
-                wallet$.set({
-                  api,
-                  info: {
-                    name: wallet.name,
-                    icon: wallet.icon,
-                    version: wallet.apiVersion,
-                  },
-                })
-              )
-            )
-          : NEVER
-      )
-    );
+  const address$ = from(wallet$).pipe(
+    switchMap(
+      (wallet) =>
+        wallet?.api.getUsedAddress().then((addr) => addr.to_js_value()) ??
+        of(null)
+    )
+  );
 
-    const address$ = from(wallet$).pipe(
-      switchMap(
-        (wallet) =>
-          wallet?.api.getUsedAddress().then((addr) => addr.to_js_value()) ??
-          of(null)
-      )
-    );
+  const connectWallet = async (name: string) => {
+    const installedWallets = BrowserWallet.getInstalledWallets();
+    const info = installedWallets.find((w) => w.name === name);
 
-    const connectWallet = async (name: string) => {
-      const installedWallets = BrowserWallet.getInstalledWallets();
-      const info = installedWallets.find((w) => w.name === name);
-
-      if (info) {
-        try {
-          const api = await BrowserWallet.enable(name);
-          wallet$.set({ api, info });
-        } catch (error) {
-          console.log(error);
-        }
+    if (info) {
+      try {
+        const api = await BrowserWallet.enable(name);
+        wallet$.set({ api, info });
+      } catch (error) {
+        console.log(error);
       }
-    };
+    }
+  };
 
-    return makeModule(
-      {
-        wallet$,
-        adaBalance$: fromObservable(adaBalance$, 0),
-        address$: fromObservable(address$, null),
-        availableWallets$: fromObservable(
-          defer(() => of(BrowserWallet.getInstalledWallets())),
-          []
-        ),
-        connectWallet,
-      },
-      connectEnabledWalletEffect$
-    );
-  }
-);
+  return makeViewModel<ConnectWalletViewModel>(
+    {
+      wallet$,
+      adaBalance$: fromObservable(adaBalance$, 0),
+      address$: fromObservable(address$, null),
+      availableWallets$: fromObservable(
+        defer(() => of(BrowserWallet.getInstalledWallets())),
+        []
+      ),
+      connectWallet,
+    },
+    connectEnabledWalletEffect$
+  );
+});

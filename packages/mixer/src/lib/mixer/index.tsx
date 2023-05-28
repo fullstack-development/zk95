@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Tabs, Tab, TabBody } from 'react95';
 
-import { DepositForm } from '../deposit';
-import { MainContent } from './styled';
+import { injectable } from '@mixer/injectable';
 
-export const Mixer = () => {
+import { MainContent } from './styled';
+import { mkDepositForm } from '../deposit';
+
+export const mkMixer = injectable(mkDepositForm, (DepositForm) => () => {
   const [tab, setTab] = useState<number>(0);
 
   return (
@@ -23,4 +25,4 @@ export const Mixer = () => {
       </TabBody>
     </MainContent>
   );
-};
+});

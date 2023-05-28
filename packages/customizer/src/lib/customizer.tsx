@@ -1,8 +1,8 @@
+import { useMemo, useState } from 'react';
 import { ThemeProvider } from 'styled-components';
 import { Button, Monitor, Select } from 'react95';
 import { WindowsIcon } from '@mixer/icons';
 import { Window } from '@mixer/components';
-import { token, useDependency } from '@mixer/react-injectable';
 import {
   MonitorContent,
   MonitorDesktop,
@@ -12,18 +12,13 @@ import {
   ThemeSelectBox,
   Footer,
 } from './styled';
-import {
-  CUSTOMIZE_VIEW_MODEL,
-  CustomizeViewModel,
-  ThemeKey,
-} from './view-model';
-import { useMemo, useState } from 'react';
+import { mkCustomizeViewModel, ThemeKey } from './view-model';
+import { injectable } from '@mixer/injectable';
 import { SelectOption } from 'react95/dist/Select/Select.types';
+import { useViewModel } from '@mixer/utils';
 
-export function Customizer() {
-  const { selectedTheme$, setTheme, themes } = useDependency(
-    token(CUSTOMIZE_VIEW_MODEL)<CustomizeViewModel>()
-  );
+export const mkCustomizer = injectable(mkCustomizeViewModel, (vm$) => () => {
+  const { selectedTheme$, setTheme, themes } = useViewModel(vm$);
 
   const [selectedLocalTheme, setLocalTheme] = useState<ThemeKey>(
     selectedTheme$.get()
@@ -78,6 +73,4 @@ export function Customizer() {
       </Footer>
     </MainContent>
   );
-}
-
-export default Customizer;
+});

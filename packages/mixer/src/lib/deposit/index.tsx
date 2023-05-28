@@ -2,18 +2,13 @@ import { Button, Radio } from 'react95';
 import { useProperties } from '@frp-ts/react';
 import { Modal } from '@mixer/components';
 
-import {
-  DEPOSIT_KEY,
-  DepositViewModel,
-  mkDepositViewModel,
-} from './view-model';
+import { mkDepositViewModel } from './view-model';
 import { DepositFormContent, FormFooter, PoolsBox } from './styled';
-import { runDeps, token, useDependency } from '@mixer/react-injectable';
+import { injectable } from '@mixer/injectable';
+import { useViewModel } from '@mixer/utils';
 
-export function DepositFormComponent() {
-  const { poolSize$, setPoolSize } = useDependency(
-    token(DEPOSIT_KEY)<DepositViewModel>()
-  );
+export const mkDepositForm = injectable(mkDepositViewModel, (vm$) => () => {
+  const { poolSize$, setPoolSize } = useViewModel(vm$);
   const [poolSize] = useProperties(poolSize$);
 
   return (
@@ -57,6 +52,4 @@ export function DepositFormComponent() {
       <Modal open={false}>Test</Modal>
     </DepositFormContent>
   );
-}
-
-export const DepositForm = runDeps(mkDepositViewModel)(DepositFormComponent);
+});

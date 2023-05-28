@@ -3,24 +3,20 @@ import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { ModalProvider } from 'styled-react-modal';
 import { styleReset } from 'react95';
-import original from 'react95/dist/themes/original';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
 
-import { runDeps, token, useDependency } from '@mixer/react-injectable';
 import { ModalBackground } from '@mixer/components';
-import {
-  CUSTOMIZE_VIEW_MODEL,
-  CustomizeViewModel,
-  mkCustomizeViewModel,
-} from '@mixer/customizer';
+import { mkCustomizeViewModel } from '@mixer/customizer';
 
-import { App } from './app/app';
+import { mkApp } from './app/app';
 
 // @ts-ignore
 import ms_sans_serif from 'react95/dist/fonts/ms_sans_serif.woff2';
 // @ts-ignore
 import ms_sans_serif_bold from 'react95/dist/fonts/ms_sans_serif_bold.woff2';
 import { useProperties } from '@frp-ts/react';
+import { injectable } from '@mixer/injectable';
+import { useViewModel } from '@mixer/utils';
 
 const GlobalStyles = createGlobalStyle`
   ${styleReset}
@@ -53,22 +49,26 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-const Root = runDeps(mkCustomizeViewModel)(() => {
-  const customizeVM = useDependency(
-    token(CUSTOMIZE_VIEW_MODEL)<CustomizeViewModel>()
-  );
-  const [themeKey] = useProperties(customizeVM.selectedTheme$);
+const mkRoot = injectable(
+  mkCustomizeViewModel,
+  mkApp,
+  (customizeVM$, App) => () => {
+    const customizeVM = useViewModel(customizeVM$);
+    const [themeKey] = useProperties(customizeVM.selectedTheme$);
 
-  return (
-    <StrictMode>
-      <GlobalStyles />
-      <ThemeProvider theme={customizeVM.themes[themeKey]}>
-        <ModalProvider backgroundComponent={ModalBackground}>
-          <App />
-        </ModalProvider>
-      </ThemeProvider>
-    </StrictMode>
-  );
-});
+    return (
+      <StrictMode>
+        <GlobalStyles />
+        <ThemeProvider theme={customizeVM.themes[themeKey]}>
+          <ModalProvider backgroundComponent={ModalBackground}>
+            <App />
+          </ModalProvider>
+        </ThemeProvider>
+      </StrictMode>
+    );
+  }
+);
+
+const Root = mkRoot({});
 
 root.render(<Root />);

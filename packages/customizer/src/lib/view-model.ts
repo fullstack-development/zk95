@@ -1,7 +1,8 @@
 import { newAtom, Property } from '@frp-ts/core';
 import themes from 'react95/dist/themes';
 
-import { injectable, makeModule } from '@mixer/react-injectable';
+import { injectable } from '@mixer/injectable';
+import { makeViewModel } from '@mixer/utils';
 
 export type ThemeKey = keyof typeof themes;
 
@@ -11,11 +12,10 @@ export type CustomizeViewModel = {
   setTheme: (themeKey: ThemeKey) => void;
 };
 
-export const CUSTOMIZE_VIEW_MODEL = 'customizeViewModel';
-export const mkCustomizeViewModel = injectable(CUSTOMIZE_VIEW_MODEL, () => {
+export const mkCustomizeViewModel = injectable(() => {
   const selectedTheme$ = newAtom<ThemeKey>('original');
 
-  return makeModule<CustomizeViewModel>({
+  return makeViewModel<CustomizeViewModel>({
     selectedTheme$,
     themes,
     setTheme: selectedTheme$.set,

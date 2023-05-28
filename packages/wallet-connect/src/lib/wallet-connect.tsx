@@ -4,34 +4,37 @@ import { useProperties, useProperty } from '@frp-ts/react';
 
 import { WindowsIcon, UserIcon } from '@mixer/icons';
 
-import { useClickOutside } from '@mixer/utils';
-import { useDependency, token } from '@mixer/react-injectable';
-import { CONNECT_WALLET_KEY, ConnectWalletViewModel } from './view-model';
+import { useClickOutside, useViewModel } from '@mixer/utils';
+import { ConnectWalletViewModel, mkConnectWalletViewModel } from './view-model';
 import { Root, Menu, MenuItem, MenuSideBar, UserItem } from './styled';
+import { injectable } from '@mixer/injectable';
 
-export function WalletConnect() {
-  const [open, setOpen] = useState(false);
-  const vm = useDependency(token(CONNECT_WALLET_KEY)<ConnectWalletViewModel>());
-  const wallet = useProperty(vm.wallet$);
+export const mkWalletConnect = injectable(
+  mkConnectWalletViewModel,
+  (vm$) => () => {
+    const vm = useViewModel(vm$);
+    const [open, setOpen] = useState(false);
+    const wallet = useProperty(vm.wallet$);
 
-  return (
-    <Root>
-      <Button
-        onClick={() => setOpen(!open)}
-        active={open}
-        style={{ fontWeight: 'bold' }}
-      >
-        <img
-          src={wallet ? wallet.info.icon : WindowsIcon}
-          alt="react95 logo"
-          style={{ height: '20px', marginRight: 4 }}
-        />
-        {wallet ? wallet.info.name : 'Connect Wallet'}
-      </Button>
-      {open && <WalletsList vm={vm} onClose={() => setOpen(false)} />}
-    </Root>
-  );
-}
+    return (
+      <Root>
+        <Button
+          onClick={() => setOpen(!open)}
+          active={open}
+          style={{ fontWeight: 'bold' }}
+        >
+          <img
+            src={wallet ? wallet.info.icon : WindowsIcon}
+            alt="react95 logo"
+            style={{ height: '20px', marginRight: 4 }}
+          />
+          {wallet ? wallet.info.name : 'Connect Wallet'}
+        </Button>
+        {open && <WalletsList vm={vm} onClose={() => setOpen(false)} />}
+      </Root>
+    );
+  }
+);
 
 type WalletsListProps = {
   vm: ConnectWalletViewModel;
