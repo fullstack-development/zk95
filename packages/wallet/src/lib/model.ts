@@ -1,4 +1,15 @@
-import { defer, from, map, of, switchMap } from 'rxjs';
+import {
+  EMPTY,
+  Observable,
+  defer,
+  filter,
+  first,
+  from,
+  map,
+  mergeAll,
+  of,
+  switchMap,
+} from 'rxjs';
 import { newAtom, Property } from '@frp-ts/core';
 import { Wallet, BrowserWallet } from '@meshsdk/core';
 import { injectable } from '@mixer/injectable';
@@ -21,6 +32,7 @@ export type WalletModel = {
   adaBalance$: Property<number>;
   address$: Property<string | null>;
   availableWallets$: Property<Wallet[]>;
+  connectEnabledWalletEffect$: Observable<void>;
   connectWallet: (walletName: string) => Promise<void>;
 };
 
@@ -59,6 +71,23 @@ export const mkWalletModel = injectable((): WalletModel => {
     }
   };
 
+  const connectEnabledWalletEffect$ = from(
+    SUPPORTED_WALLETS.map((w) =>
+      window?.cardano?.[w]
+        ? from(
+            window.cardano[w]
+              .isEnabled()
+              .then((enabled) => (enabled ? window.cardano[w] : undefined))
+          )
+        : EMPTY
+    )
+  ).pipe(
+    mergeAll(),
+    filter((w): w is (typeof window.cardano)[string] => !!w),
+    first(null, null),
+    switchMap((wallet) => (wallet ? from(connectWallet(wallet.name)) : EMPTY))
+  );
+
   return {
     wallet$,
     adaBalance$: fromObservable(adaBalance$, 0),
@@ -67,6 +96,7 @@ export const mkWalletModel = injectable((): WalletModel => {
       defer(() => of(BrowserWallet.getInstalledWallets())),
       []
     ),
+    connectEnabledWalletEffect$,
     connectWallet,
   };
 });

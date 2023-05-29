@@ -13,7 +13,6 @@ import {
   DesktopGrid,
   DesktopManagerContent,
 } from './styled';
-import { useEffect } from 'react';
 
 type Props = {
   widgetsConfig: WidgetConfig[];
@@ -25,14 +24,6 @@ export const mkDesktop = injectable(
     ({ widgetsConfig }: Props) => {
       const { activeWidgets$, openWidget } = model;
       const [activeWidgets] = useProperties(activeWidgets$);
-
-      useEffect(() => {
-        const mixer = widgetsConfig.find((w) => w.id === 'mixer');
-
-        if (mixer) {
-          openWidget(mixer);
-        }
-      }, [widgetsConfig, openWidget]);
 
       return (
         <DesktopManagerContent id="desktop">
@@ -75,7 +66,7 @@ function DraggableWidget({
       bounds="#desktop"
       handle={`.${handleId}`}
       axis="both"
-      defaultPosition={{ x: 100, y: 100 }}
+      defaultPosition={{ x: 80, y: 80 }}
       onMouseDown={() => model.makeWidgetActive(widget.id)}
       scale={1}
     >

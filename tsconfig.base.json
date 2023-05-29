@@ -21,6 +21,7 @@
       "@mixer/icons": ["packages/icons/src/index.ts"],
       "@mixer/injectable": ["packages/injectable/src/index.ts"],
       "@mixer/mixer": ["packages/mixer/src/index.ts"],
+      "@mixer/notifier": ["packages/notifier/src/index.ts"],
       "@mixer/offchain": ["packages/offchain/src/index.ts"],
       "@mixer/secret-manager": ["packages/secret-manager/src/index.ts"],
       "@mixer/utils": ["packages/utils/src/index.ts"],
