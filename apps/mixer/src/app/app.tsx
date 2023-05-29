@@ -2,18 +2,23 @@ import { useEffect, useState } from 'react';
 import { AppBar, Handle, Toolbar } from 'react95';
 
 import { injectable } from '@mixer/injectable';
-import { mkWalletConnect } from '@mixer/wallet-connect';
+import { mkWalletConnect } from '@mixer/wallet';
 import { mkDesktop, mkWidgetBar } from '@mixer/desktop';
 
 import { Footer, InfoFrame, Main, Root } from './styled';
 import { mkWidgetsConfig } from './widgets';
+import { mkSyncEffectsViewModel } from './view.model';
+import { useViewModel } from '@mixer/utils';
 
 export const mkApp = injectable(
   mkWidgetsConfig,
+  mkSyncEffectsViewModel,
   mkDesktop,
   mkWalletConnect,
   mkWidgetBar,
-  (WIDGETS_CONFIG, Desktop, WalletConnect, WidgetsBar) => () => {
+  (WIDGETS_CONFIG, syncViewModel, Desktop, WalletConnect, WidgetsBar) => () => {
+    useViewModel(syncViewModel, []);
+
     return (
       <Root>
         <Main>

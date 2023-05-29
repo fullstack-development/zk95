@@ -6,7 +6,7 @@ import { styleReset } from 'react95';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
 
 import { ModalBackground } from '@mixer/components';
-import { mkCustomizeViewModel } from '@mixer/customizer';
+import { mkCustomizeModel } from '@mixer/customizer';
 
 import { mkApp } from './app/app';
 
@@ -16,7 +16,6 @@ import ms_sans_serif from 'react95/dist/fonts/ms_sans_serif.woff2';
 import ms_sans_serif_bold from 'react95/dist/fonts/ms_sans_serif_bold.woff2';
 import { useProperties } from '@frp-ts/react';
 import { injectable } from '@mixer/injectable';
-import { useViewModel } from '@mixer/utils';
 
 const GlobalStyles = createGlobalStyle`
   ${styleReset}
@@ -50,16 +49,15 @@ const root = ReactDOM.createRoot(
 );
 
 const mkRoot = injectable(
-  mkCustomizeViewModel,
+  mkCustomizeModel,
   mkApp,
-  (customizeVM$, App) => () => {
-    const customizeVM = useViewModel(customizeVM$);
-    const [themeKey] = useProperties(customizeVM.selectedTheme$);
+  (customizeModel, App) => () => {
+    const [themeKey] = useProperties(customizeModel.selectedTheme$);
 
     return (
       <StrictMode>
         <GlobalStyles />
-        <ThemeProvider theme={customizeVM.themes[themeKey]}>
+        <ThemeProvider theme={customizeModel.themes[themeKey]}>
           <ModalProvider backgroundComponent={ModalBackground}>
             <App />
           </ModalProvider>

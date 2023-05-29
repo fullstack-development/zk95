@@ -1,8 +1,9 @@
-export {
+export type {
   Injectable,
   InjectableValue,
   InjectableDependencies,
-  injectable,
   UnknownDependencyTree,
 } from './lib/injectable';
+
+export { injectable } from './lib/injectable';
 export { token } from './lib/token';

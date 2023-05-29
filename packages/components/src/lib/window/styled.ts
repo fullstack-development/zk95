@@ -5,6 +5,14 @@ import {
   Window,
 } from 'react95';
 
+export const StyledWindow = styled(Window)`
+  display: grid;
+  grid-template-rows: 36px 1fr;
+  grid-template-columns: 100%;
+  width: 100%;
+  height: 100%;
+`;
+
 export const WindowHeader = styled(React95WinHeader)`
   display: grid;
   height: 36px;
@@ -25,11 +33,4 @@ export const WindowTitle = styled.h2`
   align-items: center;
   column-gap: 5px;
   margin: 0;
-`;
-
-export const StyledWindow = styled(Window)`
-  display: grid;
-  grid-template-rows: 36px 1fr;
-  width: 100%;
-  height: 100%;
 `;

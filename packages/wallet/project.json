@@ -1,21 +1,27 @@
 {
-  "name": "wallet-connect",
+  "name": "wallet",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/wallet-connect/src",
+  "sourceRoot": "packages/wallet/src",
   "projectType": "library",
   "targets": {
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["packages/wallet-connect/**/*.ts"]
+        "lintFilePatterns": [
+          "packages/wallet/**/*.ts"
+        ]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
-        "jestConfig": "packages/wallet-connect/jest.config.ts",
+        "jestConfig": "packages/wallet/jest.config.ts",
         "passWithNoTests": true
       },
       "configurations": {

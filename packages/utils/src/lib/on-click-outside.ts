@@ -1,17 +1,20 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 export function useClickOutside<E extends HTMLElement>(handler: () => void) {
   const ref = useRef<E>(null);
 
-  function handleEvent(e: { target: EventTarget | null }) {
-    if (
-      ref.current &&
-      (e.target instanceof Node || e.target === null) &&
-      !ref.current.contains(e.target)
-    ) {
-      handler();
-    }
-  }
+  const handleEvent = useCallback(
+    (e: { target: EventTarget | null }) => {
+      if (
+        ref.current &&
+        (e.target instanceof Node || e.target === null) &&
+        !ref.current.contains(e.target)
+      ) {
+        handler();
+      }
+    },
+    [handler]
+  );
 
   useEffect(() => {
     if (window.PointerEvent) {
@@ -29,7 +32,7 @@ export function useClickOutside<E extends HTMLElement>(handler: () => void) {
         document.removeEventListener('touchstart', handleEvent);
       }
     };
-  }, []);
+  }, [handleEvent]);
 
   return ref;
 }

@@ -24,7 +24,7 @@
       "@mixer/offchain": ["packages/offchain/src/index.ts"],
       "@mixer/secret-manager": ["packages/secret-manager/src/index.ts"],
       "@mixer/utils": ["packages/utils/src/index.ts"],
-      "@mixer/wallet-connect": ["packages/wallet-connect/src/index.ts"]
+      "@mixer/wallet": ["packages/wallet/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

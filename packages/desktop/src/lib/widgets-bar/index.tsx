@@ -16,8 +16,9 @@ export const mkWidgetBar = injectable(
         <Toolbar>
           {Object.values(activeWidgets).map(({ caption, iconSrc, id }) => (
             <Button
+              key={id}
               active={id === activeWidgetId}
-              onMouseDown={() => makeWidgetActive(id)}
+              onMouseUp={() => makeWidgetActive(id)}
             >
               <img src={iconSrc} alt="i" width={20} height={20} />
               {caption}

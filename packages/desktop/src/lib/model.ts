@@ -1,6 +1,6 @@
 import { ComponentType } from 'react';
 import { injectable } from '@mixer/injectable';
-import { Property, newAtom, action } from '@frp-ts/core';
+import { Property, newAtom, combine } from '@frp-ts/core';
 
 export type WidgetConfig = {
   id: string;
@@ -10,39 +10,49 @@ export type WidgetConfig = {
   Component: ComponentType;
 };
 
-type WidgetLayout = {
-  order: number;
-};
+export type Widget = WidgetConfig;
 
-type Widget = WidgetConfig & WidgetLayout;
-
-export type DesktopViewModel = {
+export type DesktopModel = {
   activeWidgetId$: Property<string | null>;
   activeWidgets$: Property<Record<string, Widget>>;
+  widgetsOrder$: Property<Record<string, number>>;
   openWidget: (widget: WidgetConfig) => void;
   closeWidget: (widgetId: string) => void;
   makeWidgetActive: (widgetId: string) => void;
+  blur: () => void;
 };
 
-export const mkDesktopModel = injectable(() => {
+export const mkDesktopModel = injectable((): DesktopModel => {
   const activeWidgets$ = newAtom<Record<string, Widget>>({});
   const activeWidgetId$ = newAtom<string | null>(null);
-  const widgetsCount$ = newAtom<number>(0);
+  const widgetsOrder$ = combine(
+    activeWidgets$,
+    activeWidgetId$,
+    (activeWidgets, activeWidgetId) => {
+      const currentWidgetsIds = Object.keys(activeWidgets);
 
+      if (activeWidgetId) {
+        currentWidgetsIds.sort((a, b) =>
+          a === activeWidgetId ? 1 : b === activeWidgetId ? -1 : 0
+        );
+      }
+
+      return currentWidgetsIds.reduce<Record<string, number>>(
+        (acc, id, idx) => {
+          acc[id] = idx;
+          return acc;
+        },
+        {}
+      );
+    }
+  );
   const openWidget = (widget: WidgetConfig) => {
     const currentWidgets = activeWidgets$.get();
 
-    if (currentWidgets[widget.id]) {
-      makeWidgetActive(widget.id);
-    } else {
-      action(() => {
-        const order = widgetsCount$.get() + 1;
-        widgetsCount$.set(order);
-        const activeWidget = { ...widget, order };
-        activeWidgetId$.set(widget.id);
-        activeWidgets$.set({ ...currentWidgets, [widget.id]: activeWidget });
-      });
+    if (!currentWidgets[widget.id]) {
+      activeWidgets$.set({ ...currentWidgets, [widget.id]: widget });
     }
+    makeWidgetActive(widget.id);
   };
 
   const closeWidget = (widgetId: string) => {
@@ -53,37 +63,19 @@ export const mkDesktopModel = injectable(() => {
       activeWidgets$.set(newWidgets);
     }
   };
-
-  function reorderWidgets(focusedWidgetId: string) {
-    const currentWidgets = activeWidgets$.get();
-    const currentWidgetsIds = Object.keys(activeWidgets$.get());
-    const widgetCount = widgetsCount$.get();
-    return currentWidgetsIds.reduce<Record<string, Widget>>((acc, widgetId) => {
-      const widget = currentWidgets[widgetId];
-      acc[widgetId] = {
-        ...widget,
-        order: widget.id === focusedWidgetId ? widgetCount : widget.order - 1,
-      };
-
-      return acc;
-    }, {});
-  }
-
-  function makeWidgetActive(widgetId: string) {
+  function makeWidgetActive(widgetId: string | null) {
     if (activeWidgetId$.get() !== widgetId) {
-      action(() => {
-        activeWidgetId$.set(widgetId);
-        const reorderedWidgets = reorderWidgets(widgetId);
-        activeWidgets$.set(reorderedWidgets);
-      });
+      activeWidgetId$.set(widgetId);
     }
   }
 
   return {
     activeWidgetId$,
     activeWidgets$,
+    widgetsOrder$,
     openWidget,
     closeWidget,
     makeWidgetActive,
+    blur: () => activeWidgetId$.set(null),
   };
 });

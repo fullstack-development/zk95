@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import ReactModal, { BaseModalBackground } from 'styled-react-modal';
 
 import { Window } from '../window';
+import { ModalWindow } from './styled';
 
 export type Props = {
   open: boolean;
@@ -17,10 +18,12 @@ export const Modal = ({
   onClose,
 }: PropsWithChildren<Props>) => {
   return (
-    <ReactModal isOpen={open} beforeClose={onClose}>
-      <Window title={title} onClose={onClose}>
-        {children}
-      </Window>
+    <ReactModal isOpen={open} onBackgroundClick={onClose}>
+      <ModalWindow>
+        <Window title={title} onClose={onClose}>
+          {children}
+        </Window>
+      </ModalWindow>
     </ReactModal>
   );
 };

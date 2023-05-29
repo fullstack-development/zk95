@@ -20,6 +20,6 @@ module.exports = composePlugins(withNx(), withReact(), (config) => {
     test: /\.(mp3|mp4|ogg|wav|eot|ttf|woff|woff2|zip|otf)$/,
     type: 'asset/resource',
   },)
-
+  config.ignoreWarnings = [/Failed to parse source map/];
   return config;
 });
