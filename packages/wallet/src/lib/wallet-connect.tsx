@@ -4,33 +4,36 @@ import { useProperties, useProperty } from '@frp-ts/react';
 
 import { WindowsIcon, UserIcon } from '@mixer/icons';
 
-import { useClickOutside } from '@mixer/utils';
+import { bindModule, useClickOutside } from '@mixer/utils';
 import { WalletModel, mkWalletModel } from './model';
 import { Root, Menu, MenuItem, MenuSideBar, UserItem } from './styled';
 import { injectable } from '@mixer/injectable';
 
-export const mkWalletConnect = injectable(mkWalletModel, (model) => () => {
-  const [open, setOpen] = useState(false);
-  const wallet = useProperty(model.wallet$);
+export const mkWalletConnect = injectable(
+  mkWalletModel,
+  bindModule((model) => () => {
+    const [open, setOpen] = useState(false);
+    const wallet = useProperty(model.wallet$);
 
-  return (
-    <Root>
-      <Button
-        onClick={() => setOpen(!open)}
-        active={open}
-        style={{ fontWeight: 'bold' }}
-      >
-        <img
-          src={wallet ? wallet.info.icon : WindowsIcon}
-          alt="react95 logo"
-          style={{ height: '20px', marginRight: 4 }}
-        />
-        {wallet ? wallet.info.name : 'Connect Wallet'}
-      </Button>
-      {open && <WalletsList model={model} onClose={() => setOpen(false)} />}
-    </Root>
-  );
-});
+    return (
+      <Root>
+        <Button
+          onClick={() => setOpen(!open)}
+          active={open}
+          style={{ fontWeight: 'bold' }}
+        >
+          <img
+            src={wallet ? wallet.info.icon : WindowsIcon}
+            alt="react95 logo"
+            style={{ height: '20px', marginRight: 4 }}
+          />
+          {wallet ? wallet.info.name : 'Connect Wallet'}
+        </Button>
+        {open && <WalletsList model={model} onClose={() => setOpen(false)} />}
+      </Root>
+    );
+  })
+);
 
 type WalletsListProps = {
   model: WalletModel;

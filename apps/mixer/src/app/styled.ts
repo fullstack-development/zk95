@@ -20,6 +20,8 @@ export const Footer = styled.footer`
 
 export const InfoFrame = styled(Frame)`
   display: grid;
+  grid-template-columns: max-content max-content;
+  column-gap: 6px;
   align-items: center;
   padding: 0 10px;
   height: 100%;

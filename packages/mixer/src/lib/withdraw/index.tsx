@@ -3,13 +3,13 @@ import { useProperties } from '@frp-ts/react';
 
 import { injectable } from '@mixer/injectable';
 import { mkWithdrawFromViewModel } from './view-model';
-import { useViewModel } from '@mixer/utils';
+import { useRunModule } from '@mixer/utils';
 import { Field, Fieldset, Footer, WithdrawForm } from './styled';
 
 export const mkWithdrawForm = injectable(
   mkWithdrawFromViewModel,
   (vm) => () => {
-    const { note$, address$, setNote, setAddress } = useViewModel(vm, []);
+    const { note$, address$, setNote, setAddress } = useRunModule(vm, []);
     const [note, address] = useProperties(note$, address$);
 
     return (

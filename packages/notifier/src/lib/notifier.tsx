@@ -1,14 +1,9 @@
-import styles from './notifier.module.css';
+import { injectable } from '@mixer/injectable';
 
-/* eslint-disable-next-line */
-export interface NotifierProps {}
+import { InfoIcon } from '@mixer/icons';
 
-export function Notifier(props: NotifierProps) {
-  return (
-    <div className={styles['container']}>
-      <h1>Welcome to Notifier!</h1>
-    </div>
-  );
-}
+import { mkNotifierModel } from './model';
 
-export default Notifier;
+export const mkNotifier = injectable(mkNotifierModel, (model) => () => {
+  return <img width={20} height={20} src={InfoIcon} alt="info" />;
+});

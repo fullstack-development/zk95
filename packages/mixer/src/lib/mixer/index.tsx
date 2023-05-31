@@ -6,11 +6,12 @@ import { injectable } from '@mixer/injectable';
 import { MainContent } from './styled';
 import { mkDepositForm } from '../deposit';
 import { mkWithdrawForm } from '../withdraw';
+import { bindModule } from '@mixer/utils';
 
 export const mkMixer = injectable(
   mkDepositForm,
   mkWithdrawForm,
-  (DepositForm, WithdrawForm) => () => {
+  bindModule((DepositForm, WithdrawForm) => () => {
     const [tab, setTab] = useState<number>(0);
 
     return (
@@ -29,5 +30,5 @@ export const mkMixer = injectable(
         </TabBody>
       </MainContent>
     );
-  }
+  })
 );

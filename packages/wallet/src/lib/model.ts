@@ -11,10 +11,10 @@ import {
   switchMap,
 } from 'rxjs';
 import { newAtom, Property } from '@frp-ts/core';
-import { Wallet, BrowserWallet } from '@meshsdk/core';
+import { Wallet, BrowserWallet, UTxO } from '@meshsdk/core';
 import { injectable } from '@mixer/injectable';
 
-import { fromObservable } from '@mixer/utils';
+import { Module, fromObservable, mkModule } from '@mixer/utils';
 
 export const SUPPORTED_WALLETS = [
   'begin',
@@ -32,11 +32,11 @@ export type WalletModel = {
   adaBalance$: Property<number>;
   address$: Property<string | null>;
   availableWallets$: Property<Wallet[]>;
-  connectEnabledWalletEffect$: Observable<void>;
+  getCollateral$: () => Observable<UTxO[] | null>;
   connectWallet: (walletName: string) => Promise<void>;
 };
 
-export const mkWalletModel = injectable((): WalletModel => {
+export const mkWalletModel = injectable(() => {
   const wallet$ = newAtom<{ api: BrowserWallet; info: Wallet } | null>(null);
 
   const adaBalance$ = from(wallet$).pipe(
@@ -56,6 +56,11 @@ export const mkWalletModel = injectable((): WalletModel => {
         of(null)
     )
   );
+
+  const getCollateral$ = () =>
+    from(wallet$).pipe(
+      switchMap((wallet) => wallet?.api.getCollateral() ?? of(null))
+    );
 
   const connectWallet = async (name: string) => {
     const installedWallets = BrowserWallet.getInstalledWallets();
@@ -85,18 +90,21 @@ export const mkWalletModel = injectable((): WalletModel => {
     mergeAll(),
     filter((w): w is (typeof window.cardano)[string] => !!w),
     first(null, null),
-    switchMap((wallet) => (wallet ? from(connectWallet(wallet.name)) : EMPTY))
+    switchMap((wallet) => (wallet ? connectWallet(wallet.name) : EMPTY))
   );
 
-  return {
-    wallet$,
-    adaBalance$: fromObservable(adaBalance$, 0),
-    address$: fromObservable(address$, null),
-    availableWallets$: fromObservable(
-      defer(() => of(BrowserWallet.getInstalledWallets())),
-      []
-    ),
-    connectEnabledWalletEffect$,
-    connectWallet,
-  };
+  return mkModule<WalletModel>(
+    {
+      wallet$,
+      adaBalance$: fromObservable(adaBalance$, 0),
+      address$: fromObservable(address$, null),
+      availableWallets$: fromObservable(
+        defer(() => of(BrowserWallet.getInstalledWallets())),
+        []
+      ),
+      getCollateral$,
+      connectWallet,
+    },
+    connectEnabledWalletEffect$
+  );
 });

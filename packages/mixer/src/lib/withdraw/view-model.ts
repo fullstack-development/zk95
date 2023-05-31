@@ -1,6 +1,6 @@
 import { Property, newAtom } from '@frp-ts/core';
 import { injectable } from '@mixer/injectable';
-import { makeViewModel } from '@mixer/utils';
+import { bindModuleFactory } from '@mixer/utils';
 import { mkWithdrawModel } from './model';
 
 export type WithdrawFromViewModel = {
@@ -12,15 +12,15 @@ export type WithdrawFromViewModel = {
 
 export const mkWithdrawFromViewModel = injectable(
   mkWithdrawModel,
-  (model) => () => {
+  bindModuleFactory((model) => (): WithdrawFromViewModel => {
     const note$ = newAtom<string>('');
     const address$ = newAtom<string>('');
 
-    return makeViewModel<WithdrawFromViewModel>({
+    return {
       note$,
       address$,
       setNote: note$.set,
       setAddress: address$.set,
-    });
-  }
+    };
+  })
 );

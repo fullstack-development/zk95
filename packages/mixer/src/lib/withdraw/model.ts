@@ -1,22 +1,24 @@
 import { Property, newAtom } from '@frp-ts/core';
 import { injectable } from '@mixer/injectable';
-import { Observable, Subject, of } from 'rxjs';
+import { mkModule } from '@mixer/utils';
+import { EMPTY, Subject, switchMap } from 'rxjs';
 
 export type WithdrawModel = {
   withdrawing$: Property<boolean>;
-  withdrawEffect$: Observable<unknown>;
   withdraw: (note: string, address: string) => void;
 };
 
-export const mkWithdrawModel = injectable((): WithdrawModel => {
+export const mkWithdrawModel = injectable(() => {
   const withdrawing$ = newAtom<boolean>(false);
   const withdrawAction$ = new Subject<{ note: string; address: string }>();
 
-  const withdrawEffect$ = of();
+  const withdrawEffect$ = withdrawAction$.pipe(switchMap(() => EMPTY));
 
-  return {
-    withdrawing$,
-    withdrawEffect$,
-    withdraw: (note, address) => withdrawAction$.next({ note, address }),
-  };
+  return mkModule<WithdrawModel>(
+    {
+      withdrawing$,
+      withdraw: (note, address) => withdrawAction$.next({ note, address }),
+    },
+    withdrawEffect$
+  );
 });

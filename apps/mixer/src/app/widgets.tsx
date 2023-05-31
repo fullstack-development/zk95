@@ -3,11 +3,12 @@ import { MixerIcon, CustomizeIcon } from '@mixer/icons';
 import { injectable } from '@mixer/injectable';
 import { mkMixer } from '@mixer/mixer';
 import { mkCustomizer } from '@mixer/customizer';
+import { bindModule } from '@mixer/utils';
 
 export const mkWidgetsConfig = injectable(
   mkMixer,
   mkCustomizer,
-  (Mixer, Customizer): WidgetConfig[] => [
+  bindModule((Mixer, Customizer): WidgetConfig[] => [
     {
       id: 'mixer',
       caption: 'mixer.exe',
@@ -22,5 +23,5 @@ export const mkWidgetsConfig = injectable(
       defaultSize: { width: 500, height: 440 },
       Component: Customizer,
     },
-  ]
+  ])
 );

@@ -3,7 +3,7 @@ import Draggable from 'react-draggable';
 
 import { injectable } from '@mixer/injectable';
 import { Window } from '@mixer/components';
-import { useClickOutside } from '@mixer/utils';
+import { bindModule, useClickOutside } from '@mixer/utils';
 
 import { WidgetConfig, Widget, mkDesktopModel, DesktopModel } from '../model';
 import { WidgetIcon } from '../widget-icon';
@@ -20,31 +20,30 @@ type Props = {
 
 export const mkDesktop = injectable(
   mkDesktopModel,
-  (model) =>
-    ({ widgetsConfig }: Props) => {
-      const { activeWidgets$, openWidget } = model;
-      const [activeWidgets] = useProperties(activeWidgets$);
+  bindModule((model) => ({ widgetsConfig }: Props) => {
+    const { activeWidgets$, openWidget } = model;
+    const [activeWidgets] = useProperties(activeWidgets$);
 
-      return (
-        <DesktopManagerContent id="desktop">
-          <DesktopDraggableArea>
-            {Object.values(activeWidgets).map((widget) => (
-              <DraggableWidget key={widget.id} widget={widget} model={model} />
-            ))}
-          </DesktopDraggableArea>
-          <DesktopGrid>
-            {widgetsConfig.map((widget) => (
-              <WidgetIcon
-                key={widget.id}
-                iconSrc={widget.iconSrc}
-                caption={widget.caption}
-                onDoubleClick={() => openWidget(widget)}
-              />
-            ))}
-          </DesktopGrid>
-        </DesktopManagerContent>
-      );
-    }
+    return (
+      <DesktopManagerContent id="desktop">
+        <DesktopDraggableArea>
+          {Object.values(activeWidgets).map((widget) => (
+            <DraggableWidget key={widget.id} widget={widget} model={model} />
+          ))}
+        </DesktopDraggableArea>
+        <DesktopGrid>
+          {widgetsConfig.map((widget) => (
+            <WidgetIcon
+              key={widget.id}
+              iconSrc={widget.iconSrc}
+              caption={widget.caption}
+              onDoubleClick={() => openWidget(widget)}
+            />
+          ))}
+        </DesktopGrid>
+      </DesktopManagerContent>
+    );
+  })
 );
 
 function DraggableWidget({

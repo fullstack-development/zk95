@@ -1,6 +1,7 @@
 import { Property, newAtom } from '@frp-ts/core';
 import { injectable } from '@mixer/injectable';
 import { mkSecretManager } from '@mixer/secret-manager';
+import { bindModule, mkModule } from '@mixer/utils';
 import {
   EMPTY,
   Observable,
@@ -22,7 +23,6 @@ export type DepositModel = {
   poolSize$: Property<number>;
   note$: Property<string | null>;
   depositing$: Property<boolean>;
-  depositEffect$: Observable<unknown>;
   setPoolSize: (size: number) => void;
   deposit: () => void;
   submitDeposit: () => void;
@@ -31,7 +31,7 @@ export type DepositModel = {
 
 export const mkDepositModel = injectable(
   mkSecretManager,
-  ({ getSecretInfo$ }): DepositModel => {
+  bindModule(({ getSecretInfo$ }) => {
     const depositAction$ = new Subject();
     const submitDepositAction$ = new Subject<boolean>();
 
@@ -74,23 +74,25 @@ export const mkDepositModel = injectable(
       switchMap(() => iif(() => !depositing$.get(), depositFlow$, EMPTY))
     );
 
-    return {
-      poolSize$,
-      note$,
-      depositing$,
-      depositEffect$,
-      setPoolSize: poolSize$.set,
-      deposit: () => depositAction$.next(void 0),
-      submitDeposit: () => {
-        submitDepositAction$.next(true);
-        note$.set(null);
+    return mkModule(
+      {
+        poolSize$,
+        note$,
+        depositing$,
+        setPoolSize: poolSize$.set,
+        deposit: () => depositAction$.next(void 0),
+        submitDeposit: () => {
+          submitDepositAction$.next(true);
+          note$.set(null);
+        },
+        rejectDeposit: () => {
+          submitDepositAction$.next(false);
+          note$.set(null);
+        },
       },
-      rejectDeposit: () => {
-        submitDepositAction$.next(false);
-        note$.set(null);
-      },
-    };
-  }
+      depositEffect$
+    );
+  })
 );
 
 const makeEffect = <V, R>(
