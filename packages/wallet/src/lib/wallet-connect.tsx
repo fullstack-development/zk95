@@ -4,14 +4,14 @@ import { useProperties, useProperty } from '@frp-ts/react';
 
 import { WindowsIcon, UserIcon } from '@mixer/icons';
 
-import { bindModule, useClickOutside } from '@mixer/utils';
+import { combineEff, useClickOutside } from '@mixer/utils';
 import { WalletModel, mkWalletModel } from './model';
 import { Root, Menu, MenuItem, MenuSideBar, UserItem } from './styled';
 import { injectable } from '@mixer/injectable';
 
 export const mkWalletConnect = injectable(
   mkWalletModel,
-  bindModule((model) => () => {
+  combineEff((model) => () => {
     const [open, setOpen] = useState(false);
     const wallet = useProperty(model.wallet$);
 

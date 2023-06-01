@@ -1,6 +1,5 @@
 import {
   BrowserWallet,
-  KoiosProvider,
   Transaction,
   resolvePlutusScriptAddress,
   UTxO,
@@ -12,92 +11,61 @@ import {
 } from '@meshsdk/core';
 import type { PlutusScript } from '@meshsdk/core';
 
+import { Blockfrost, Lucid } from 'lucid-cardano';
+
 import { injectable, token } from '@mixer/injectable';
-import { bindModule, mkModule } from '@mixer/utils';
+import { combineEff, withEff } from '@mixer/utils';
 import { mkWalletModel } from '@mixer/wallet';
-import { filter, first, forkJoin, from, map, switchMap } from 'rxjs';
+import {
+  filter,
+  first,
+  forkJoin,
+  from,
+  map,
+  shareReplay,
+  switchMap,
+} from 'rxjs';
+
+const koiosPreprodUrl = 'https://preprod.koios.rest/api/v0';
 
 export const mkOffchain = injectable(
   token('depositScript')<string>(),
   token('tokenUnit')<string>(),
   mkWalletModel,
-  bindModule((depositScriptCBorHash, tokenUnit, wallet) => {
-    const koios = new KoiosProvider('preprod');
+  combineEff((depositScriptCBorHash, tokenUnit, wallet) => {
     const script: PlutusScript = {
       code: depositScriptCBorHash,
       version: 'V2',
     };
+
+    const lucid$ = from(
+      Lucid.new(
+        new Blockfrost(
+          'https://cardano-preprod.blockfrost.io/api/v0',
+          'preprodZpZ9X9GL1xL5vajWd8VNxHxcTyYoMePJ'
+        ),
+        'Preprod'
+      )
+    ).pipe(shareReplay(1));
 
     const scriptAddress = resolvePlutusScriptAddress(script, 0);
 
     const deposit = () => {
       const makeDeposit$ = (walletApi: BrowserWallet) =>
         forkJoin([
-          koios.fetchAddressUTxOs(scriptAddress),
+          lucid$,
           walletApi.getCollateral(),
           walletApi.getChangeAddress(),
         ]).pipe(
-          switchMap(async ([scriptUtxos, collateral, address]) => {
-            const minutes = 15;
-            const nowDateTime = new Date();
-            const dateTimeAdd5Min = new Date(
-              nowDateTime.getTime() + minutes * 60000
-            );
-            const slot = resolveSlotNo('preprod', dateTimeAdd5Min.getTime());
-            const scriptUtxo = getUtxoByAsset(
-              { quantity: '1', unit: tokenUnit },
-              scriptUtxos
-            );
-            if (scriptUtxo) {
-              try {
-                const datum = readPlutusData(
-                  scriptUtxo.output.plutusData ?? ''
-                );
-                const redeemer = {
-                  data: { alternative: 0, fields: [] },
-                };
-                console.log(scriptUtxos);
+          switchMap(async ([lucid, collateral, address]) => {
+            try {
+              lucid.newTx().payToContract;
 
-                const tx = new Transaction({
-                  initiator: walletApi,
-                }).redeemValue({
-                  value: scriptUtxo,
-                  script,
-                  datum: scriptUtxo,
-                  redeemer,
-                });
-                // .sendValue(
-                //   {
-                //     address: scriptAddress,
-                //     datum: {
-                //       value: datum,
-                //       inline: true,
-                //     },
-                //     script,
-                //   },
-                //   {
-                //     input: scriptUtxo.input,
-                //     output: {
-                //       ...scriptUtxo.output,
-                //       amount: addAmounts(scriptUtxo.output.amount, {
-                //         unit: 'lovelace',
-                //         quantity: '100000000',
-                //       }),
-                //     },
-                //   } as UTxO
-                // )
-                // .setCollateral(collateral)
-                // .setRequiredSigners([address.to_js_value()])
-                // .setTimeToExpire(slot);
-
-                const unsignedTx = await tx.build();
-                const signedTx = await walletApi.signTx(unsignedTx, true);
-                console.log(readTransaction(signedTx));
-                const txHash = await koios.submitTx(signedTx);
-                console.log({ txHash });
-              } catch (error) {
-                console.log(error);
-              }
+              // const unsignedTx = await tx.build();
+              // const signedTx = await walletApi.signTx(unsignedTx, true);
+              // const txHash = await koios.submitTx(signedTx);
+            } catch (error) {
+              console.log(error);
             }
           })
         );
@@ -142,7 +110,7 @@ export const mkOffchain = injectable(
       );
     }
 
-    return mkModule({
+    return withEff({
       deposit,
     });
   })

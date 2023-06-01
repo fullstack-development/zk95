@@ -8,7 +8,7 @@ import { mkNotifier } from '@mixer/notifier';
 
 import { mkWidgetsConfig } from './widgets';
 import { Footer, InfoFrame, Main, Root } from './styled';
-import { bindModule } from '@mixer/utils';
+import { combineEff } from '@mixer/utils';
 
 export const mkApp = injectable(
   mkWidgetsConfig,
@@ -16,7 +16,7 @@ export const mkApp = injectable(
   mkWalletConnect,
   mkWidgetBar,
   mkNotifier,
-  bindModule(
+  combineEff(
     (WIDGETS_CONFIG, Desktop, WalletConnect, WidgetsBar, Notifier) => () => {
       return (
         <Root>

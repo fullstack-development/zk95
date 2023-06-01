@@ -1,5 +1,4 @@
 import { injectable } from '@mixer/injectable';
-import { mkModule, Module } from '@mixer/utils';
 import { defer, first, from, map, Observable, of, switchMap, zip } from 'rxjs';
 
 export type SecretManagerModel = {
@@ -13,7 +12,7 @@ export type SecretManagerModel = {
   hash: (value: Uint8Array) => Observable<Uint8Array>;
 };
 
-export const mkSecretManager = injectable((): Module<SecretManagerModel> => {
+export const mkSecretManager = injectable(() => {
   const secret$ = defer(() => of(crypto.getRandomValues(new Uint8Array(31))));
   const nullifier$ = defer(() =>
     of(crypto.getRandomValues(new Uint8Array(31)))
@@ -45,9 +44,9 @@ export const mkSecretManager = injectable((): Module<SecretManagerModel> => {
     );
   }
 
-  return mkModule({
+  return {
     getSecretInfo$,
     mkCommitmentHash,
     hash,
-  });
+  };
 });

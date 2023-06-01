@@ -14,7 +14,7 @@ import { newAtom, Property } from '@frp-ts/core';
 import { Wallet, BrowserWallet, UTxO } from '@meshsdk/core';
 import { injectable } from '@mixer/injectable';
 
-import { Module, fromObservable, mkModule } from '@mixer/utils';
+import { fromObservable, withEff } from '@mixer/utils';
 
 export const SUPPORTED_WALLETS = [
   'begin',
@@ -93,7 +93,7 @@ export const mkWalletModel = injectable(() => {
     switchMap((wallet) => (wallet ? connectWallet(wallet.name) : EMPTY))
   );
 
-  return mkModule<WalletModel>(
+  return withEff<WalletModel>(
     {
       wallet$,
       adaBalance$: fromObservable(adaBalance$, 0),

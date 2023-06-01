@@ -3,12 +3,12 @@ import { MixerIcon, CustomizeIcon } from '@mixer/icons';
 import { injectable } from '@mixer/injectable';
 import { mkMixer } from '@mixer/mixer';
 import { mkCustomizer } from '@mixer/customizer';
-import { bindModule } from '@mixer/utils';
+import { combineEff } from '@mixer/utils';
 
 export const mkWidgetsConfig = injectable(
   mkMixer,
   mkCustomizer,
-  bindModule((Mixer, Customizer): WidgetConfig[] => [
+  combineEff((Mixer, Customizer): WidgetConfig[] => [
     {
       id: 'mixer',
       caption: 'mixer.exe',

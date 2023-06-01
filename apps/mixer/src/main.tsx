@@ -16,7 +16,7 @@ import ms_sans_serif from 'react95/dist/fonts/ms_sans_serif.woff2';
 import ms_sans_serif_bold from 'react95/dist/fonts/ms_sans_serif_bold.woff2';
 import { useProperties } from '@frp-ts/react';
 import { injectable } from '@mixer/injectable';
-import { useRunModule } from '@mixer/utils';
+import { useRunEff } from '@mixer/utils';
 
 const GlobalStyles = createGlobalStyle`
   ${styleReset}
@@ -54,7 +54,7 @@ const mkRoot = injectable(
   mkApp,
   (customizeModel, appM) => () => {
     const [themeKey] = useProperties(customizeModel.selectedTheme$);
-    const App = useRunModule(appM);
+    const App = useRunEff(appM);
 
     return (
       <StrictMode>

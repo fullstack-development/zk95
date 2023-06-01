@@ -3,7 +3,7 @@ import Draggable from 'react-draggable';
 
 import { injectable } from '@mixer/injectable';
 import { Window } from '@mixer/components';
-import { bindModule, useClickOutside } from '@mixer/utils';
+import { combineEff, useClickOutside } from '@mixer/utils';
 
 import { WidgetConfig, Widget, mkDesktopModel, DesktopModel } from '../model';
 import { WidgetIcon } from '../widget-icon';
@@ -20,7 +20,7 @@ type Props = {
 
 export const mkDesktop = injectable(
   mkDesktopModel,
-  bindModule((model) => ({ widgetsConfig }: Props) => {
+  combineEff((model) => ({ widgetsConfig }: Props) => {
     const { activeWidgets$, openWidget } = model;
     const [activeWidgets] = useProperties(activeWidgets$);
 

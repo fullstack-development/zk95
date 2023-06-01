@@ -1,7 +1,8 @@
 import { Property, newAtom } from '@frp-ts/core';
 import { injectable } from '@mixer/injectable';
-import { bindModuleFactory } from '@mixer/utils';
+import { combineEffFactory, withEff } from '@mixer/utils';
 import { mkWithdrawModel } from './model';
+import { interval, tap } from 'rxjs';
 
 export type WithdrawFromViewModel = {
   note$: Property<string>;
@@ -12,15 +13,20 @@ export type WithdrawFromViewModel = {
 
 export const mkWithdrawFromViewModel = injectable(
   mkWithdrawModel,
-  bindModuleFactory((model) => (): WithdrawFromViewModel => {
+  combineEffFactory((model) => () => {
     const note$ = newAtom<string>('');
     const address$ = newAtom<string>('');
 
-    return {
-      note$,
-      address$,
-      setNote: note$.set,
-      setAddress: address$.set,
-    };
+    return withEff<WithdrawFromViewModel>(
+      {
+        note$,
+        address$,
+        setNote: note$.set,
+        setAddress: address$.set,
+      },
+      interval(1000).pipe(
+        tap(() => console.log('mkWithdrawFromViewModel effect'))
+      )
+    );
   })
 );

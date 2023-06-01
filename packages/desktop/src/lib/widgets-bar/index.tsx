@@ -2,11 +2,11 @@ import { injectable } from '@mixer/injectable';
 import { useProperties } from '@frp-ts/react';
 import { mkDesktopModel } from '../model';
 import { Toolbar, Button } from './styled';
-import { bindModule } from '@mixer/utils';
+import { combineEff } from '@mixer/utils';
 
 export const mkWidgetBar = injectable(
   mkDesktopModel,
-  bindModule(({ activeWidgetId$, activeWidgets$, makeWidgetActive }) => () => {
+  combineEff(({ activeWidgetId$, activeWidgets$, makeWidgetActive }) => () => {
     const [activeWidgets, activeWidgetId] = useProperties(
       activeWidgets$,
       activeWidgetId$

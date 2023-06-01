@@ -1,7 +1,7 @@
 import { Property, newAtom } from '@frp-ts/core';
 import { injectable } from '@mixer/injectable';
 import { mkSecretManager } from '@mixer/secret-manager';
-import { bindModule, mkModule } from '@mixer/utils';
+import { combineEff, withEff } from '@mixer/utils';
 import {
   EMPTY,
   Observable,
@@ -31,7 +31,7 @@ export type DepositModel = {
 
 export const mkDepositModel = injectable(
   mkSecretManager,
-  bindModule(({ getSecretInfo$ }) => {
+  combineEff(({ getSecretInfo$ }) => {
     const depositAction$ = new Subject();
     const submitDepositAction$ = new Subject<boolean>();
 
@@ -74,7 +74,7 @@ export const mkDepositModel = injectable(
       switchMap(() => iif(() => !depositing$.get(), depositFlow$, EMPTY))
     );
 
-    return mkModule(
+    return withEff(
       {
         poolSize$,
         note$,

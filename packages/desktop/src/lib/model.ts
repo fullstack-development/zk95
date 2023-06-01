@@ -1,7 +1,7 @@
 import { ComponentType } from 'react';
-import { injectable } from '@mixer/injectable';
+import { injectable, token } from '@mixer/injectable';
 import { Property, newAtom, combine } from '@frp-ts/core';
-import { Module, mkModule } from '@mixer/utils';
+import { Eff, withEff } from '@mixer/utils';
 
 export type WidgetConfig = {
   id: string;
@@ -23,7 +23,9 @@ export type DesktopModel = {
   blur: () => void;
 };
 
-export const mkDesktopModel = injectable((): Module<DesktopModel> => {
+export const WIDGET_CONFIG_TOKEN = token('widgetConfig')<WidgetConfig[]>();
+
+export const mkDesktopModel = injectable((): Eff<DesktopModel> => {
   const activeWidgets$ = newAtom<Record<string, Widget>>({});
   const activeWidgetId$ = newAtom<string | null>(null);
   const widgetsOrder$ = combine(
@@ -70,7 +72,7 @@ export const mkDesktopModel = injectable((): Module<DesktopModel> => {
     }
   }
 
-  return mkModule({
+  return withEff({
     activeWidgetId$,
     activeWidgets$,
     widgetsOrder$,

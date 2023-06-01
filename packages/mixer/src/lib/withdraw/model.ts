@@ -1,6 +1,6 @@
 import { Property, newAtom } from '@frp-ts/core';
 import { injectable } from '@mixer/injectable';
-import { mkModule } from '@mixer/utils';
+import { withEff } from '@mixer/utils';
 import { EMPTY, Subject, switchMap } from 'rxjs';
 
 export type WithdrawModel = {
@@ -14,7 +14,7 @@ export const mkWithdrawModel = injectable(() => {
 
   const withdrawEffect$ = withdrawAction$.pipe(switchMap(() => EMPTY));
 
-  return mkModule<WithdrawModel>(
+  return withEff<WithdrawModel>(
     {
       withdrawing$,
       withdraw: (note, address) => withdrawAction$.next({ note, address }),

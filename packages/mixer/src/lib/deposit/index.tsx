@@ -15,12 +15,12 @@ import { injectable } from '@mixer/injectable';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { useState } from 'react';
 import { mkOffchain } from '@mixer/offchain';
-import { bindModule } from '@mixer/utils';
+import { combineEff } from '@mixer/utils';
 
 export const mkDepositForm = injectable(
   mkDepositModel,
   mkOffchain,
-  bindModule(
+  combineEff(
     (
         {
           poolSize$,
