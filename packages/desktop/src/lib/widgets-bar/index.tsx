@@ -1,8 +1,10 @@
-import { injectable } from '@mixer/injectable';
 import { useProperties } from '@frp-ts/react';
+
+import { injectable } from '@mixer/injectable';
+import { combineEff } from '@mixer/eff';
+
 import { mkDesktopModel } from '../model';
 import { Toolbar, Button } from './styled';
-import { combineEff } from '@mixer/utils';
 
 export const mkWidgetBar = injectable(
   mkDesktopModel,

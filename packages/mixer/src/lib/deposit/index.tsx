@@ -1,6 +1,11 @@
+import { useState } from 'react';
 import { Button, Radio, Hourglass } from 'react95';
 import { useProperties } from '@frp-ts/react';
+import CopyToClipboard from 'react-copy-to-clipboard';
+
 import { Modal } from '@mixer/components';
+import { injectable } from '@mixer/injectable';
+import { combineEff } from '@mixer/eff';
 
 import { mkDepositModel } from './model';
 import {
@@ -11,10 +16,6 @@ import {
   NoteField,
   PoolsBox,
 } from './styled';
-import { injectable } from '@mixer/injectable';
-import CopyToClipboard from 'react-copy-to-clipboard';
-import { useState } from 'react';
-import { combineEff } from '@mixer/utils';
 
 export const mkDepositForm = injectable(
   mkDepositModel,

@@ -13,7 +13,8 @@ import { newAtom, Property } from '@frp-ts/core';
 import { WalletApi, Cardano, C } from 'lucid-cardano';
 import { injectable } from '@mixer/injectable';
 
-import { fromObservable, withEff } from '@mixer/utils';
+import { fromObservable } from '@mixer/utils';
+import { withEff } from '@mixer/eff';
 
 export const SUPPORTED_WALLETS = [
   'begin',

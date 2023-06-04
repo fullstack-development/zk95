@@ -1,31 +1,21 @@
 {
-  "name": "injectable",
+  "name": "shared",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/injectable/src",
+  "sourceRoot": "packages/shared/src",
   "projectType": "library",
   "targets": {
-    "build": {
-      "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/packages/injectable",
-        "main": "packages/injectable/src/index.ts",
-        "tsConfig": "packages/injectable/tsconfig.lib.json",
-        "assets": ["packages/injectable/*.md"]
-      }
-    },
     "lint": {
       "executor": "@nx/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["packages/injectable/**/*.ts"]
+        "lintFilePatterns": ["packages/shared/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "packages/injectable/jest.config.ts",
+        "jestConfig": "packages/shared/jest.config.ts",
         "passWithNoTests": true
       },
       "configurations": {

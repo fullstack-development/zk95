@@ -5,10 +5,6 @@ import {
   shareReplay,
   switchMap,
   Observable,
-  interval,
-  from,
-  of,
-  mergeMap,
 } from 'rxjs';
 import {
   Lucid,
@@ -23,7 +19,7 @@ import {
 
 import { ONCHAIN_CONFIG_KEY, OnchainConfig } from '@mixer/onchain-config';
 import { injectable, token } from '@mixer/injectable';
-import { combineEff } from '@mixer/utils';
+import { combineEff } from '@mixer/eff';
 import { mkWalletModel } from '@mixer/wallet';
 
 export type Offchain = {

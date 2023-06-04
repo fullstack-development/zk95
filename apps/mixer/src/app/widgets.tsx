@@ -1,10 +1,10 @@
+import { injectable } from '@mixer/injectable';
+import { combineEff } from '@mixer/eff';
 import { WidgetConfig } from '@mixer/desktop';
 import { MixerIcon, CustomizeIcon, SearchIcon } from '@mixer/icons';
-import { injectable } from '@mixer/injectable';
 import { mkMixer } from '@mixer/mixer';
 import { mkCustomizer } from '@mixer/customizer';
 import { mkTransactionWatcher } from '@mixer/transaction-watcher';
-import { combineEff } from '@mixer/utils';
 
 export const mkWidgetsConfig = injectable(
   mkMixer,

@@ -6,7 +6,7 @@ import {
 } from '@mixer/chain-index-provider';
 import { injectable } from '@mixer/injectable';
 import { filter, from, interval, switchMap, tap, throttle } from 'rxjs';
-import { Eff, withEff } from '@mixer/utils';
+import { Eff, withEff } from '@mixer/eff';
 
 type TxStatusList = Record<string, TxStatus>;
 

@@ -4,9 +4,12 @@ import * as ReactDOM from 'react-dom/client';
 import { ModalProvider } from 'styled-react-modal';
 import { styleReset } from 'react95';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
+import { useProperties } from '@frp-ts/react';
 
 import { ModalBackground } from '@mixer/components';
 import { mkCustomizeModel } from '@mixer/customizer';
+import { injectable } from '@mixer/injectable';
+import { useRunEff } from '@mixer/eff';
 
 import { mkApp } from './app/app';
 
@@ -14,9 +17,6 @@ import { mkApp } from './app/app';
 import ms_sans_serif from 'react95/dist/fonts/ms_sans_serif.woff2';
 // @ts-ignore
 import ms_sans_serif_bold from 'react95/dist/fonts/ms_sans_serif_bold.woff2';
-import { useProperties } from '@frp-ts/react';
-import { injectable } from '@mixer/injectable';
-import { useRunEff } from '@mixer/utils';
 
 const GlobalStyles = createGlobalStyle`
   ${styleReset}

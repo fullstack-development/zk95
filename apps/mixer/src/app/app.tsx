@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import { AppBar, Handle, Toolbar } from 'react95';
 
 import { injectable } from '@mixer/injectable';
+import { combineEff } from '@mixer/eff';
 import { mkWalletConnect } from '@mixer/wallet';
 import { mkDesktop, mkWidgetBar } from '@mixer/desktop';
 import { mkNotifier } from '@mixer/notifier';
 
 import { mkWidgetsConfig } from './widgets';
 import { Footer, InfoFrame, Main, Root } from './styled';
-import { combineEff } from '@mixer/utils';
 
 export const mkApp = injectable(
   mkWidgetsConfig,

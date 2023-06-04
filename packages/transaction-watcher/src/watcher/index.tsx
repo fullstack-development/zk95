@@ -6,7 +6,7 @@ import { Content, ScrollView, TxHash, TxItem, TxStatusIcon } from './styled';
 import { TxStatus, mkTransactionWatcherModel } from '../model';
 import { useProperties } from '@frp-ts/react';
 import { ErrorIcon, SuccessIcon } from '@mixer/icons';
-import { combineEff } from '@mixer/utils';
+import { combineEff } from '@mixer/eff';
 
 export const mkTransactionWatcher = injectable(
   mkTransactionWatcherModel,

@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { Tabs, Tab, TabBody } from 'react95';
 
 import { injectable } from '@mixer/injectable';
+import { combineEff } from '@mixer/eff';
 
 import { MainContent } from './styled';
 import { mkDepositForm } from '../deposit';
 import { mkWithdrawForm } from '../withdraw';
-import { combineEff } from '@mixer/utils';
 
 export const mkMixer = injectable(
   mkDepositForm,

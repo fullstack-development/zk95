@@ -3,8 +3,9 @@ import { Anchor, Avatar, Button, Hourglass, Separator } from 'react95';
 import { useProperties, useProperty } from '@frp-ts/react';
 
 import { WindowsIcon, UserIcon } from '@mixer/icons';
+import { combineEff } from '@mixer/eff';
+import { useClickOutside } from '@mixer/utils';
 
-import { combineEff, useClickOutside } from '@mixer/utils';
 import { WalletModel, mkWalletModel } from './model';
 import { Root, Menu, MenuItem, MenuSideBar, UserItem } from './styled';
 import { injectable } from '@mixer/injectable';

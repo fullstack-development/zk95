@@ -1,6 +1,6 @@
 import { Property, newAtom } from '@frp-ts/core';
 import { injectable } from '@mixer/injectable';
-import { withEff } from '@mixer/utils';
+import { withEff } from '@mixer/eff';
 import { EMPTY, Subject, switchMap } from 'rxjs';
 
 export type WithdrawModel = {

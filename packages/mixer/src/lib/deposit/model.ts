@@ -3,7 +3,7 @@ import { injectable } from '@mixer/injectable';
 import { mkOffchain } from '@mixer/offchain';
 import { mkSecretManager } from '@mixer/secret-manager';
 import { mkTransactionWatcherModel } from '@mixer/transaction-watcher';
-import { combineEff, withEff } from '@mixer/utils';
+import { combineEff, withEff } from '@mixer/eff';
 import {
   EMPTY,
   Observable,

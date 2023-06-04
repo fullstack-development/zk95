@@ -1,6 +1,6 @@
 import { Property, newAtom } from '@frp-ts/core';
 import { injectable } from '@mixer/injectable';
-import { combineEffFactory, withEff } from '@mixer/utils';
+import { combineEffFactory, withEff } from '@mixer/eff';
 import { mkWithdrawModel } from './model';
 import { interval, tap } from 'rxjs';
 
