@@ -1,14 +1,16 @@
 import { WidgetConfig } from '@mixer/desktop';
-import { MixerIcon, CustomizeIcon } from '@mixer/icons';
+import { MixerIcon, CustomizeIcon, SearchIcon } from '@mixer/icons';
 import { injectable } from '@mixer/injectable';
 import { mkMixer } from '@mixer/mixer';
 import { mkCustomizer } from '@mixer/customizer';
+import { mkTransactionWatcher } from '@mixer/transaction-watcher';
 import { combineEff } from '@mixer/utils';
 
 export const mkWidgetsConfig = injectable(
   mkMixer,
   mkCustomizer,
-  combineEff((Mixer, Customizer): WidgetConfig[] => [
+  mkTransactionWatcher,
+  combineEff((Mixer, Customizer, Watcher): WidgetConfig[] => [
     {
       id: 'mixer',
       caption: 'mixer.exe',
@@ -22,6 +24,13 @@ export const mkWidgetsConfig = injectable(
       iconSrc: CustomizeIcon,
       defaultSize: { width: 500, height: 440 },
       Component: Customizer,
+    },
+    {
+      id: 'transactions',
+      caption: 'My Transactions',
+      iconSrc: SearchIcon,
+      defaultSize: { width: 520, height: 240 },
+      Component: Watcher,
     },
   ])
 );

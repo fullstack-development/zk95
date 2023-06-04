@@ -43,5 +43,5 @@ export const MenuItem = styled(MenuListItem)`
 export const MenuSideBar = styled.div`
   height: 100%;
   width: 100%;
-  background-color: ${({ theme }) => theme.headerBackground};
+  background-color: ${({ theme }) => theme.hoverBackground};
 `;

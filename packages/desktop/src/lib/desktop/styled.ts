@@ -8,12 +8,14 @@ export const DesktopManagerContent = styled.div`
   align-content: stretch;
   width: 100%;
   height: 100%;
+  background-color: ${({ theme }) => theme.desktopBackground};
 `;
 
 export const DesktopDraggableArea = styled.div`
   position: relative;
   width: 0;
   height: 0;
+  z-index: 1;
 `;
 
 export const DesktopDraggableItem = styled.div<{ order: number }>`

@@ -9,12 +9,16 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "es2015",
+    "strict": true,
     "module": "esnext",
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@mixer/chain-index-provider": [
+        "packages/chain-index-provider/src/index.ts"
+      ],
       "@mixer/components": ["packages/components/src/index.ts"],
       "@mixer/customizer": ["packages/customizer/src/index.ts"],
       "@mixer/desktop": ["packages/desktop/src/index.ts"],
@@ -23,7 +27,11 @@
       "@mixer/mixer": ["packages/mixer/src/index.ts"],
       "@mixer/notifier": ["packages/notifier/src/index.ts"],
       "@mixer/offchain": ["packages/offchain/src/index.ts"],
+      "@mixer/onchain-config": ["packages/onchain-config/src/index.ts"],
       "@mixer/secret-manager": ["packages/secret-manager/src/index.ts"],
+      "@mixer/transaction-watcher": [
+        "packages/transaction-watcher/src/index.ts"
+      ],
       "@mixer/utils": ["packages/utils/src/index.ts"],
       "@mixer/wallet": ["packages/wallet/src/index.ts"]
     }

@@ -3,7 +3,8 @@ import Draggable from 'react-draggable';
 
 import { injectable } from '@mixer/injectable';
 import { Window } from '@mixer/components';
-import { combineEff, useClickOutside } from '@mixer/utils';
+import { useClickOutside } from '@mixer/utils';
+import { mkCustomizeModel } from '@mixer/customizer';
 
 import { WidgetConfig, Widget, mkDesktopModel, DesktopModel } from '../model';
 import { WidgetIcon } from '../widget-icon';
@@ -20,30 +21,40 @@ type Props = {
 
 export const mkDesktop = injectable(
   mkDesktopModel,
-  combineEff((model) => ({ widgetsConfig }: Props) => {
-    const { activeWidgets$, openWidget } = model;
-    const [activeWidgets] = useProperties(activeWidgets$);
+  mkCustomizeModel,
+  (model, { selectedTheme$ }) =>
+    ({ widgetsConfig }: Props) => {
+      const { activeWidgets$, openWidget } = model;
+      const [activeWidgets, selectedThemeKey] = useProperties(
+        activeWidgets$,
+        selectedTheme$
+      );
 
-    return (
-      <DesktopManagerContent id="desktop">
-        <DesktopDraggableArea>
-          {Object.values(activeWidgets).map((widget) => (
-            <DraggableWidget key={widget.id} widget={widget} model={model} />
-          ))}
-        </DesktopDraggableArea>
-        <DesktopGrid>
-          {widgetsConfig.map((widget) => (
-            <WidgetIcon
-              key={widget.id}
-              iconSrc={widget.iconSrc}
-              caption={widget.caption}
-              onDoubleClick={() => openWidget(widget)}
-            />
-          ))}
-        </DesktopGrid>
-      </DesktopManagerContent>
-    );
-  })
+      // useEffect(() => {
+      //   openWidget(widgetsConfig[2]);
+      // }, []);
+
+      return (
+        <DesktopManagerContent id="desktop">
+          <DesktopDraggableArea>
+            {Object.values(activeWidgets).map((widget) => (
+              <DraggableWidget key={widget.id} widget={widget} model={model} />
+            ))}
+          </DesktopDraggableArea>
+          <DesktopGrid>
+            {widgetsConfig.map((widget) => (
+              <WidgetIcon
+                key={widget.id}
+                iconSrc={widget.iconSrc}
+                caption={widget.caption}
+                themeKey={selectedThemeKey}
+                onDoubleClick={() => openWidget(widget)}
+              />
+            ))}
+          </DesktopGrid>
+        </DesktopManagerContent>
+      );
+    }
 );
 
 function DraggableWidget({

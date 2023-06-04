@@ -1,7 +1,6 @@
 import { ComponentType } from 'react';
 import { injectable, token } from '@mixer/injectable';
 import { Property, newAtom, combine } from '@frp-ts/core';
-import { Eff, withEff } from '@mixer/utils';
 
 export type WidgetConfig = {
   id: string;
@@ -25,7 +24,7 @@ export type DesktopModel = {
 
 export const WIDGET_CONFIG_TOKEN = token('widgetConfig')<WidgetConfig[]>();
 
-export const mkDesktopModel = injectable((): Eff<DesktopModel> => {
+export const mkDesktopModel = injectable(() => {
   const activeWidgets$ = newAtom<Record<string, Widget>>({});
   const activeWidgetId$ = newAtom<string | null>(null);
   const widgetsOrder$ = combine(
@@ -35,9 +34,11 @@ export const mkDesktopModel = injectable((): Eff<DesktopModel> => {
       const currentWidgetsIds = Object.keys(activeWidgets);
 
       if (activeWidgetId) {
-        currentWidgetsIds.sort((a, b) =>
-          a === activeWidgetId ? 1 : b === activeWidgetId ? -1 : 0
-        );
+        const order = currentWidgetsIds.indexOf(activeWidgetId);
+        if (order > -1) {
+          currentWidgetsIds.splice(order, 1);
+          currentWidgetsIds.push(activeWidgetId);
+        }
       }
 
       return currentWidgetsIds.reduce<Record<string, number>>(
@@ -72,7 +73,7 @@ export const mkDesktopModel = injectable((): Eff<DesktopModel> => {
     }
   }
 
-  return withEff({
+  return {
     activeWidgetId$,
     activeWidgets$,
     widgetsOrder$,
@@ -80,5 +81,5 @@ export const mkDesktopModel = injectable((): Eff<DesktopModel> => {
     closeWidget,
     makeWidgetActive,
     blur: () => activeWidgetId$.set(null),
-  });
+  };
 });

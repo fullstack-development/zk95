@@ -3,22 +3,32 @@ import styled from 'styled-components';
 type Props = {
   iconSrc: string;
   caption: string;
+  themeKey: string;
   onDoubleClick: () => void;
 };
 
-export const WidgetIcon = ({ iconSrc, caption, onDoubleClick }: Props) => {
+export const WidgetIcon = ({
+  iconSrc,
+  caption,
+  themeKey,
+  onDoubleClick,
+}: Props) => {
   return (
     <WidgetIconButton tabIndex={1} onDoubleClick={onDoubleClick}>
-      <img src={iconSrc} alt="icon" />
-      <WidgetIconCaption>{caption}</WidgetIconCaption>
+      <Icon src={iconSrc} alt="icon" />
+      <WidgetIconCaption themeKey={themeKey}>{caption}</WidgetIconCaption>
     </WidgetIconButton>
   );
 };
 
-const WidgetIconCaption = styled.span`
-  &:focus {
-    outline: rgb(0, 0, 0) dotted 1px;
-  }
+const Icon = styled.img``;
+
+const WidgetIconCaption = styled.span<{ themeKey: string }>`
+  color: ${({ themeKey, theme }) =>
+    themeKey === 'original' || themeKey === 'ash'
+      ? theme.canvasTextInvert
+      : theme.materialText};
+  font-family: 'ms_sans_serif';
 `;
 
 const WidgetIconButton = styled.button`
@@ -28,9 +38,10 @@ const WidgetIconButton = styled.button`
   border: none;
   padding: 3px;
   cursor: pointer;
-  color: ${({ theme }) => theme.canvasTextInvert};
 
   &:focus > ${WidgetIconCaption} {
-    outline: rgb(0, 0, 0) dotted 1px;
+    color: ${({ theme }) => theme.materialTextInvert};
+    outline: ${({ theme }) => theme.focusSecondary} dotted 1px;
+    background-color: ${({ theme }) => theme.hoverBackground};
   }
 `;

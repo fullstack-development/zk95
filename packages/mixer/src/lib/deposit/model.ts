@@ -1,6 +1,8 @@
 import { Property, newAtom } from '@frp-ts/core';
 import { injectable } from '@mixer/injectable';
+import { mkOffchain } from '@mixer/offchain';
 import { mkSecretManager } from '@mixer/secret-manager';
+import { mkTransactionWatcherModel } from '@mixer/transaction-watcher';
 import { combineEff, withEff } from '@mixer/utils';
 import {
   EMPTY,
@@ -9,14 +11,13 @@ import {
   finalize,
   first,
   forkJoin,
-  from,
   iif,
   of,
   switchMap,
   tap,
   OperatorFunction,
-  timer,
-  map,
+  catchError,
+  throwError,
 } from 'rxjs';
 
 export type DepositModel = {
@@ -31,18 +32,17 @@ export type DepositModel = {
 
 export const mkDepositModel = injectable(
   mkSecretManager,
-  combineEff(({ getSecretInfo$ }) => {
+  mkTransactionWatcherModel,
+  mkOffchain,
+  combineEff(({ getSecretInfo$ }, watcherModel, { deposit$ }) => {
     const depositAction$ = new Subject();
     const submitDepositAction$ = new Subject<boolean>();
 
-    const poolSize$ = newAtom<number>(10);
+    const poolSize$ = newAtom<number>(100);
     const depositing$ = newAtom<boolean>(false);
     const note$ = newAtom<string | null>(null);
 
-    const depositFlow$ = forkJoin([
-      getSecretInfo$(),
-      from(poolSize$).pipe(first()),
-    ]).pipe(
+    const depositFlow$ = forkJoin([getSecretInfo$(), of(poolSize$.get())]).pipe(
       tap(() => depositing$.set(true)),
       tap(([[secret, nullifier], poolSize]) => {
         note$.set(
@@ -51,20 +51,24 @@ export const mkDepositModel = injectable(
           )}${Buffer.from(secret).toString('hex')}`
         );
       }),
-      switchMap(([[, , commitmentHash]], poolSize) =>
+      switchMap(([[, , commitmentHash], poolSize]) =>
         forkJoin([
           submitDepositAction$.pipe(first()),
           of(commitmentHash),
           of(poolSize),
         ])
       ),
-      switchMap(([submitted]) =>
-        submitted ? timer(2000).pipe(map(() => submitted)) : of(submitted)
+      switchMap(([submitted, commitmentHash, poolSize]) =>
+        submitted
+          ? deposit$(poolSize, Buffer.from(commitmentHash).toString('hex'))
+          : throwError(() => 'rejected')
       ),
       tap({
-        next: (submitted) => {
-          console.log(submitted ? 'success' : 'fail');
-        },
+        next: (txHash) => watcherModel.watchTx(txHash),
+      }),
+      catchError((error) => {
+        console.log(error);
+        return EMPTY;
       }),
       finalize(() => depositing$.set(false))
     );

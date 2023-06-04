@@ -14,25 +14,20 @@ import {
 import { injectable } from '@mixer/injectable';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { useState } from 'react';
-import { mkOffchain } from '@mixer/offchain';
 import { combineEff } from '@mixer/utils';
 
 export const mkDepositForm = injectable(
   mkDepositModel,
-  mkOffchain,
   combineEff(
-    (
-        {
-          poolSize$,
-          note$,
-          depositing$,
-          submitDeposit,
-          rejectDeposit,
-          deposit,
-          setPoolSize,
-        },
-        offchain
-      ) =>
+    ({
+        poolSize$,
+        note$,
+        depositing$,
+        submitDeposit,
+        rejectDeposit,
+        deposit,
+        setPoolSize,
+      }) =>
       () => {
         const [poolSize, note, depositing] = useProperties(
           poolSize$,
@@ -50,6 +45,7 @@ export const mkDepositForm = injectable(
                 onChange={(event) => setPoolSize(Number(event.target.value))}
                 value={1}
                 label="₳1"
+                disabled
                 name="1"
               />
               <br />
@@ -58,6 +54,7 @@ export const mkDepositForm = injectable(
                 onChange={(event) => setPoolSize(Number(event.target.value))}
                 value={10}
                 label="₳10"
+                disabled
                 name="10"
               />
               <br />
@@ -74,11 +71,12 @@ export const mkDepositForm = injectable(
                 onChange={(event) => setPoolSize(Number(event.target.value))}
                 value={1000}
                 label="₳1000"
+                disabled
                 name="fruits"
               />
             </PoolsBox>
             <Footer>
-              <Button onClick={offchain.deposit} disabled={depositing}>
+              <Button onClick={deposit} disabled={depositing}>
                 {depositing ? <Hourglass /> : 'Deposit'}
               </Button>
             </Footer>

@@ -1,117 +1,125 @@
 import {
-  BrowserWallet,
-  Transaction,
-  resolvePlutusScriptAddress,
-  UTxO,
-  readPlutusData,
-  Asset,
-  parseAssetUnit,
-  readTransaction,
-  resolveSlotNo,
-} from '@meshsdk/core';
-import type { PlutusScript } from '@meshsdk/core';
-
-import { Blockfrost, Lucid } from 'lucid-cardano';
-
-import { injectable, token } from '@mixer/injectable';
-import { combineEff, withEff } from '@mixer/utils';
-import { mkWalletModel } from '@mixer/wallet';
-import {
-  filter,
+  combineLatest,
   first,
-  forkJoin,
-  from,
   map,
   shareReplay,
   switchMap,
+  Observable,
+  interval,
+  from,
+  of,
+  mergeMap,
 } from 'rxjs';
+import {
+  Lucid,
+  Address,
+  Data,
+  Constr,
+  fromText,
+  TxHash,
+  Assets,
+  Blockfrost,
+} from 'lucid-cardano';
 
-const koiosPreprodUrl = 'https://preprod.koios.rest/api/v0';
+import { ONCHAIN_CONFIG_KEY, OnchainConfig } from '@mixer/onchain-config';
+import { injectable, token } from '@mixer/injectable';
+import { combineEff } from '@mixer/utils';
+import { mkWalletModel } from '@mixer/wallet';
+
+export type Offchain = {
+  deposit$: (poolSize: number, commitmentHash: string) => Observable<TxHash>;
+  withdraw$: () => void;
+};
 
 export const mkOffchain = injectable(
-  token('depositScript')<string>(),
-  token('tokenUnit')<string>(),
+  token(ONCHAIN_CONFIG_KEY)<OnchainConfig>(),
   mkWalletModel,
-  combineEff((depositScriptCBorHash, tokenUnit, wallet) => {
-    const script: PlutusScript = {
-      code: depositScriptCBorHash,
-      version: 'V2',
-    };
+  combineEff((onchainConfig, walletModel): Offchain => {
+    const provider = new Blockfrost(
+      'https://cardano-preprod.blockfrost.io/api/v0',
+      'preprodZpZ9X9GL1xL5vajWd8VNxHxcTyYoMePJ'
+    );
+    const lucid$ = combineLatest([
+      Lucid.new(provider, 'Preprod'),
+      walletModel.wallet$,
+    ]).pipe(
+      map(([lucid, wallet]) =>
+        wallet ? lucid.selectWallet(wallet.api) : lucid
+      ),
+      shareReplay(1)
+    );
 
-    const lucid$ = from(
-      Lucid.new(
-        new Blockfrost(
-          'https://cardano-preprod.blockfrost.io/api/v0',
-          'preprodZpZ9X9GL1xL5vajWd8VNxHxcTyYoMePJ'
-        ),
-        'Preprod'
-      )
-    ).pipe(shareReplay(1));
+    const deposit$ = (poolSize: number, commitmentHash: string) =>
+      lucid$.pipe(
+        first(),
+        switchMap((lucid) =>
+          (async () => {
+            const config = onchainConfig[poolSize];
 
-    const scriptAddress = resolvePlutusScriptAddress(script, 0);
-
-    const deposit = () => {
-      const makeDeposit$ = (walletApi: BrowserWallet) =>
-        forkJoin([
-          lucid$,
-          walletApi.getCollateral(),
-          walletApi.getChangeAddress(),
-        ]).pipe(
-          switchMap(async ([lucid, collateral, address]) => {
-            try {
-              lucid.newTx().payToContract;
-
-              // const unsignedTx = await tx.build();
-              // const signedTx = await walletApi.signTx(unsignedTx, true);
-              // const txHash = await koios.submitTx(signedTx);
-            } catch (error) {
-              console.log(error);
+            if (config === undefined) {
+              throw new Error(`Pool with ${poolSize} nominal not found`);
             }
-          })
-        );
 
-      from(wallet.wallet$)
-        .pipe(
-          map((wallet) => wallet?.api),
-          filter(
-            (walletApi): walletApi is BrowserWallet => walletApi !== undefined
-          ),
-          first(),
-          switchMap(makeDeposit$)
+            const depositScriptAddress: Address =
+              lucid.utils.validatorToAddress({
+                type: config.script.type,
+                script: config.script.cbor,
+              });
+
+            const UTxOsWithScriptRef = await lucid.utxosAt(
+              config.addressWithScriptRef
+            );
+            const depositUTxOs = await lucid.utxosAt(depositScriptAddress);
+
+            const referenceScriptUTxO = UTxOsWithScriptRef.find((utxo) =>
+              Boolean(utxo.scriptRef)
+            );
+
+            if (!referenceScriptUTxO)
+              throw new Error('Reference script not found');
+
+            const poolUTxO = depositUTxOs.find(
+              (utxo) => utxo.assets[config.tokenUnit] !== undefined
+            );
+
+            if (!poolUTxO) throw new Error('Pool not found');
+
+            const redeemer = Data.to(new Constr(0, [fromText(commitmentHash)]));
+
+            const tx = await lucid
+              .newTx()
+              .readFrom([referenceScriptUTxO])
+              .collectFrom([poolUTxO], redeemer)
+              .payToContract(
+                depositScriptAddress,
+                { inline: poolUTxO.datum ?? undefined },
+                sumAssets(poolUTxO.assets, { lovelace: BigInt('100000000') })
+              )
+              .complete();
+            const signedTx = await tx.sign().complete();
+            const txHash = await signedTx.submit();
+            return txHash;
+          })()
         )
-        .subscribe();
+      );
+
+    const withdraw$ = () => {
+      //
     };
 
-    function getUtxoByAsset(targetAsset: Asset, utxos: UTxO[]) {
-      const { assetName: targetAssetName, policyId: targetPolicyId } =
-        parseAssetUnit(targetAsset.unit);
-      return utxos.find((utxo) =>
-        utxo.output.amount.find((asset) => {
-          const { assetName, policyId } = parseAssetUnit(asset.unit);
-          return (
-            targetAssetName === assetName &&
-            targetPolicyId === policyId &&
-            targetAsset.quantity === asset.quantity
-          );
-        })
-      );
+    function sumAssets(...assets: Assets[]) {
+      return assets.reduce<Assets>((acc, assets) => {
+        Object.keys(assets).forEach((unit) => {
+          acc[unit] = (acc[unit] ?? BigInt(0)) + assets[unit];
+        });
+
+        return acc;
+      }, {});
     }
 
-    function addAmounts(amount: Asset[], assetToAdd: Asset): Asset[] {
-      return amount.map((asset) =>
-        asset.unit === assetToAdd.unit
-          ? {
-              unit: asset.unit,
-              quantity: String(
-                Number(asset.quantity) + Number(assetToAdd.quantity)
-              ),
-            }
-          : asset
-      );
-    }
-
-    return withEff({
-      deposit,
-    });
+    return {
+      deposit$,
+      withdraw$,
+    };
   })
 );

@@ -44,18 +44,18 @@ const WalletsList = ({
   model: { availableWallets$, wallet$, address$, adaBalance$, connectWallet },
   onClose,
 }: WalletsListProps) => {
-  const [wallets, address, connectedWallet, adaBalance] = useProperties(
+  const [wallets, address, adaBalance, connectedWallet] = useProperties(
     availableWallets$,
     address$,
-    wallet$,
-    adaBalance$
+    adaBalance$,
+    wallet$
   );
   const ref = useClickOutside<HTMLUListElement>(onClose);
   const isWalletConnected = (name: string) =>
     connectedWallet?.info.name === name;
 
-  const handleMenuItemClick = (walletName: string) => {
-    connectWallet(walletName);
+  const handleMenuItemClick = (walletKey: string) => {
+    connectWallet(walletKey);
     onClose();
   };
 
@@ -76,7 +76,7 @@ const WalletsList = ({
                   >
                     {address?.replace(/^(.{4})(.*)(.{4})/i, '$1...$3')}
                   </Anchor>
-                  ₳{adaBalance.toFixed(2)}
+                  ₳{adaBalance.toString()}
                 </>
               ) : (
                 <Hourglass />
@@ -88,7 +88,7 @@ const WalletsList = ({
         {wallets.map((w) => (
           <MenuItem
             key={w.name}
-            onClick={() => handleMenuItemClick(w.name)}
+            onClick={() => handleMenuItemClick(w.key)}
             disabled={isWalletConnected(w.name)}
           >
             <Avatar

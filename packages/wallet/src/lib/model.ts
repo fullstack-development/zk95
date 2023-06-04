@@ -1,17 +1,16 @@
 import {
   EMPTY,
-  Observable,
   defer,
   filter,
   first,
   from,
   map,
-  mergeAll,
+  mergeMap,
   of,
   switchMap,
 } from 'rxjs';
 import { newAtom, Property } from '@frp-ts/core';
-import { Wallet, BrowserWallet, UTxO } from '@meshsdk/core';
+import { WalletApi, Cardano, C } from 'lucid-cardano';
 import { injectable } from '@mixer/injectable';
 
 import { fromObservable, withEff } from '@mixer/utils';
@@ -27,48 +26,52 @@ export const SUPPORTED_WALLETS = [
   'typhoncip30',
 ];
 
+type WalletInfo = Pick<Cardano[string], 'apiVersion' | 'icon' | 'name'> & {
+  key: string;
+};
+
 export type WalletModel = {
-  wallet$: Property<{ api: BrowserWallet; info: Wallet } | null>;
-  adaBalance$: Property<number>;
+  wallet$: Property<{ api: WalletApi; info: WalletInfo } | null>;
+  adaBalance$: Property<bigint>;
   address$: Property<string | null>;
-  availableWallets$: Property<Wallet[]>;
-  getCollateral$: () => Observable<UTxO[] | null>;
+  availableWallets$: Property<WalletInfo[]>;
   connectWallet: (walletName: string) => Promise<void>;
 };
 
 export const mkWalletModel = injectable(() => {
-  const wallet$ = newAtom<{ api: BrowserWallet; info: Wallet } | null>(null);
+  const wallet$ = newAtom<{ api: WalletApi; info: WalletInfo } | null>(null);
 
   const adaBalance$ = from(wallet$).pipe(
     switchMap((wallet) =>
       wallet
-        ? from(wallet.api.getLovelace()).pipe(
-            map((lovelace) => Number(lovelace) / 1000000)
+        ? from(wallet.api.getBalance()).pipe(
+            map((lovelace) => deserializeValue(lovelace) / BigInt(1000000))
           )
-        : of(0)
+        : of(BigInt(0))
     )
   );
 
   const address$ = from(wallet$).pipe(
     switchMap(
       (wallet) =>
-        wallet?.api.getUsedAddress().then((addr) => addr.to_js_value()) ??
-        of(null)
+        wallet?.api.getUsedAddresses().then(([addr]) => addr) ?? of(null)
     )
   );
 
-  const getCollateral$ = () =>
-    from(wallet$).pipe(
-      switchMap((wallet) => wallet?.api.getCollateral() ?? of(null))
-    );
+  const connectWallet = async (key: string) => {
+    if (window.cardano === undefined) return;
 
-  const connectWallet = async (name: string) => {
-    const installedWallets = BrowserWallet.getInstalledWallets();
-    const info = installedWallets.find((w) => w.name === name);
+    const installedWallets = getInstalledWallets();
+    const info = installedWallets.find((w) => w.key === key);
 
     if (info) {
       try {
-        const api = await BrowserWallet.enable(name);
+        const api = await window.cardano[key].enable();
+
+        if (api.getCollateral === undefined) {
+          api.getCollateral = api.experimental.getCollateral;
+        }
+
         wallet$.set({ api, info });
       } catch (error) {
         console.log(error);
@@ -76,33 +79,49 @@ export const mkWalletModel = injectable(() => {
     }
   };
 
-  const connectEnabledWalletEffect$ = from(
-    SUPPORTED_WALLETS.map((w) =>
-      window?.cardano?.[w]
+  const getInstalledWallets = (): WalletInfo[] => {
+    if (window.cardano === undefined) return [];
+
+    return SUPPORTED_WALLETS.filter(
+      (key) => window.cardano[key] !== undefined
+    ).map((key) => ({
+      key,
+      name: window.cardano[key].name,
+      icon: window.cardano[key].icon,
+      apiVersion: window.cardano[key].apiVersion,
+    }));
+  };
+
+  const connectEnabledWalletEffect$ = from(SUPPORTED_WALLETS).pipe(
+    mergeMap((key) =>
+      window?.cardano?.[key]
         ? from(
-            window.cardano[w]
+            window.cardano[key]
               .isEnabled()
-              .then((enabled) => (enabled ? window.cardano[w] : undefined))
+              .then((enabled) => (enabled ? key : undefined))
           )
         : EMPTY
-    )
-  ).pipe(
-    mergeAll(),
-    filter((w): w is (typeof window.cardano)[string] => !!w),
+    ),
+    filter((key): key is string => !!key),
     first(null, null),
-    switchMap((wallet) => (wallet ? connectWallet(wallet.name) : EMPTY))
+    switchMap((key) => (key ? connectWallet(key) : EMPTY))
   );
+
+  function deserializeValue(value: string): bigint {
+    return BigInt(
+      C.Value.from_bytes(Buffer.from(value, 'hex')).coin().to_str()
+    );
+  }
 
   return withEff<WalletModel>(
     {
       wallet$,
-      adaBalance$: fromObservable(adaBalance$, 0),
+      adaBalance$: fromObservable(adaBalance$, BigInt(0)),
       address$: fromObservable(address$, null),
       availableWallets$: fromObservable(
-        defer(() => of(BrowserWallet.getInstalledWallets())),
+        defer(() => of(getInstalledWallets())),
         []
       ),
-      getCollateral$,
       connectWallet,
     },
     connectEnabledWalletEffect$

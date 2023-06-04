@@ -6,9 +6,6 @@ import {
 } from 'react95';
 
 export const StyledWindow = styled(Window)`
-  display: grid;
-  grid-template-rows: 36px 1fr;
-  grid-template-columns: 100%;
   width: 100%;
   height: 100%;
 `;
@@ -19,11 +16,12 @@ export const WindowHeader = styled(React95WinHeader)`
   grid-template-columns: 1fr max-content;
   align-items: center;
   align-content: center;
+  color: ${({ theme, active }) =>
+    active ? theme.headerText : theme.headerNotActiveText};
 `;
 
 export const WindowContent = styled(React95WindowContent)`
-  display: grid;
-  padding: 16px;
+  height: calc(100% - 36px);
 `;
 
 export const WindowTitle = styled.h2`

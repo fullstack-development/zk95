@@ -1,6 +1,6 @@
 import { memoMany } from '@frp-ts/utils';
 import { useEffect, useMemo } from 'react';
-import { ObservableInput, merge } from 'rxjs';
+import { Observable, ObservableInput, merge, share } from 'rxjs';
 
 type ExtractValue<Effs> = {
   readonly [Index in keyof Effs]: Effs[Index] extends Eff<infer Value>
@@ -10,12 +10,12 @@ type ExtractValue<Effs> = {
     : never;
 };
 
-const effValueSymbol = Symbol('@effValue');
+const valueSymbol = Symbol('@value');
 const effectSymbol = Symbol('@effect');
 
 export interface Eff<Value> {
-  [effValueSymbol]: Value;
-  [effectSymbol]: Set<ObservableInput<unknown>>;
+  [valueSymbol]: Value;
+  [effectSymbol]: Observable<unknown>;
 }
 
 export function combineEff<Value, Targets extends readonly unknown[]>(
@@ -24,32 +24,24 @@ export function combineEff<Value, Targets extends readonly unknown[]>(
 export function combineEff(
   bind: (...values: unknown[]) => unknown
 ): (...targets: unknown[]) => Eff<unknown> {
-  const memoizedBind = memoMany(bind);
-
   return (...targets: unknown[]) => {
     const values = targets.map((target) =>
-      isEff(target) ? target[effValueSymbol] : target
+      isEff(target) ? target[valueSymbol] : target
     );
 
-    const effects = targets
-      .filter(isEff)
-      .reduce<Set<ObservableInput<unknown>>>(
-        (acc, module) => new Set([...acc, ...module[effectSymbol]]),
-        new Set()
-      );
-
-    const value = memoizedBind(...values);
+    const effects = targets.filter(isEff).map((eff) => eff[effectSymbol]);
+    const value = bind(...values);
 
     if (isEff(value)) {
       return {
-        [effValueSymbol]: value[effValueSymbol],
-        [effectSymbol]: new Set([...effects, ...value[effectSymbol]]),
+        [valueSymbol]: value[valueSymbol],
+        [effectSymbol]: merge(...effects, value[effectSymbol]),
       };
     }
 
     return {
-      [effValueSymbol]: value,
-      [effectSymbol]: effects,
+      [valueSymbol]: value,
+      [effectSymbol]: merge(...effects),
     };
   };
 }
@@ -70,29 +62,24 @@ export function combineEffFactory(
 
   return (...targets: unknown[]) => {
     const values = targets.map((target) =>
-      isEff(target) ? target[effValueSymbol] : target
+      isEff(target) ? target[valueSymbol] : target
     );
-    const effects = targets
-      .filter(isEff)
-      .reduce<Set<ObservableInput<unknown>>>(
-        (acc, module) => new Set([...acc, ...module[effectSymbol]]),
-        new Set()
-      );
+    const effects = targets.filter(isEff).map((eff) => eff[effectSymbol]);
 
-    const factory = memoizedMkFactory(...values);
+    const bind = memoizedMkFactory(...values);
 
     return (...args: unknown[]) => {
-      const value = factory(...args);
+      const value = bind(...args);
 
       if (isEff(value)) {
         return {
-          [effValueSymbol]: value[effValueSymbol],
-          [effectSymbol]: new Set([...effects, ...value[effectSymbol]]),
+          [valueSymbol]: value[valueSymbol],
+          [effectSymbol]: merge(...effects, value[effectSymbol]),
         };
       }
       return {
-        [effValueSymbol]: value,
-        [effectSymbol]: effects,
+        [valueSymbol]: value,
+        [effectSymbol]: merge(...effects),
       };
     };
   };
@@ -103,18 +90,17 @@ export function withEff<Value>(
   ...effects: ObservableInput<unknown>[]
 ): Eff<Value> {
   return {
-    [effValueSymbol]: value,
-    [effectSymbol]: new Set(effects),
+    [valueSymbol]: value,
+    [effectSymbol]: merge(...effects).pipe(share()),
   };
 }
 
-export function effValue<Value>(eff: Eff<Value>): Value {
-  return eff[effValueSymbol];
+export function valueEff<Value>(eff: Eff<Value>): Value {
+  return eff[valueSymbol];
 }
 
 export function runEff(eff: Eff<unknown>): () => void {
-  const effect = merge(...eff[effectSymbol]);
-  const subscription = effect.subscribe();
+  const subscription = eff[effectSymbol].subscribe();
   return () => subscription.unsubscribe();
 }
 
@@ -128,20 +114,20 @@ export function useRunEff(
   args: unknown[] = []
 ): unknown {
   const eff = useMemo(() => {
-    if (typeof effOrFactory === 'function') {
-      return effOrFactory(...args);
+    if (isEff(effOrFactory)) {
+      return effOrFactory;
     }
 
-    return effOrFactory;
+    return effOrFactory(...args);
   }, [effOrFactory, ...args]);
 
   useEffect(() => runEff(eff), [eff]);
 
-  return effValue(eff);
+  return valueEff(eff);
 }
 
 const isEff = (value: unknown): value is Eff<unknown> =>
   typeof value === 'object' &&
   value !== null &&
-  effValueSymbol in value &&
+  valueSymbol in value &&
   effectSymbol in value;
