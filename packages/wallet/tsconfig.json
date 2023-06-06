@@ -6,7 +6,7 @@
     "allowSyntheticDefaultImports": true,
     "strict": true
   },
-  "files": ["../../tools/global.d.ts"],
+  "files": ["../../global.d.ts"],
   "include": [],
   "references": [
     {

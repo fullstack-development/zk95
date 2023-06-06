@@ -3,6 +3,10 @@ import { StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
 import { ModalProvider } from 'styled-react-modal';
 import { styleReset } from 'react95';
+// @ts-ignore
+import ms_sans_serif from 'react95/dist/fonts/ms_sans_serif.woff2';
+// @ts-ignore
+import ms_sans_serif_bold from 'react95/dist/fonts/ms_sans_serif_bold.woff2';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
 import { useProperties } from '@frp-ts/react';
 
@@ -12,11 +16,6 @@ import { injectable } from '@mixer/injectable';
 import { useRunEff } from '@mixer/eff';
 
 import { mkApp } from './app/app';
-
-// @ts-ignore
-import ms_sans_serif from 'react95/dist/fonts/ms_sans_serif.woff2';
-// @ts-ignore
-import ms_sans_serif_bold from 'react95/dist/fonts/ms_sans_serif_bold.woff2';
 
 const GlobalStyles = createGlobalStyle`
   ${styleReset}
@@ -82,6 +81,10 @@ const Root = mkRoot({
       addressWithScriptRef:
         'addr_test1wzaavkj270w4hvrmz88mveqcehlud0fxs964ncx94q85qhgrec9x5',
     },
+  },
+  zKeyConfig: {
+    url: 'https://media.githubusercontent.com/media/prodderman/storage/main/withdraw.gz',
+    version: 1,
   },
 });
 

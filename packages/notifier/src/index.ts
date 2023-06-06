@@ -1,1 +1,2 @@
-export * from './lib/notifier';
+export * from './notifier';
+export * from './message-popup';

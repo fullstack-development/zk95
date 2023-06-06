@@ -6,6 +6,7 @@ import { combineEff } from '@mixer/eff';
 import { mkWalletConnect } from '@mixer/wallet';
 import { mkDesktop, mkWidgetBar } from '@mixer/desktop';
 import { mkNotifier } from '@mixer/notifier';
+import { zKeyLoadingProgressBar } from '@mixer/zkey-loader';
 
 import { mkWidgetsConfig } from './widgets';
 import { Footer, InfoFrame, Main, Root } from './styled';
@@ -16,35 +17,46 @@ export const mkApp = injectable(
   mkWalletConnect,
   mkWidgetBar,
   mkNotifier,
+  zKeyLoadingProgressBar,
   combineEff(
-    (WIDGETS_CONFIG, Desktop, WalletConnect, WidgetsBar, Notifier) => () => {
-      return (
-        <Root>
-          <Main>
-            <Desktop widgetsConfig={WIDGETS_CONFIG} />
-          </Main>
-          <Footer>
-            <AppBar
-              position="static"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'max-content 1fr min-content max-content',
-              }}
-            >
-              <WalletConnect />
-              <WidgetsBar />
-              <Handle />
-              <Toolbar>
-                <InfoFrame variant="status">
-                  <Notifier />
-                  <Clock />
-                </InfoFrame>
-              </Toolbar>
-            </AppBar>
-          </Footer>
-        </Root>
-      );
-    }
+    (
+        WIDGETS_CONFIG,
+        Desktop,
+        WalletConnect,
+        WidgetsBar,
+        Notifier,
+        ZKeyLoadingProgress
+      ) =>
+      () => {
+        return (
+          <Root>
+            <Main>
+              {/* <ZKeyLoadingProgress /> */}
+              <Desktop widgetsConfig={WIDGETS_CONFIG} />
+            </Main>
+            <Footer>
+              <AppBar
+                position="static"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns:
+                    'max-content 1fr min-content max-content',
+                }}
+              >
+                <WalletConnect />
+                <WidgetsBar />
+                <Handle />
+                <Toolbar>
+                  <InfoFrame variant="status">
+                    <Notifier />
+                    <Clock />
+                  </InfoFrame>
+                </Toolbar>
+              </AppBar>
+            </Footer>
+          </Root>
+        );
+      }
   )
 );
 

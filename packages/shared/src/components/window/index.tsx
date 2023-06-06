@@ -9,7 +9,7 @@ import {
 import { CloseIcon } from '../close-icon';
 
 type Props = {
-  className?: string;
+  id?: string;
   title?: string;
   iconSrc?: string;
   active?: boolean;
@@ -19,14 +19,14 @@ type Props = {
 export const Window = ({
   title,
   iconSrc,
-  className,
+  id,
   active,
   children,
   onClose,
 }: PropsWithChildren<Props>) => {
   return (
     <StyledWindow>
-      <WindowHeader className={className} active={active}>
+      <WindowHeader id={id} active={active}>
         <WindowTitle>
           {iconSrc && <img width={20} height={20} src={iconSrc} alt="icon" />}
           {title}
@@ -34,6 +34,7 @@ export const Window = ({
         {onClose && (
           <Button
             onMouseDown={(event) => event.stopPropagation()}
+            onPointerCancel={onClose}
             onClick={onClose}
           >
             <CloseIcon />

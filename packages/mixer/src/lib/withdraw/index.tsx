@@ -3,7 +3,6 @@ import { useProperties } from '@frp-ts/react';
 
 import { injectable } from '@mixer/injectable';
 import { useRunEff } from '@mixer/eff';
-
 import { mkWithdrawFromViewModel } from './view-model';
 import { Field, Fieldset, Footer, WithdrawForm } from './styled';
 

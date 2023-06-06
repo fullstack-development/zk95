@@ -9,7 +9,7 @@
   "files": [
     "../../node_modules/@nx/react/typings/cssmodule.d.ts",
     "../../node_modules/@nx/react/typings/image.d.ts",
-    "../../tools/global.d.ts"
+    "../../global.d.ts"
   ],
   "exclude": [
     "jest.config.ts",
@@ -27,5 +27,5 @@
     "src/**/*.jsx",
     "src/**/*.ts",
     "src/**/*.tsx"
-, "../../tools/styled.d.ts"  ]
+  ]
 }

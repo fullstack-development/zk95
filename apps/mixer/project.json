@@ -22,6 +22,7 @@
           "apps/mixer/src/assets"
         ],
         "scripts": [],
+        "progress": true,
         "isolatedConfig": true,
         "webpackConfig": "apps/mixer/webpack.config.js"
       },

@@ -74,7 +74,7 @@ function DraggableWidget({
     <Draggable
       nodeRef={nodeRef}
       bounds="#desktop"
-      handle={`.${handleId}`}
+      handle={`#${handleId}`}
       axis="both"
       defaultPosition={{ x: 80, y: 80 }}
       onMouseDown={() => model.makeWidgetActive(widget.id)}
@@ -86,7 +86,7 @@ function DraggableWidget({
         order={widgetsOrder[widget.id]}
       >
         <Window
-          className={handleId}
+          id={handleId}
           title={widget.caption}
           iconSrc={widget.iconSrc}
           active={activeWidgetId === widget.id}

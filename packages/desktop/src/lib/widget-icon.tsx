@@ -37,6 +37,7 @@ const WidgetIconButton = styled.button`
   background: none;
   border: none;
   padding: 3px;
+  font-size: 14px;
   cursor: pointer;
 
   &:focus > ${WidgetIconCaption} {

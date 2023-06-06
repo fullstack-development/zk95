@@ -6,6 +6,7 @@ module.exports = composePlugins(withNx(), withReact(), (config) => {
   config.experiments = {
     asyncWebAssembly: true,
     layers: true,
+    topLevelAwait: true,
   };
 
   config.plugins = config.plugins ?? []
@@ -16,10 +17,11 @@ module.exports = composePlugins(withNx(), withReact(), (config) => {
   config.plugins.push(new ProvidePlugin({ Buffer: ["buffer", "Buffer"] }))
   config.resolve.fallback["stream"] = require.resolve("stream");
   config.resolve.fallback["buffer"] = require.resolve("buffer");
+
   config.module.rules.push({
     test: /\.(mp3|mp4|ogg|wav|eot|ttf|woff|woff2|zip|otf)$/,
     type: 'asset/resource',
-  },)
+  })
   config.ignoreWarnings = [/Failed to parse source map/];
   return config;
 });
