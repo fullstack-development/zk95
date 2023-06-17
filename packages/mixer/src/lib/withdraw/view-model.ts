@@ -25,7 +25,7 @@ export const mkWithdrawFromViewModel = injectable(
         setAddress: address$.set,
       },
       interval(1000).pipe(
-        tap(() => console.log('mkWithdrawFromViewModel effect'))
+        tap((tick) => console.log(`mkWithdrawFromViewModel effect ${tick}`))
       )
     );
   })

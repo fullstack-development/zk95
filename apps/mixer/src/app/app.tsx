@@ -48,7 +48,7 @@ export const mkApp = injectable(
                 <Handle />
                 <Toolbar>
                   <InfoFrame variant="status">
-                    <Notifier />
+                    {/* <Notifier /> */}
                     <Clock />
                   </InfoFrame>
                 </Toolbar>

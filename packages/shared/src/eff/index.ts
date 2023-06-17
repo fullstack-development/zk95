@@ -19,10 +19,10 @@ export interface Eff<Value> {
 }
 
 export function combineEff<Value, Targets extends readonly unknown[]>(
-  bind: (...values: ExtractValue<Targets>) => Eff<Value> | Value
+  project: (...values: ExtractValue<Targets>) => Eff<Value> | Value
 ): (...targets: Targets) => Eff<Value>;
 export function combineEff(
-  bind: (...values: unknown[]) => unknown
+  project: (...values: unknown[]) => unknown
 ): (...targets: unknown[]) => Eff<unknown> {
   return (...targets: unknown[]) => {
     const values = targets.map((target) =>
@@ -30,7 +30,7 @@ export function combineEff(
     );
 
     const effects = targets.filter(isEff).map((eff) => eff[effectSymbol]);
-    const value = bind(...values);
+    const value = project(...values);
 
     if (isEff(value)) {
       return {
@@ -66,10 +66,10 @@ export function combineEffFactory(
     );
     const effects = targets.filter(isEff).map((eff) => eff[effectSymbol]);
 
-    const bind = memoizedMkFactory(...values);
+    const project = memoizedMkFactory(...values);
 
     return (...args: unknown[]) => {
-      const value = bind(...args);
+      const value = project(...args);
 
       if (isEff(value)) {
         return {
@@ -95,13 +95,9 @@ export function withEff<Value>(
   };
 }
 
-export function valueEff<Value>(eff: Eff<Value>): Value {
-  return eff[valueSymbol];
-}
-
-export function runEff(eff: Eff<unknown>): () => void {
+export function runEff<V>(eff: Eff<V>): [V, () => void] {
   const subscription = eff[effectSymbol].subscribe();
-  return () => subscription.unsubscribe();
+  return [eff[valueSymbol], () => subscription.unsubscribe()];
 }
 
 export function useRunEff<Value, Args extends unknown[]>(
@@ -121,9 +117,14 @@ export function useRunEff(
     return effOrFactory(...args);
   }, [effOrFactory, ...args]);
 
-  useEffect(() => runEff(eff), [eff]);
+  useEffect(() => {
+    const subscription = eff[effectSymbol].subscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [eff]);
 
-  return valueEff(eff);
+  return eff[valueSymbol];
 }
 
 const isEff = (value: unknown): value is Eff<unknown> =>

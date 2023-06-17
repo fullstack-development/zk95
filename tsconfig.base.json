@@ -35,6 +35,7 @@
         "packages/transaction-watcher/src/index.ts"
       ],
       "@mixer/utils": ["packages/shared/src/utils/index.ts"],
+      "@mixer/merkletree": ["packages/shared/src/merkletree/index.ts"],
       "@mixer/wallet": ["packages/wallet/src/index.ts"],
       "@mixer/zkey-loader": ["packages/zkey-loader/src/index.ts"]
     }
