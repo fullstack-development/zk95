@@ -1,12 +1,11 @@
 import { Property, newAtom } from '@frp-ts/core';
 import { injectable } from '@mixer/injectable';
 import { mkOffchain } from '@mixer/offchain';
-import { mkSecretManager } from '@mixer/secret-manager';
+import { getRandomValues, hash, concatHashes, toHex } from '@mixer/hash';
 import { mkTransactionWatcherModel } from '@mixer/transaction-watcher';
 import { combineEff, withEff } from '@mixer/eff';
 import {
   EMPTY,
-  Observable,
   Subject,
   finalize,
   first,
@@ -15,9 +14,9 @@ import {
   of,
   switchMap,
   tap,
-  OperatorFunction,
   catchError,
   throwError,
+  defer,
 } from 'rxjs';
 
 export type DepositModel = {
@@ -31,10 +30,9 @@ export type DepositModel = {
 };
 
 export const mkDepositModel = injectable(
-  mkSecretManager,
   mkTransactionWatcherModel,
   mkOffchain,
-  combineEff(({ getSecretInfo$ }, watcherModel, { deposit$ }) => {
+  combineEff((watcherModel, { deposit$ }) => {
     const depositAction$ = new Subject();
     const submitDepositAction$ = new Subject<boolean>();
 
@@ -42,25 +40,27 @@ export const mkDepositModel = injectable(
     const depositing$ = newAtom<boolean>(false);
     const note$ = newAtom<string | null>(null);
 
-    const depositFlow$ = forkJoin([getSecretInfo$(), of(poolSize$.get())]).pipe(
+    const depositFlow$ = defer(() =>
+      of([
+        hash(getRandomValues(31)),
+        hash(getRandomValues(31)),
+        poolSize$.get(),
+      ] as const)
+    ).pipe(
       tap(() => depositing$.set(true)),
-      tap(([[secret, nullifier], poolSize]) => {
-        note$.set(
-          `ada-${poolSize}-${Buffer.from(nullifier).toString(
-            'hex'
-          )}${Buffer.from(secret).toString('hex')}`
-        );
+      tap(([nullifier, secret, poolSize]) => {
+        note$.set(`ada-${poolSize}-${toHex(nullifier)}${toHex(secret)}`);
       }),
-      switchMap(([[, , commitmentHash], poolSize]) =>
+      switchMap(([nullifier, secret, poolSize]) =>
         forkJoin([
           submitDepositAction$.pipe(first()),
-          of(commitmentHash),
+          of(concatHashes(secret, nullifier)),
           of(poolSize),
         ])
       ),
       switchMap(([submitted, commitmentHash, poolSize]) =>
         submitted
-          ? deposit$(poolSize, Buffer.from(commitmentHash).toString('hex'))
+          ? deposit$(poolSize, commitmentHash)
           : throwError(() => 'rejected')
       ),
       tap({
@@ -73,8 +73,7 @@ export const mkDepositModel = injectable(
       finalize(() => depositing$.set(false))
     );
 
-    const depositEffect$ = makeEffect(
-      depositAction$,
+    const depositEffect$ = depositAction$.pipe(
       switchMap(() => iif(() => !depositing$.get(), depositFlow$, EMPTY))
     );
 
@@ -98,8 +97,3 @@ export const mkDepositModel = injectable(
     );
   })
 );
-
-const makeEffect = <V, R>(
-  action$: Observable<V>,
-  flow: OperatorFunction<V, R>
-) => action$.pipe(flow);

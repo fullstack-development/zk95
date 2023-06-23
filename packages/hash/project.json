@@ -1,7 +1,7 @@
 {
-  "name": "secret-manager",
+  "name": "hash",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/secret-manager/src",
+  "sourceRoot": "packages/hash/src",
   "projectType": "library",
   "targets": {
     "lint": {
@@ -11,7 +11,7 @@
       ],
       "options": {
         "lintFilePatterns": [
-          "packages/secret-manager/**/*.ts"
+          "packages/hash/**/*.ts"
         ]
       }
     },
@@ -21,7 +21,7 @@
         "{workspaceRoot}/coverage/{projectRoot}"
       ],
       "options": {
-        "jestConfig": "packages/secret-manager/jest.config.ts",
+        "jestConfig": "packages/hash/jest.config.ts",
         "passWithNoTests": true
       },
       "configurations": {

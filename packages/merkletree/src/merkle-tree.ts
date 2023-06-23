@@ -1,7 +1,4 @@
-import { sha256 } from 'hash.js';
-import { fromHex, toHex } from 'lucid-cardano';
-
-type Hasher = (value: string | ArrayBuffer) => Uint8Array;
+import { concatHashes, hash, fromHex, toHex } from '@mixer/hash';
 
 export type MerkleLeaf = {
   hash: Uint8Array;
@@ -26,7 +23,11 @@ export type CompletedMerkleTree = MerkleTreeBase & {
 
 export type UncompletedMerkleTree = MerkleTreeBase & {
   readonly completed: false;
-  readonly addLeaf: (value: string, needHash?: boolean) => MerkleTree;
+  readonly nextIdx: number;
+  readonly addLeaf: (
+    value: string | Uint8Array,
+    needHash?: boolean
+  ) => MerkleTree;
 };
 
 export type MerkleTree = CompletedMerkleTree | UncompletedMerkleTree;
@@ -39,18 +40,15 @@ type MakeMerkleTreeProps = {
   needHash?: boolean;
 };
 
-export const hasher = (value: string | ArrayBuffer) =>
-  Buffer.from(sha256().update(value).digest());
-
 export function mkMerkleTree({
   leafs,
   depth,
   zeroValue = '',
   needHash = true,
 }: MakeMerkleTreeProps): MerkleTree {
-  const zeroHash = hasher(zeroValue);
+  const zeroHash = hash(zeroValue);
   const hashedLeafs = leafs
-    .map((leaf) => (needHash ? hasher(leaf) : fromHex(leaf)))
+    .map((leaf) => (needHash ? hash(leaf) : fromHex(leaf)))
     .filter((leafHash) => toHex(leafHash) !== toHex(zeroHash));
   const levels = Math.max(
     depth ? Math.ceil(depth - 1) : Math.ceil(Math.log2(hashedLeafs.length)),
@@ -61,7 +59,7 @@ export function mkMerkleTree({
     .fill(zeroHash)
     .map((zeroHash, idx) => ({ hash: hashedLeafs[idx] ?? zeroHash }));
 
-  const root = create(levels, hasher, leafsLayer)[0];
+  const root = create(levels, leafsLayer)[0];
   const completed = hashedLeafs.length >= maxLeafsCount;
 
   const merkleBase: MerkleTreeBase = {
@@ -75,11 +73,12 @@ export function mkMerkleTree({
     const nextIdx = leafsLayer.findIndex(
       ({ hash }) => toHex(zeroHash) === toHex(hash)
     );
-    const addLeaf = mkAddLeaf(root, nextIdx, levels, zeroHash, hasher);
+    const addLeaf = mkAddLeaf(root, nextIdx, levels, zeroHash);
 
     return {
       completed: false,
       ...merkleBase,
+      nextIdx,
       addLeaf,
     };
   }
@@ -94,10 +93,9 @@ function mkAddLeaf(
   root: MerkleNode | MerkleLeaf,
   nextIdx: number,
   levels: number,
-  zeroHash: Uint8Array,
-  hasher: Hasher
-): (value: string, needHash?: boolean) => MerkleTree {
-  return (value: string, needHash = true) => {
+  zeroHash: Uint8Array
+): (value: string | Uint8Array, needHash?: boolean) => MerkleTree {
+  return (value: string | Uint8Array, needHash = true) => {
     const traverse = (
       step: number,
       node: MerkleNode | MerkleLeaf
@@ -120,7 +118,11 @@ function mkAddLeaf(
       }
 
       return {
-        hash: needHash ? hasher(value) : fromHex(value),
+        hash: needHash
+          ? hash(value)
+          : value instanceof Uint8Array
+          ? value
+          : fromHex(value),
       };
     };
 
@@ -149,11 +151,12 @@ function mkAddLeaf(
 
     if (!completed) {
       const newNextIdx = nextIdx + 1;
-      const addLeaf = mkAddLeaf(newRoot, newNextIdx, levels, zeroHash, hasher);
+      const addLeaf = mkAddLeaf(newRoot, newNextIdx, levels, zeroHash);
 
       return {
         completed: false,
         ...merkleBase,
+        nextIdx: newNextIdx,
         addLeaf,
       };
     }
@@ -194,10 +197,6 @@ export function isNode(node: MerkleLeaf | MerkleNode): node is MerkleNode {
   return 'left' in node && 'right' in node;
 }
 
-export function concatHashes(hash1: Uint8Array, hash2: Uint8Array): Uint8Array {
-  return hasher(Buffer.concat([hash1, hash2]));
-}
-
 function reduceTree<R>(
   fn: (acc: R, node: MerkleNode | MerkleLeaf) => R,
   node: MerkleNode | MerkleLeaf,
@@ -216,7 +215,6 @@ function reduceTree<R>(
 
 function create(
   level: number,
-  hasher: Hasher,
   nodes: MerkleLeaf[] | MerkleNode[]
 ): MerkleNode[] | MerkleLeaf[] {
   if (level === 0) {
@@ -238,7 +236,7 @@ function create(
     layer.push(newNode);
   }
 
-  return create(level - 1, hasher, layer);
+  return create(level - 1, layer);
 }
 
 function getMaxLeafsCount(level: number) {

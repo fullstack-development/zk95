@@ -1,7 +1,7 @@
 import { Frame, GroupBox } from 'react95';
 import styled from 'styled-components';
 
-export const DepositFormContent = styled.section`
+export const DepositFormContent = styled.form`
   display: grid;
   height: 100%;
   align-content: space-between;

@@ -1,11 +1,5 @@
-import { toHex } from 'lucid-cardano';
-import {
-  mkMerkleTree,
-  isNode,
-  hasher,
-  concatHashes,
-  UncompletedMerkleTree,
-} from './merkle-tree';
+import { toHex, concatHashes, hash } from '@mixer/hash';
+import { mkMerkleTree, isNode, UncompletedMerkleTree } from './merkle-tree';
 const zeroValue = 'zeroValue';
 
 /**
@@ -18,10 +12,10 @@ const zeroValue = 'zeroValue';
  *   1   2 0   0
  */
 
-const leaf1 = hasher('one');
-const leaf2 = hasher('two');
-const leaf3 = hasher(zeroValue);
-const leaf4 = hasher(zeroValue);
+const leaf1 = hash('one');
+const leaf2 = hash('two');
+const leaf3 = hash(zeroValue);
+const leaf4 = hash(zeroValue);
 
 const layer2node1 = concatHashes(leaf1, leaf2);
 const layer2node2 = concatHashes(leaf3, leaf4);
@@ -46,19 +40,17 @@ describe('Merkle Tree', () => {
   describe('mkMerkleTree', () => {
     it('must create uncompleted tree with only one leaf with hashed zero value and the leaf is root', () => {
       const mt = mkMerkleTree({ leafs: [], zeroValue });
-      console.log(toHex(hasher(zeroValue)));
+      console.log(toHex(hash(zeroValue)));
       expect(isNode(mt.root)).toBeFalsy();
       expect(mt.completed).toBeFalsy();
-      expect(toHex(mt.root.hash)).toBe(toHex(hasher(zeroValue)));
+      expect(toHex(mt.root.hash)).toBe(toHex(hash(zeroValue)));
     });
 
     it('must create uncompleted tree with given depth and fill all leafs with hashed zero value', () => {
       const mt = mkMerkleTree({ leafs: [], depth: 6, zeroValue });
       const hashes = mt.getLeafs().map((leaf) => toHex(leaf.hash));
 
-      expect(
-        hashes.every((hash) => hash === toHex(hasher(zeroValue)))
-      ).toBeTruthy();
+      expect(hashes.every((h) => h === toHex(hash(zeroValue)))).toBeTruthy();
     });
 
     it('must create uncompleted tree with given depth and leafs, hash the leafs and fill the rest with hashed zero value', () => {
@@ -67,16 +59,16 @@ describe('Merkle Tree', () => {
 
       expect(mt.completed).toBeFalsy();
       expect(
-        hashes.every((hash, idx) => {
+        hashes.every((h, idx) => {
           if (idx === 0) {
-            return hash === toHex(hasher('asd'));
+            return h === toHex(hash('asd'));
           }
 
           if (idx === 1) {
-            return hash === toHex(hasher('qwe'));
+            return h === toHex(hash('qwe'));
           }
 
-          return hash === toHex(hasher(zeroValue));
+          return h === toHex(hash(zeroValue));
         })
       ).toBeTruthy();
     });
@@ -84,7 +76,7 @@ describe('Merkle Tree', () => {
     it('must create completed tree with given leafs if number of leafs is power of 2', () => {
       const leafs = ['1', '2', '3', '4', '5', '6', '7', '8'];
       const mt = mkMerkleTree({ leafs, zeroValue });
-      const givenHashedLeafs = leafs.map((leaf) => toHex(hasher(leaf)));
+      const givenHashedLeafs = leafs.map((leaf) => toHex(hash(leaf)));
       const hashedLeafs = mt.getLeafs().map((leaf) => toHex(leaf.hash));
 
       expect(mt.completed).toBeTruthy();
@@ -107,14 +99,14 @@ describe('Merkle Tree', () => {
       const mt = mkMerkleTree({ leafs, zeroValue });
 
       console.log(mt);
-      console.log(toHex(hasher(zeroValue)));
+      console.log(toHex(hash(zeroValue)));
       console.log(mt.getLeafs().map((leaf) => toHex(leaf.hash)));
 
       expect(
         mt.completed === false &&
           mt
             .getLeafs()
-            .every((leaf) => toHex(leaf.hash) === toHex(hasher(zeroValue)))
+            .every((leaf) => toHex(leaf.hash) === toHex(hash(zeroValue)))
       ).toBeTruthy();
     });
   });
@@ -134,7 +126,7 @@ describe('Merkle Tree', () => {
 
       expect(mt).not.toBe(newMT);
       expect(newMT.completed).toBeFalsy();
-      expect(toHex(addedLeaf.hash)).toBe(toHex(hasher(valueToAdd)));
+      expect(toHex(addedLeaf.hash)).toBe(toHex(hash(valueToAdd)));
       expect(toHex(newMT.root.hash)).toBe(expectedRootHashHex);
     });
 

@@ -49,8 +49,8 @@ export const ProtocolParametersResponse = z
       poolDeposit: params.pool_deposit,
       priceMem: params.price_mem,
       priceStep: params.price_step,
-      maxTxExMem: params.max_tx_ex_mem,
-      maxTxExSteps: params.max_tx_ex_steps,
+      maxTxExMem: params.max_tx_ex_mem * BigInt(15),
+      maxTxExSteps: params.max_tx_ex_steps * BigInt(15),
       coinsPerUtxoByte: params.coins_per_utxo_size,
       collateralPercentage: params.collateral_percent,
       maxCollateralInputs: params.max_collateral_inputs,
@@ -117,7 +117,7 @@ export const UTxOSet = z.array(
           scriptRef: reference_script
             ? {
                 type: reference_script.type,
-                cbor: reference_script.bytes,
+                script: reference_script.bytes,
               }
             : null,
           datum: inline_datum?.bytes ?? null,

@@ -19,6 +19,8 @@ export type TransactionWatcher = {
   watchTx: (txHash: string) => void;
 };
 
+const MAX_ATTEMPTS = 12
+
 export function transactionWatcherModel(
   provider: ChainIndexProvider
 ): Eff<TransactionWatcher> {
@@ -41,7 +43,7 @@ export function transactionWatcherModel(
   });
 
   const watchTx = (txHash: string) => {
-    txHashesInfo$.modify((prev) => ({ ...prev, [txHash]: 12 }));
+    txHashesInfo$.modify((prev) => ({ ...prev, [txHash]: MAX_ATTEMPTS }));
   };
 
   const watchEffect$ = from(txHashesToWatch$).pipe(

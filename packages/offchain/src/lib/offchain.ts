@@ -6,43 +6,38 @@ import {
   switchMap,
   Observable,
 } from 'rxjs';
-import {
-  Lucid,
-  Address,
-  Data,
-  TxHash,
-  Blockfrost,
-  toHex,
-  addAssets,
-} from 'lucid-cardano';
+import { Lucid, Address, Data, TxHash, toHex, addAssets } from 'lucid-cardano';
 
 import { ONCHAIN_CONFIG_KEY, OnchainConfig } from '@mixer/onchain-config';
+import { chainIndexProvider } from '@mixer/chain-index-provider';
 import { injectable, token } from '@mixer/injectable';
 import { combineEff } from '@mixer/eff';
 import { mkWalletModel } from '@mixer/wallet';
 import { Script } from '@mixer/chain-index-provider';
-import { toHexTree } from '@mixer/merkletree';
-import { traceIf } from '@mixer/utils';
+import { assert } from '@mixer/utils';
 
 import { MixerDatum, MixerRedeemer } from './scheme';
 import { deserializeMerkleTree, serializeMerkleTree } from './utils';
+import { mkProviderAdapter } from './providerAdapter';
+import { reverseBits } from '@mixer/hash';
 
 export type Offchain = {
-  deposit$: (poolSize: number, commitmentHash: string) => Observable<TxHash>;
-  withdraw$: () => void;
+  deposit$: (
+    poolSize: number,
+    commitmentHash: Uint8Array
+  ) => Observable<TxHash>;
+  withdraw$: (note: string, address: string) => Observable<TxHash>;
 };
 
 export const mkOffchain = injectable(
   token(ONCHAIN_CONFIG_KEY)<OnchainConfig>(),
   mkWalletModel,
-  combineEff((onchainConfig, walletModel): Offchain => {
-    const provider = new Blockfrost(
-      'https://cardano-preprod.blockfrost.io/api/v0',
-      'preprodZpZ9X9GL1xL5vajWd8VNxHxcTyYoMePJ'
-    );
+  chainIndexProvider,
+  combineEff((onchainConfig, walletModel, provider): Offchain => {
+    const lucidProvider = mkProviderAdapter(provider);
 
     const lucid$ = combineLatest([
-      Lucid.new(provider, 'Preprod'),
+      Lucid.new(lucidProvider, 'Preprod'),
       walletModel.wallet$,
     ]).pipe(
       map(([lucid, wallet]) =>
@@ -51,48 +46,39 @@ export const mkOffchain = injectable(
       shareReplay(1)
     );
 
-    const zeroValue = 'tornado.cash on cardano';
-
-    const deposit$ = (poolSize: number, commitmentHash: string) =>
+    const deposit$ = (poolSize: number, commitmentHash: Uint8Array) =>
       lucid$.pipe(
         first(),
-        switchMap((lucid) =>
-          deposit(
-            lucid,
-            poolSize,
-            'a6412338645d14a7782c4ef186ae0deae1d3efb6c140b62bb8a5f1238cdcd93f'
-          )
-        )
+        switchMap((lucid) => deposit(lucid, poolSize, commitmentHash))
       );
 
-    const withdraw$ = () => {
-      //
-    };
+    const withdraw$ = (note: string, address: string) =>
+      lucid$.pipe(
+        first(),
+        switchMap((lucid) => withdraw(lucid, note, address))
+      );
 
     async function deposit(
       lucid: Lucid,
       poolSize: number,
-      commitmentHash: string
+      commitmentHash: Uint8Array
     ) {
       const config = onchainConfig[poolSize];
 
-      traceIf(`Pool with ${poolSize} nominal not found`, config);
+      assert(`Pool with ${poolSize} nominal not found`, config);
 
-      const depositScriptAddress: Address = lucid.utils.validatorToAddress({
-        type: config.depositScript.type,
-        script: config.depositScript.cbor,
-      });
+      const depositScriptAddress: Address = lucid.utils.validatorToAddress(
+        config.depositScript
+      );
 
       const depositUTxOs = await lucid.utxosAt(depositScriptAddress);
 
       const utxoWithScriptRef = depositUTxOs.find(
         ({ scriptRef }) =>
-          scriptRef &&
-          toAddress(lucid, { type: scriptRef.type, cbor: scriptRef.script }) ===
-            depositScriptAddress
+          scriptRef && toAddress(lucid, scriptRef) === depositScriptAddress
       );
 
-      traceIf(
+      assert(
         `Cannot find a utxo with the deposit referece script`,
         utxoWithScriptRef
       );
@@ -101,48 +87,66 @@ export const mkOffchain = injectable(
         ({ assets }) => assets[config.vaultTokenUnit] !== undefined
       );
 
-      traceIf(`Cannot find a utxo with the vault`, vaultUTxO);
-      traceIf(`Cannot find a vault datum`, vaultUTxO.datum);
+      assert(`Cannot find a utxo with the vault`, vaultUTxO);
+      assert(`Cannot find a vault datum`, vaultUTxO.datum);
 
       const merkleTreeUTxO = depositUTxOs.find(
         ({ assets }) => assets[config.depositTreeTokenUnit] !== undefined
       );
 
-      traceIf(`Cannot find a utxo with the merkle tree`, merkleTreeUTxO);
-      traceIf(`Merkle tree datum is missing`, merkleTreeUTxO.datum);
+      assert(`Cannot find a utxo with the merkle tree`, merkleTreeUTxO);
+      assert(`Merkle tree datum is missing`, merkleTreeUTxO.datum);
 
       const inputDatum = Data.from(
         merkleTreeUTxO.datum,
         MixerDatum as never as MixerDatum
       );
 
-      traceIf('Wrong merkle tree datum', inputDatum !== 'Vault');
+      console.log({
+        datum: merkleTreeUTxO.datum,
+        commitment: toHex(commitmentHash),
+      });
+
+      assert('Wrong merkle tree datum', inputDatum !== 'Vault');
 
       const merkleTree = deserializeMerkleTree(
-        zeroValue,
+        config.zeroValue,
         inputDatum.DepositTree.DepositDatum.merkleTreeState.tree
       );
 
-      traceIf('Pool is full', !merkleTree.completed);
+      assert('Pool is full', !merkleTree.completed);
 
       const nextMerkleTree = merkleTree.addLeaf(commitmentHash, false);
 
-      const serializedMerkleTree = serializeMerkleTree(nextMerkleTree);
+      console.log({
+        merkleTree,
+        nextMerkleTree,
+      });
+
+      const serializedRoot = toHex(
+        reverseBits(nextMerkleTree.root.hash, 0, 31)
+      );
 
       const outputDatum: MixerDatum = {
         DepositTree: {
           DepositDatum: {
-            merkleTreeRoot: BigInt(`0x${toHex(nextMerkleTree.root.hash)}`),
+            merkleTreeRoot: {
+              Just: [BigInt(`0x${serializedRoot}`)],
+            },
             merkleTreeState: {
-              nextLeaf: BigInt(1),
-              tree: serializedMerkleTree,
+              nextLeaf: BigInt(
+                nextMerkleTree.completed
+                  ? nextMerkleTree.leafsCount
+                  : nextMerkleTree.nextIdx
+              ),
+              tree: serializeMerkleTree(nextMerkleTree),
             },
           },
         },
       };
 
       const depositRedeemer: MixerRedeemer = {
-        Deposit: [commitmentHash],
+        Deposit: [toHex(commitmentHash)],
       };
 
       const vaultRedeemer: MixerRedeemer = 'Topup';
@@ -177,11 +181,75 @@ export const mkOffchain = injectable(
       return txHash;
     }
 
+    async function withdraw(lucid: Lucid, note: string, address: string) {
+      const datumIn =
+        'd8799fd8799fd8799f00d87a9f5820c70db3a37303100f9c9654c50a0f1028c3adf55bd413e29177078617d19d4e63d87a9f582032a7b13eff6836a40fd4f2b9e1da47de280f371b0ff3ef361828e0d88814a7f9d87980d87980ffd87a9f582032a7b13eff6836a40fd4f2b9e1da47de280f371b0ff3ef361828e0d88814a7f9d87980d87980ffffffd87a80ffff';
+      const commitmentHashHex =
+        'af3a62ef64a383b4f07041bb2b086b1789815ffbbf7e4bac9f59adb641f921ce';
+      const userAddress = await lucid.wallet.address();
+      const config = onchainConfig[100];
+
+      const inputDatum = Data.from(datumIn, MixerDatum as never as MixerDatum);
+
+      assert('Wrong merkle tree datum', inputDatum !== 'Vault');
+
+      const merkleTree = deserializeMerkleTree(
+        config.zeroValue,
+        inputDatum.DepositTree.DepositDatum.merkleTreeState.tree
+      );
+
+      assert('Pool is full', !merkleTree.completed);
+
+      const nextMerkleTree = merkleTree.addLeaf(commitmentHashHex, false);
+
+      const serializedRoot = `0x${toHex(
+        nextMerkleTree.root.hash.slice(0, 31)
+      )}`;
+
+      const outputDatum: MixerDatum = {
+        DepositTree: {
+          DepositDatum: {
+            merkleTreeRoot: {
+              Just: [BigInt(serializedRoot)],
+            },
+            merkleTreeState: {
+              nextLeaf: BigInt(
+                nextMerkleTree.completed
+                  ? nextMerkleTree.leafsCount
+                  : nextMerkleTree.nextIdx
+              ),
+              tree: serializeMerkleTree(nextMerkleTree),
+            },
+          },
+        },
+      };
+
+      const depositRedeemer: MixerRedeemer = {
+        Deposit: [commitmentHashHex],
+      };
+
+      const tx = await lucid
+        .newTx()
+        .payToAddressWithData(
+          userAddress,
+          {
+            inline: Data.to<MixerRedeemer>(
+              depositRedeemer,
+              MixerRedeemer as never
+            ),
+          },
+          { lovelace: BigInt(2000000) }
+        )
+        .complete();
+
+      const signedTx = await tx.sign().complete();
+      const txHash = await signedTx.submit();
+
+      return txHash;
+    }
+
     function toAddress(lucid: Lucid, script: Script) {
-      return lucid.utils.validatorToAddress({
-        type: script.type,
-        script: script.cbor,
-      });
+      return lucid.utils.validatorToAddress(script);
     }
 
     return {

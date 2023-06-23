@@ -10,9 +10,9 @@ import {
   switchMap,
 } from 'rxjs';
 import { newAtom, Property } from '@frp-ts/core';
-import { WalletApi, Cardano, C } from 'lucid-cardano';
-import { injectable } from '@mixer/injectable';
+import { WalletApi, Cardano, C, fromHex } from 'lucid-cardano';
 
+import { injectable } from '@mixer/injectable';
 import { fromObservable } from '@mixer/utils';
 import { withEff } from '@mixer/eff';
 
@@ -110,7 +110,7 @@ export const mkWalletModel = injectable(() => {
 
   function deserializeValue(value: string): bigint {
     return BigInt(
-      C.Value.from_bytes(Buffer.from(value, 'hex')).coin().to_str()
+      C.Value.from_bytes(fromHex(value)).coin().to_str()
     );
   }
 

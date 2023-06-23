@@ -7,7 +7,10 @@ const MerkleTreeState = Data.Object({
 
 const DepositDatum = Data.Object({
   merkleTreeState: MerkleTreeState,
-  merkleTreeRoot: Data.Nullable(Data.Integer()),
+  merkleTreeRoot: Data.Enum([
+    Data.Object({ Just: Data.Tuple([Data.Integer()]) }),
+    Data.Literal('Nothing'),
+  ]),
 });
 
 export const MixerDatum = Data.Enum([
@@ -16,7 +19,7 @@ export const MixerDatum = Data.Enum([
 ]);
 
 export const MixerRedeemer = Data.Enum([
-  Data.Object({ Deposit: Data.Tuple([Data.Bytes()]) }),
+  Data.Object({ Deposit: Data.Tuple([Data.Any()]) }),
   Data.Literal('Topup'),
   Data.Literal('Withdraw'),
 ]);

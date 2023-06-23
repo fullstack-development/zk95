@@ -36,8 +36,6 @@ export const mkDepositForm = injectable(
           depositing$
         );
 
-        const [copied, setCopied] = useState(false);
-
         return (
           <DepositFormContent>
             <PoolsBox label="Pools" disabled={depositing}>
@@ -64,6 +62,7 @@ export const mkDepositForm = injectable(
                 onChange={(event) => setPoolSize(Number(event.target.value))}
                 value={100}
                 label="₳100"
+                disabled={depositing}
                 name="100"
               />
               <br />
@@ -86,23 +85,32 @@ export const mkDepositForm = injectable(
               title="Secret Note"
               open={note !== null}
             >
-              <ModalContent>
-                <CopyToClipboard
-                  text={note ?? ''}
-                  onCopy={() => setCopied(true)}
-                >
-                  <NoteField variant="field">{note}</NoteField>
-                </CopyToClipboard>
-                <ModalFooter>
-                  <span>{copied && 'Copied to clipboard!'}</span>
-                  <Button disabled={!copied} onClick={submitDeposit}>
-                    Submit
-                  </Button>
-                </ModalFooter>
-              </ModalContent>
+              <NoteModal note={note} onSubmit={submitDeposit} />
             </Modal>
           </DepositFormContent>
         );
       }
   )
 );
+
+type NoteModalProps = {
+  note: string | null;
+  onSubmit: () => void;
+};
+
+const NoteModal = ({ note, onSubmit }: NoteModalProps) => {
+  const [copied, setCopied] = useState(false);
+  return (
+    <ModalContent>
+      <CopyToClipboard text={note ?? ''} onCopy={() => setCopied(true)}>
+        <NoteField variant="field">{note}</NoteField>
+      </CopyToClipboard>
+      <ModalFooter>
+        <span>{copied && 'Copied to clipboard!'}</span>
+        <Button disabled={!copied} onClick={onSubmit}>
+          Submit
+        </Button>
+      </ModalFooter>
+    </ModalContent>
+  );
+};

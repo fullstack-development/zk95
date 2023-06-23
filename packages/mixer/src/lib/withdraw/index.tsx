@@ -3,17 +3,26 @@ import { useProperties } from '@frp-ts/react';
 
 import { injectable } from '@mixer/injectable';
 import { useRunEff } from '@mixer/eff';
+
 import { mkWithdrawFromViewModel } from './view-model';
 import { Field, Fieldset, Footer, WithdrawForm } from './styled';
 
 export const mkWithdrawForm = injectable(
   mkWithdrawFromViewModel,
   (vm) => () => {
-    const { note$, address$, setNote, setAddress } = useRunEff(vm, []);
+    const { note$, address$, setNote, setAddress, withdraw } = useRunEff(
+      vm,
+      []
+    );
     const [note, address] = useProperties(note$, address$);
 
     return (
-      <WithdrawForm>
+      <WithdrawForm
+        onSubmit={(e) => {
+          e.preventDefault();
+          withdraw();
+        }}
+      >
         <Fieldset>
           <Field>
             <label>Note</label>
@@ -39,7 +48,7 @@ export const mkWithdrawForm = injectable(
           </Field>
         </Fieldset>
         <Footer>
-          <Button>Withdraw</Button>
+          <Button type="submit">Withdraw</Button>
         </Footer>
       </WithdrawForm>
     );

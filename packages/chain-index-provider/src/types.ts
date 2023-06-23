@@ -39,7 +39,7 @@ export type Assets = Record<string, bigint>;
 
 export type Script = {
   type: PlutusVersion | 'Native';
-  cbor: string;
+  script: string;
 };
 
 export type ChainIndexProvider = {
