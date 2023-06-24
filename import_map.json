@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "lucid-cardano": "https://deno.land/x/lucid@0.10.6/mod.ts",
+    "@mixer/onchain": "./packages/onchain-config/src/index.ts"
+  }
+}

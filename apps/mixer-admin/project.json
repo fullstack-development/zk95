@@ -1,0 +1,50 @@
+{
+  "name": "mixer-admin",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/mixer-admin/src",
+  "targets": {
+    "build": {
+      "executor": "@nx/deno:emit",
+      "outputs": [
+        "dist/apps/mixer-admin"
+      ],
+      "options": {
+        "main": "apps/mixer-admin/src/main.ts",
+        "outputFile": "dist/apps/mixer-admin/main.js",
+        "denoConfig": "apps/mixer-admin/deno.json"
+      }
+    },
+    "deploy": {
+      "executor": "@nx/deno:run",
+      "options": {
+        "buildTarget": "mixer-admin:build",
+        "watch": false
+      }
+    },
+    "serve": {
+      "executor": "@nx/deno:run",
+      "options": {
+        "buildTarget": "mixer-admin:build",
+        "watch": true
+      }
+    },
+    "test": {
+      "executor": "@nx/deno:test",
+      "outputs": [
+        "coverage/apps/mixer-admin"
+      ],
+      "options": {
+        "coverageDirectory": "coverage/apps/mixer-admin",
+        "denoConfig": "apps/mixer-admin/deno.json"
+      }
+    },
+    "lint": {
+      "executor": "@nx/deno:lint",
+      "options": {
+        "denoConfig": "apps/mixer-admin/deno.json"
+      }
+    }
+  },
+  "tags": []
+}

@@ -72,7 +72,7 @@ export const mkOffchain = injectable(
       );
 
       const depositUTxOs = await lucid.utxosAt(depositScriptAddress);
-
+      console.log(depositUTxOs);
       const utxoWithScriptRef = depositUTxOs.find(
         ({ scriptRef }) =>
           scriptRef && toAddress(lucid, scriptRef) === depositScriptAddress

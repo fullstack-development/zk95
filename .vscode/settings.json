@@ -1,0 +1,8 @@
+{
+  "deno.enablePaths": [
+    "apps/mixer-admin"
+  ],
+  "deno.unstable": true,
+  "deno.importMap": "./import_map.json",
+  "deno.enable": true
+}
