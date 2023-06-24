@@ -1,0 +1,14 @@
+name = "stephen/on-chain"
+version = "0.0.0"
+license = "Apache-2.0"
+description = "Aiken contracts for project 'stephen/on-chain'"
+
+[repository]
+user = "stephen"
+project = "on-chain"
+platform = "github"
+
+[[dependencies]]
+name = "aiken-lang/stdlib"
+version = "main"
+source = "github"
