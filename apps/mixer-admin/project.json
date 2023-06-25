@@ -15,6 +15,17 @@
         "denoConfig": "apps/mixer-admin/deno.json"
       }
     },
+    "build-emulation": {
+      "executor": "@nx/deno:emit",
+      "outputs": [
+        "dist/apps/mixer-admin"
+      ],
+      "options": {
+        "main": "apps/mixer-admin/src/emulate.ts",
+        "outputFile": "dist/apps/mixer-admin/emulation.js",
+        "denoConfig": "apps/mixer-admin/deno.json"
+      }
+    },
     "deploy": {
       "executor": "@nx/deno:run",
       "options": {
@@ -22,27 +33,11 @@
         "watch": false
       }
     },
-    "serve": {
+    "emulate": {
       "executor": "@nx/deno:run",
       "options": {
-        "buildTarget": "mixer-admin:build",
+        "buildTarget": "mixer-admin:build-emulation",
         "watch": true
-      }
-    },
-    "test": {
-      "executor": "@nx/deno:test",
-      "outputs": [
-        "coverage/apps/mixer-admin"
-      ],
-      "options": {
-        "coverageDirectory": "coverage/apps/mixer-admin",
-        "denoConfig": "apps/mixer-admin/deno.json"
-      }
-    },
-    "lint": {
-      "executor": "@nx/deno:lint",
-      "options": {
-        "denoConfig": "apps/mixer-admin/deno.json"
       }
     }
   },

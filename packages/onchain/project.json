@@ -1,21 +1,27 @@
 {
-  "name": "onchain-config",
+  "name": "onchain",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/onchain-config/src",
+  "sourceRoot": "packages/onchain/src",
   "projectType": "library",
   "targets": {
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
-        "lintFilePatterns": ["packages/onchain-config/**/*.ts"]
+        "lintFilePatterns": [
+          "packages/onchain/**/*.ts"
+        ]
       }
     },
     "test": {
       "executor": "@nx/jest:jest",
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
       "options": {
-        "jestConfig": "packages/onchain-config/jest.config.ts",
+        "jestConfig": "packages/onchain/jest.config.ts",
         "passWithNoTests": true
       },
       "configurations": {

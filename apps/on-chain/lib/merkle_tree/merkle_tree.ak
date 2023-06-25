@@ -1,6 +1,6 @@
 use aiken/bytearray.{concat, drop}
 use aiken/hash.{Hash, Sha2_256, sha2_256}
-use aiken/list.{length, map, push}
+use aiken/list.{length, map, push, repeat}
 use aiken/math.{pow}
 
 pub type MerkleHash =
@@ -12,7 +12,7 @@ pub type MerkleTreeConfig {
 }
 
 pub type MerkleTree {
-  root: Int,
+  root: ByteArray,
   leafs: List<MerkleHash>,
 }
 
@@ -24,7 +24,7 @@ pub fn insert_leaf(
   if length(self.leafs) < pow(2, config.height) {
     let new_leafs = self.leafs |> push(leaf)
     let root_hash = calc_root_hash(new_leafs, config.height, config.zero_hash)
-    MerkleTree { root: root_hash_to_int(root_hash), leafs: new_leafs }
+    MerkleTree { root: drop(root_hash, 1), leafs: new_leafs }
   } else {
     error @"Tree is full"
   }
@@ -60,14 +60,6 @@ fn hash_pair(self: (MerkleHash, MerkleHash)) -> MerkleHash {
   concat(self.1st, self.2nd) |> sha2_256
 }
 
-fn root_hash_to_int(self: MerkleHash) -> Int {
-  self |> drop(1) |> to_int
-}
-
-fn to_int(self: ByteArray) -> Int {
-  bytearray.foldl(self, 0, fn(byte, acc) { acc * 256 + byte })
-}
-
 fn pairwise(self: List<a>, filler: a) -> List<(a, a)> {
   when self is {
     [] ->
@@ -94,7 +86,29 @@ fn pairwise(self: List<a>, filler: a) -> List<(a, a)> {
 // #6e045b8f5eaa4bdc8f8a44797255d03f4e2aac366e32859c5d07cd8de46c2ea3
 // #6e045b8f5eaa4bdc8f8a44797255d03f4e2aac366e32859c5d07cd8de46c2ea3
 
+test insert_leaf_spec_1() {
+  let zero_value = "tornado.cash on cardano"
+  let zero_hash = sha2_256(zero_value)
+  let config = MerkleTreeConfig { height: 2, zero_hash }
+  let merkle_tree = MerkleTree { root: #"ff", leafs: [] }
+  let leaf_to_add =
+    #"688787d8ff144c502c7f5cffaafe2cc588d86079f9de88304c26b0cb99ce91c6"
+  let new_merkle_tree = merkle_tree |> insert_leaf(config, leaf_to_add)
+  new_merkle_tree.root == drop(
+    #"24640b8b79e329ca31601c7e0dabcb1996f76cd14def32ba3e6864ce7f3c9ceb",
+    1,
+  )
+}
+
 test calc_root_hash_spec_1() {
+  let height = 2
+  let zero_value = "tornado.cash on cardano"
+  let zero_hash = sha2_256(zero_value)
+
+  calc_root_hash([zero_hash], height, zero_hash) == #"c70db3a37303100f9c9654c50a0f1028c3adf55bd413e29177078617d19d4e63"
+}
+
+test calc_root_hash_spec_2() {
   let height = 2
   let zero_value = "tornado.cash on cardano"
   let zero_hash = sha2_256(zero_value)
@@ -104,7 +118,7 @@ test calc_root_hash_spec_1() {
 }
 
 /// mem and cpu test
-test calc_root_hash_spec_2() {
+test calc_root_hash_spec_3() {
   let height = 40
   let zero_value = "tornado.cash on cardano"
   let zero_hash = sha2_256(zero_value)
@@ -119,6 +133,21 @@ test calc_root_hash_spec_2() {
       #"688787d8ff144c502c7f5cffaafe2cc588d86079f9de88304c26b0cb99ce91c0",
       #"688787d8ff144c502c7f5cffaafe2cc588d86079f9de88304c26b0cb99ce91c8",
     ]
+  calc_root_hash(leafs, height, zero_hash) != #"ff"
+}
+
+// max mem 14000000 | max cpu 10000000000
+//         16646174            6638887904
+test calc_root_hash_spec_4() {
+  let height = 10
+  let zero_value = "tornado.cash on cardano"
+  let zero_hash = sha2_256(zero_value)
+  let leafs =
+    repeat(
+      #"688787d8ff144c502c7f5cffaafe2cc588d86079f9de88304c26b0cb99ce91c6",
+      1024,
+    )
+
   calc_root_hash(leafs, height, zero_hash) != #"ff"
 }
 

@@ -1,244 +1,105 @@
-import { concatHashes, hash, fromHex, toHex } from '@mixer/hash';
+import { concatHashes, hash } from '@mixer/hash';
+import { fromHex } from '@mixer/hash';
 
-export type MerkleLeaf = {
-  hash: Uint8Array;
-};
+export type MerkleHash = Uint8Array;
 
-export type MerkleNode = {
-  hash: Uint8Array;
-  left: MerkleNode | MerkleLeaf;
-  right: MerkleNode | MerkleLeaf;
-};
+export interface UncompletedMerkleTree {
+  completed: false;
+  leafs: MerkleHash[];
+  root: MerkleHash;
+  insert(leaf: MerkleHash): CompletedMerkleTree | UncompletedMerkleTree;
+}
 
-type MerkleTreeBase = {
-  readonly root: MerkleNode | MerkleLeaf;
-  readonly leafsCount: number;
-  readonly getLeafs: () => MerkleLeaf[];
-  readonly isZeroLeaf: (leaf: MerkleLeaf) => boolean;
-};
+export interface CompletedMerkleTree {
+  completed: true;
+  leafs: MerkleHash[];
+  root: MerkleHash;
+}
 
-export type CompletedMerkleTree = MerkleTreeBase & {
-  readonly completed: true;
-};
-
-export type UncompletedMerkleTree = MerkleTreeBase & {
-  readonly completed: false;
-  readonly nextIdx: number;
-  readonly addLeaf: (
-    value: string | Uint8Array,
-    needHash?: boolean
-  ) => MerkleTree;
-};
-
-export type MerkleTree = CompletedMerkleTree | UncompletedMerkleTree;
-
-type MakeMerkleTreeProps = {
-  leafs: string[];
-  depth?: number;
-  hashKey?: 'SHA256';
+type MerkleTreeConfig = {
+  leafs: (MerkleHash | string)[];
+  height: number;
   zeroValue?: string;
-  needHash?: boolean;
 };
 
-export function mkMerkleTree({
-  leafs,
-  depth,
-  zeroValue = '',
-  needHash = true,
-}: MakeMerkleTreeProps): MerkleTree {
-  const zeroHash = hash(zeroValue);
-  const hashedLeafs = leafs
-    .map((leaf) => (needHash ? hash(leaf) : fromHex(leaf)))
-    .filter((leafHash) => toHex(leafHash) !== toHex(zeroHash));
-  const levels = Math.max(
-    depth ? Math.ceil(depth - 1) : Math.ceil(Math.log2(hashedLeafs.length)),
-    0
-  );
-  const maxLeafsCount = getMaxLeafsCount(levels);
-  const leafsLayer: MerkleLeaf[] = Array(maxLeafsCount)
-    .fill(zeroHash)
-    .map((zeroHash, idx) => ({ hash: hashedLeafs[idx] ?? zeroHash }));
+export class MerkleTree {
+  public completed: boolean;
+  private _leafs: MerkleHash[];
+  private _height: number;
+  private _zeroValue: string;
 
-  const root = create(levels, leafsLayer)[0];
-  const completed = hashedLeafs.length >= maxLeafsCount;
-
-  const merkleBase: MerkleTreeBase = {
-    root,
-    leafsCount: maxLeafsCount,
-    getLeafs: () => leafsLayer,
-    isZeroLeaf: (leaf) => toHex(leaf.hash) === toHex(zeroHash),
-  };
-
-  if (!completed) {
-    const nextIdx = leafsLayer.findIndex(
-      ({ hash }) => toHex(zeroHash) === toHex(hash)
+  static make({
+    leafs,
+    height,
+    zeroValue,
+  }: MerkleTreeConfig): UncompletedMerkleTree | CompletedMerkleTree {
+    return new MerkleTree(
+      leafs.map(MerkleTree.toMerkleHash),
+      height,
+      zeroValue ?? '',
+      leafs.length >= 2 ** height
     );
-    const addLeaf = mkAddLeaf(root, nextIdx, levels, zeroHash);
-
-    return {
-      completed: false,
-      ...merkleBase,
-      nextIdx,
-      addLeaf,
-    };
   }
 
-  return {
-    completed: true,
-    ...merkleBase,
-  };
-}
-
-function mkAddLeaf(
-  root: MerkleNode | MerkleLeaf,
-  nextIdx: number,
-  levels: number,
-  zeroHash: Uint8Array
-): (value: string | Uint8Array, needHash?: boolean) => MerkleTree {
-  return (value: string | Uint8Array, needHash = true) => {
-    const traverse = (
-      step: number,
-      node: MerkleNode | MerkleLeaf
-    ): MerkleNode | MerkleLeaf => {
-      if (isNode(node)) {
-        const direction = nextIdx & (2 ** step);
-        const subtree = traverse(
-          step - 1,
-          node[direction === 0 ? 'left' : 'right']
-        );
-
-        const left = direction === 0 ? subtree : node.left;
-        const right = direction === 0 ? node.right : subtree;
-
-        return {
-          hash: concatHashes(left.hash, right.hash),
-          left,
-          right,
-        };
-      }
-
-      return {
-        hash: needHash
-          ? hash(value)
-          : value instanceof Uint8Array
-          ? value
-          : fromHex(value),
-      };
-    };
-
-    const newRoot = traverse(levels - 1, root);
-    const maxLeafsCount = getMaxLeafsCount(levels);
-    const newNextIdx = nextIdx + 1;
-    const completed = newNextIdx === maxLeafsCount;
-
-    const merkleBase: MerkleTreeBase = {
-      root: newRoot,
-      leafsCount: maxLeafsCount,
-      isZeroLeaf: (leaf) => toHex(leaf.hash) === toHex(zeroHash),
-      getLeafs: () =>
-        reduceTree<MerkleLeaf[]>(
-          (acc, node) => {
-            if (!isNode(node)) {
-              acc.push(node);
-            }
-
-            return acc;
-          },
-          newRoot,
-          []
-        ),
-    };
-
-    if (!completed) {
-      const newNextIdx = nextIdx + 1;
-      const addLeaf = mkAddLeaf(newRoot, newNextIdx, levels, zeroHash);
-
-      return {
-        completed: false,
-        ...merkleBase,
-        nextIdx: newNextIdx,
-        addLeaf,
-      };
-    }
-
-    return {
-      completed: true,
-      ...merkleBase,
-    };
-  };
-}
-
-export function toHexTree(tree: MerkleTree) {
-  type HexMerkleTree =
-    | {
-        hash: string;
-      }
-    | {
-        hash: string;
-        left: HexMerkleTree;
-        right: HexMerkleTree;
-      };
-  return traverse(tree.root);
-
-  function traverse(node: MerkleNode | MerkleLeaf): HexMerkleTree {
-    if (isNode(node)) {
-      return {
-        hash: toHex(node.hash),
-        left: traverse(node.left),
-        right: traverse(node.right),
-      };
-    }
-
-    return { hash: toHex(node.hash) };
-  }
-}
-
-export function isNode(node: MerkleLeaf | MerkleNode): node is MerkleNode {
-  return 'left' in node && 'right' in node;
-}
-
-function reduceTree<R>(
-  fn: (acc: R, node: MerkleNode | MerkleLeaf) => R,
-  node: MerkleNode | MerkleLeaf,
-  initialValue: R
-): R {
-  if (isNode(node)) {
-    const leftResult = reduceTree(fn, node.left, initialValue);
-    const currentResult = fn(leftResult, node);
-    const rightResult = reduceTree(fn, node.right, currentResult);
-
-    return rightResult;
+  private constructor(
+    leafs: MerkleHash[],
+    height: number,
+    zeroValue: string,
+    completed: boolean
+  ) {
+    this._leafs = leafs;
+    this._height = height;
+    this._zeroValue = zeroValue;
+    this.completed = completed;
   }
 
-  return fn(initialValue, node);
-}
-
-function create(
-  level: number,
-  nodes: MerkleLeaf[] | MerkleNode[]
-): MerkleNode[] | MerkleLeaf[] {
-  if (level === 0) {
-    return nodes as MerkleNode[];
+  get leafs() {
+    return this._leafs;
   }
 
-  const layer: MerkleNode[] = [];
-  const maxLeafsCount = getMaxLeafsCount(level);
-
-  for (let idx = 0; idx <= maxLeafsCount - 2; idx += 2) {
-    const left = nodes[idx];
-    const right = nodes[idx + 1];
-    const hash = concatHashes(left.hash, right.hash);
-    const newNode: MerkleNode = {
-      hash,
-      left,
-      right,
-    };
-    layer.push(newNode);
+  get root() {
+    const zeroHash = hash(this._zeroValue);
+    return hashLayers(this._leafs, this._height, zeroHash)[0];
   }
 
-  return create(level - 1, layer);
+  public insert(leaf: MerkleHash | string) {
+    return MerkleTree.make({
+      leafs: this._leafs.concat(MerkleTree.toMerkleHash(leaf)),
+      height: this._height,
+      zeroValue: this._zeroValue,
+    });
+  }
+
+  static toMerkleHash = (value: Uint8Array | string) =>
+    typeof value === 'string' ? fromHex(value) : value;
 }
 
-function getMaxLeafsCount(level: number) {
-  return 2 ** level;
+function hashLayers(
+  leafs: MerkleHash[],
+  currentHeight: number,
+  layerZeroHash: MerkleHash
+): MerkleHash[] {
+  return currentHeight === 0
+    ? leafs
+    : hashLayers(
+        pairwise(leafs, layerZeroHash).map(hashPair),
+        currentHeight - 1,
+        hashPair([layerZeroHash, layerZeroHash])
+      );
+}
+
+function hashPair([left, right]: [MerkleHash, MerkleHash]): MerkleHash {
+  return concatHashes(left, right);
+}
+
+function pairwise<A>(list: A[], filler: A): [A, A][] {
+  const result: [A, A][] = [];
+
+  for (let idx = 0; idx < list.length; idx = idx + 2) {
+    const left = list[idx];
+    const right = list[idx + 1] ?? filler;
+    result.push([left, right]);
+  }
+
+  return result;
 }

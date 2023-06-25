@@ -3,16 +3,14 @@ import {
   Lucid,
   applyDoubleCborEncoding,
   applyParamsToScript,
-  fromText,
   type Script,
 } from 'lucid-cardano';
 
-import { readValidator } from './utils.ts';
+import { readValidator } from '../../utils.ts';
 
 export async function createMintingPolicy(
-  lucid: Lucid,
-  tokenName: string
-): Promise<{ script: Script; policyId: string; tokenName: string }> {
+  lucid: Lucid
+): Promise<{ script: Script; policyId: string }> {
   const makeMintingPolicy = readValidator(
     'mixer_protocol_token.mixer_minting_policy'
   );
@@ -23,10 +21,7 @@ export async function createMintingPolicy(
     BigInt(userWalletUtxos[0].outputIndex),
   ]);
 
-  const mintingPolicy = applyParamsToScript(makeMintingPolicy.script, [
-    outRef,
-    fromText(tokenName),
-  ]);
+  const mintingPolicy = applyParamsToScript(makeMintingPolicy.script, [outRef]);
 
   const policyId = lucid.utils.validatorToScriptHash({
     type: 'PlutusV2',
@@ -39,6 +34,5 @@ export async function createMintingPolicy(
       script: applyDoubleCborEncoding(mintingPolicy),
     },
     policyId,
-    tokenName: fromText(tokenName),
   };
 }

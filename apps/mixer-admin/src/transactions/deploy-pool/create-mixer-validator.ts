@@ -1,41 +1,38 @@
-// deno-lint-ignore-file no-explicit-any
 import {
-  Data,
   applyDoubleCborEncoding,
   applyParamsToScript,
-  fromText,
   sha256,
   toHex,
   type Script,
   type Address,
   type Lucid,
+  Constr,
 } from 'lucid-cardano';
 
-import { readValidator } from './utils.ts';
-import { MixerConfig } from './scheme.ts';
+import { readValidator } from '../../utils.ts';
 
 export function createMixerValidator(
   lucid: Lucid,
   policyId: string,
-  tokenName: string,
+  treeTokenNameHash: string,
+  vaultTokenNameHash: string,
   nominal: bigint,
   treeHeight: bigint,
   zeroValue: string
 ): { script: Script; address: Address } {
   const makeMixerValidator = readValidator('mixer.mixer_validator');
+  const zeroHashHex = toHex(sha256(new TextEncoder().encode(zeroValue)));
 
-  const mixerConfig: MixerConfig = {
-    protocolPolicyId: policyId,
-    protocolTokenName: fromText(tokenName),
-    poolNominal: nominal,
-    merkleTreeConfig: {
-      height: treeHeight,
-      zeroHash: toHex(sha256(new TextEncoder().encode(zeroValue))),
-    },
-  };
+  const mixerConfig = new Constr(0, [
+    policyId,
+    treeTokenNameHash,
+    vaultTokenNameHash,
+    nominal,
+    new Constr(0, [treeHeight, zeroHashHex]),
+  ]);
 
   const mixerValidator = applyParamsToScript(makeMixerValidator.script, [
-    Data.to<MixerConfig>(mixerConfig, MixerConfig as any),
+    mixerConfig,
   ]);
 
   const script: Script = {
