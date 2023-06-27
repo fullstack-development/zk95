@@ -5,7 +5,7 @@
   "scripts": {
     "frontend": "npx nx serve mixer",
     "build-onchain": "npx nx build mixer",
-    "deploy-pool": "npx nx execute pool-deployment",
+    "deploy-pool": "npx nx deploy pool-deployment",
     "deploy": "gh-pages -d dist/apps/mixer"
   },
   "private": true,
@@ -20,7 +20,7 @@
     "@nx/js": "16.4.0",
     "@nx/linter": "16.2.1",
     "@nx/node": "16.4.0",
-    "@nx/react": "^16.2.1",
+    "@nx/react": "16.4.0",
     "@nx/rollup": "16.4.0",
     "@nx/webpack": "16.4.0",
     "@nx/workspace": "16.2.1",
@@ -32,8 +32,8 @@
     "@testing-library/react": "14.0.0",
     "@types/jest": "^29.4.0",
     "@types/node": "18.14.2",
-    "@types/react": "18.0.28",
-    "@types/react-dom": "18.0.11",
+    "@types/react": "18.2.13",
+    "@types/react-dom": "18.2.6",
     "@types/styled-react-modal": "^1.2.2",
     "@typescript-eslint/eslint-plugin": "^5.58.0",
     "@typescript-eslint/parser": "^5.58.0",

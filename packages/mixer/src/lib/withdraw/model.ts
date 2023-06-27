@@ -2,7 +2,7 @@ import { Property, newAtom } from '@frp-ts/core';
 import { injectable } from '@mixer/injectable';
 import { combineEff, withEff } from '@mixer/eff';
 import { EMPTY, Subject, catchError, switchMap, tap } from 'rxjs';
-import { mkOffchain } from '@mixer/offchain';
+import { mkOffchainConsumer } from '@mixer/offchain-consumer';
 import { mkTransactionWatcherModel } from '@mixer/transaction-watcher';
 
 export type WithdrawModel = {
@@ -11,7 +11,7 @@ export type WithdrawModel = {
 };
 
 export const mkWithdrawModel = injectable(
-  mkOffchain,
+  mkOffchainConsumer,
   mkTransactionWatcherModel,
   combineEff(({ withdraw$ }, { watchTx }) => {
     const withdrawing$ = newAtom<boolean>(false);

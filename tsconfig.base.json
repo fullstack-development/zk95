@@ -31,6 +31,7 @@
       "@mixer/mixer": ["packages/mixer/src/index.ts"],
       "@mixer/notifier": ["packages/notifier/src/index.ts"],
       "@mixer/offchain": ["packages/offchain/src/index.ts"],
+      "@mixer/offchain-consumer": ["packages/offchain-consumer/src/index.ts"],
       "@mixer/onchain": ["packages/onchain/plutus.json"],
       "@mixer/proof-generator": ["packages/proof-generator/src/index.ts"],
       "@mixer/transaction-watcher": [

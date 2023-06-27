@@ -12,9 +12,9 @@ import { chainIndexProvider } from '@mixer/chain-index-provider';
 import { injectable } from '@mixer/injectable';
 import { combineEff } from '@mixer/eff';
 import { mkWalletModel } from '@mixer/wallet';
+import { deposit } from '@mixer/offchain';
 
 import { mkProviderAdapter } from './provider/adapter';
-import { deposit } from './transactions/deposit';
 
 export type Offchain = {
   deposit$: (
@@ -24,7 +24,7 @@ export type Offchain = {
   withdraw$: (note: string, address: string) => Observable<TxHash>;
 };
 
-export const mkOffchain = injectable(
+export const mkOffchainConsumer = injectable(
   mkWalletModel,
   chainIndexProvider,
   combineEff((walletModel, provider): Offchain => {
@@ -49,12 +49,8 @@ export const mkOffchain = injectable(
     const withdraw$ = (note: string, address: string) =>
       lucid$.pipe(
         first(),
-        switchMap((lucid) => withdraw(lucid, note, address))
+        switchMap((lucid) => '')
       );
-
-    async function withdraw(lucid: Lucid, note: string, address: string) {
-      return '';
-    }
 
     return {
       deposit$,

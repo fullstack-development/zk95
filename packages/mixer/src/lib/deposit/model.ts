@@ -1,6 +1,6 @@
 import { Property, newAtom } from '@frp-ts/core';
 import { injectable } from '@mixer/injectable';
-import { mkOffchain } from '@mixer/offchain';
+import { mkOffchainConsumer } from '@mixer/offchain-consumer';
 import { getRandomValues, hash, concatHashes, toHex } from '@mixer/crypto';
 import { mkTransactionWatcherModel } from '@mixer/transaction-watcher';
 import { combineEff, withEff } from '@mixer/eff';
@@ -31,7 +31,7 @@ export type DepositModel = {
 
 export const mkDepositModel = injectable(
   mkTransactionWatcherModel,
-  mkOffchain,
+  mkOffchainConsumer,
   combineEff((watcherModel, { deposit$ }) => {
     const depositAction$ = new Subject();
     const submitDepositAction$ = new Subject<boolean>();

@@ -19,10 +19,27 @@
         "compile"
       ]
     },
-    "execute": {
-      "command": "npx dotenv -e apps/pool-deployment/.env node dist/apps/pool-deployment/apps/pool-deployment/src/main.js {args}",
+    "deploy": {
+      "command": "npx dotenv -e apps/pool-deployment/.env node dist/apps/pool-deployment/apps/pool-deployment/src/main.js",
       "dependsOn": [
-        "build"
+        {
+          "projects": "self",
+          "target": "build"
+        },
+        {
+          "projects": "onchain",
+          "target": "build:dev"
+        }
+      ]
+    },
+    "deploy-prod": {
+      "command": "npx dotenv -e apps/pool-deployment/.env node dist/apps/pool-deployment/apps/pool-deployment/src/main.js",
+      "dependsOn": [
+        "build",
+        {
+          "projects": "onchain",
+          "target": "build:prod"
+        }
       ]
     }
   },

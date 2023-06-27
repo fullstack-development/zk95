@@ -8,7 +8,7 @@
       "command": "aiken build ./packages/onchain"
     },
     "build:dev": {
-      "command": "aiken build./packages/onchain --keep-traces"
+      "command": "aiken build ./packages/onchain --keep-traces"
     },
     "test": {
       "command": "aiken check ./packages/onchain"
