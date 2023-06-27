@@ -8,7 +8,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "importHelpers": true,
-    "target": "es2015",
+    "target": "esnext",
     "strict": true,
     "module": "esnext",
     "lib": [
@@ -56,7 +56,7 @@
         "packages/offchain/src/index.ts"
       ],
       "@mixer/onchain": [
-        "packages/onchain/src/index.ts"
+        "packages/onchain/plutus.json"
       ],
       "@mixer/proof-generator": [
         "packages/proof-generator/src/index.ts"
