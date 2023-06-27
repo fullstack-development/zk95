@@ -1,10 +1,12 @@
 /* eslint-disable */
 export default {
   displayName: 'offchain',
-  preset: '../../jest.preset.js',
+  // preset: '../../jest.preset.js',
   transform: {
-    '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
+    // '^.+\\.(js|ts)$': 'ts-jest',
   },
-  moduleFileExtensions: ['ts', 'js', 'html'],
+  testEnvironment: 'node',
+  moduleFileExtensions: ['ts', 'js', 'mjs'],
+  transformIgnorePatterns: ['node_modules/(?!lucid-cardano)'],
   coverageDirectory: '../../coverage/packages/offchain',
 };

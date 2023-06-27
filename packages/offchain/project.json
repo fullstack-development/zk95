@@ -30,6 +30,9 @@
           "codeCoverage": true
         }
       }
+    },
+    "test-es": {
+      "command": "cd ./packages/offchain NODE_OPTIONS=--experimental-vm-modules npx jest"
     }
   },
   "tags": []

@@ -1,7 +1,7 @@
 import { Property, newAtom } from '@frp-ts/core';
 import { injectable } from '@mixer/injectable';
 import { mkOffchain } from '@mixer/offchain';
-import { getRandomValues, hash, concatHashes, toHex } from '@mixer/hash';
+import { getRandomValues, hash, concatHashes, toHex } from '@mixer/crypto';
 import { mkTransactionWatcherModel } from '@mixer/transaction-watcher';
 import { combineEff, withEff } from '@mixer/eff';
 import {

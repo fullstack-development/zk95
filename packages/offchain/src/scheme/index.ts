@@ -28,13 +28,13 @@ export const MixerDatum = Data.Enum([
   Data.Literal('Vault'),
 ]);
 
-export type MintRedeemer = Data.Static<typeof MintRedeemer>;
-export const MintRedeemer = Data.Array(Data.Bytes());
-
-export type Redeemer = Data.Static<typeof Redeemer>;
-export const Redeemer = Data.Enum([
+export type MixerRedeemer = Data.Static<typeof MixerRedeemer>;
+export const MixerRedeemer = Data.Enum([
   Data.Object({
     Deposit: Data.Tuple([Data.Bytes()]),
   }),
   Data.Literal('Withdraw'),
 ]);
+
+export type MintRedeemer = Data.Static<typeof MintRedeemer>;
+export const MintRedeemer = Data.Array(Data.Bytes());

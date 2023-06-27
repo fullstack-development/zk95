@@ -1,4 +1,4 @@
-import { toHex, concatHashes, hash } from '@mixer/hash';
+import { toHex, concatHashes, hash } from '@mixer/crypto';
 import { MerkleTree } from './merkle-tree';
 const zeroValue = 'zeroValue';
 

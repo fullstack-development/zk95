@@ -7,8 +7,9 @@ import {
   addAssets,
   toHex,
 } from 'lucid-cardano';
-import { MerkleTree, assert } from '../utils.ts';
-import { MixerDatum, Redeemer } from '../scheme.ts';
+import { MerkleTree } from '@mixer/merkletree';
+import { assert } from '@mixer/utils';
+import { MixerDatum, MixerRedeemer } from '../scheme';
 
 export async function deposit(
   lucid: Lucid,
@@ -50,11 +51,11 @@ export async function deposit(
   assert(`Cannot find a utxo with the merkle tree`, merkleTreeUTxO);
   assert(`Merkle tree datum is missing`, merkleTreeUTxO.datum);
 
-  const redeemer = Data.to<Redeemer>(
+  const redeemer = Data.to<MixerRedeemer>(
     {
       Deposit: [toHex(commitmentHash)],
     },
-    Redeemer as never
+    MixerRedeemer as never
   );
 
   const inputDatum = Data.from<MixerDatum>(

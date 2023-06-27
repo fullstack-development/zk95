@@ -1,0 +1,30 @@
+{
+  "name": "pool-deployment",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/pool-deployment/src",
+  "projectType": "application",
+  "targets": {
+    "compile": {
+      "executor": "@nx/js:tsc",
+      "options": {
+        "rootDir": ".",
+        "outputPath": "dist/apps/pool-deployment",
+        "main": "apps/pool-deployment/main.ts",
+        "tsConfig": "apps/pool-deployment/tsconfig.app.json"
+      }
+    },
+    "build": {
+      "command": "npx resolve-tspaths --project ./tsconfig.base.json --out ./dist/apps/pool-deployment",
+      "dependsOn": [
+        "compile"
+      ]
+    },
+    "execute": {
+      "command": "npx dotenv -e apps/pool-deployment/.env node dist/apps/pool-deployment/apps/pool-deployment/src/main.js {args}",
+      "dependsOn": [
+        "build"
+      ]
+    }
+  },
+  "tags": []
+}

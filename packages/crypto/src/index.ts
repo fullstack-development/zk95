@@ -1,7 +1,7 @@
-import { sha256 } from 'hash.js';
+import hashjs from 'hash.js';
 
 export function hash(value: string | ArrayBuffer): Uint8Array {
-  return Buffer.from(sha256().update(value).digest());
+  return Buffer.from(hashjs.sha256().update(value).digest());
 }
 
 export function getRandomValues(bytes: number): Uint8Array {

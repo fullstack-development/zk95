@@ -1,5 +1,5 @@
-import { concatHashes, hash } from '@mixer/hash';
-import { fromHex } from '@mixer/hash';
+import { concatHashes, hash } from '@mixer/crypto';
+import { fromHex } from '@mixer/crypto';
 
 export type MerkleHash = Uint8Array;
 
@@ -59,7 +59,11 @@ export class MerkleTree {
 
   get root() {
     const zeroHash = hash(this._zeroValue);
-    return hashLayers(this._leafs, this._height, zeroHash)[0];
+    return hashLayers(
+      this._leafs.length === 0 ? [zeroHash] : this._leafs,
+      this._height,
+      zeroHash
+    )[0];
   }
 
   public insert(leaf: MerkleHash | string) {

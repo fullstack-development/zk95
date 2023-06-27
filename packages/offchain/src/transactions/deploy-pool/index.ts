@@ -1,17 +1,9 @@
-import {
-  Lucid,
-  Data,
-  type Assets,
-  sha256,
-  toHex,
-  fromText,
-  Constr,
-} from 'lucid-cardano';
-import { createMixerValidator } from './create-mixer-validator.ts';
-import { createMintingPolicy } from './create-minting-policy.ts';
+import { Lucid, Data, Assets, toHex, fromText } from 'lucid-cardano';
+import { createMixerValidator } from './create-mixer-validator';
+import { createMintingPolicy } from './create-minting-policy';
 
-import { MerkleTree } from '../../utils.ts';
-import { MintRedeemer, MixerDatum } from '../../scheme.ts';
+import { MerkleTree } from '@mixer/merkletree';
+import { MintRedeemer, MixerDatum } from '../../scheme';
 
 export async function deployPool(
   lucid: Lucid,

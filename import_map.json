@@ -1,6 +1,0 @@
-{
-  "imports": {
-    "lucid-cardano": "https://deno.land/x/lucid@0.10.6/mod.ts",
-    "@mixer/merkletree": "./packages/merkletree/src/merkle-tree.ts"
-  }
-}

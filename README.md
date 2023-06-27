@@ -1,11 +1,20 @@
-# cardano-mixer-frontend
+# cardano_mixer
 
-# To run frontend
+## Requirements
 
-- install node >= 16.x.x
-- npm i
-- npm run start
+- node >= 16.x.x
+- aiken
+- npm install
 
-# To deploy smart contract
+## To run frontend
 
-- install deno
+- npm run frontend
+
+## To build validators
+
+- npm run build-onchain
+
+## To deploy pool
+
+- create .env in apps/pool-deployment according to .env.example
+- npm run deploy

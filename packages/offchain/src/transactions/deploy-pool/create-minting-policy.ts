@@ -6,7 +6,7 @@ import {
   type Script,
 } from 'lucid-cardano';
 
-import { readValidator } from '../../utils.ts';
+import { readValidator } from '../../utils';
 
 export async function createMintingPolicy(
   lucid: Lucid
