@@ -1,4 +1,4 @@
-import { Emulator, Lucid } from 'lucid-cardano';
+import { Lucid, Emulator } from 'lucid-cardano';
 import { deployPool } from './transactions/deploy-pool';
 
 const mnemonicPhrase =

@@ -16,23 +16,11 @@
       }
     },
     "test": {
-      "executor": "@nx/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
-      ],
+      "executor": "nx:run-commands",
       "options": {
-        "jestConfig": "packages/offchain/jest.config.ts",
-        "passWithNoTests": true
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "codeCoverage": true
-        }
+        "cwd": "packages/offchain",
+        "command": "node --no-warnings --experimental-vm-modules run-test.js"
       }
-    },
-    "test-es": {
-      "command": "cd ./packages/offchain NODE_OPTIONS=--experimental-vm-modules npx jest"
     }
   },
   "tags": []
