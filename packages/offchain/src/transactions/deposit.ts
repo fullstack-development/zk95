@@ -10,15 +10,19 @@ import {
 import { MerkleTree } from '@mixer/merkletree';
 import { assert } from '@mixer/utils';
 import { MixerDatum, MixerRedeemer } from '../scheme';
+import { PoolInfo } from './types';
 
 export async function deposit(
   lucid: Lucid,
-  mixerScript: Script,
-  treeTokenUnit: string,
-  vaultTokenUnit: string,
-  poolSize: number,
-  treeHeight: number,
-  zeroValue: string,
+  {
+    mixerScript,
+    treeTokenUnit,
+    vaultTokenUnit,
+    nominal,
+    treeHeight,
+    zeroValue,
+  }: PoolInfo,
+
   commitmentHash: Uint8Array
 ) {
   const depositScriptAddress: Address =
@@ -101,7 +105,7 @@ export async function deposit(
       depositScriptAddress,
       { inline: vaultUTxO.datum },
       addAssets(vaultUTxO.assets, {
-        lovelace: BigInt(poolSize) * BigInt(1000000),
+        lovelace: BigInt(nominal) * BigInt(1000000),
       })
     )
     .complete();

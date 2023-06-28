@@ -4,6 +4,7 @@ import { createMintingPolicy } from './create-minting-policy';
 
 import { MerkleTree } from '@mixer/merkletree';
 import { MintRedeemer, MixerDatum } from '../../scheme';
+import { PoolInfo } from '../types';
 
 export async function deployPool(
   lucid: Lucid,
@@ -12,7 +13,7 @@ export async function deployPool(
   zeroValue: string,
   treeTokenName: string,
   vaultTokenName: string
-) {
+): Promise<PoolInfo> {
   console.info('creating token minting policy...');
   const { script: mintingPolicyScript, policyId } = await createMintingPolicy(
     lucid
@@ -114,6 +115,7 @@ export async function deployPool(
   return {
     txHash,
     nominal,
+    treeHeight,
     treeTokenUnit,
     vaultTokenUnit,
     zeroValue,
