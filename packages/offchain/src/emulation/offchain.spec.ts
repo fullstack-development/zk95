@@ -22,7 +22,7 @@ async function prepareEmulator(): Promise<[Lucid, Emulator]> {
 }
 
 describe('offchain', () => {
-  it('deploy pool transaction', async () => {
+  it('deploy pool', async () => {
     const [lucid, emulator] = await prepareEmulator();
     await deployPool(lucid, 100, treeHeight, zeroValue, 'Tree', 'Vault');
     emulator.awaitBlock(1);
@@ -30,7 +30,7 @@ describe('offchain', () => {
     expect(emulator.ledger).toMatchSnapshot('deployment ledger');
   });
 
-  it('deposit transaction', async () => {
+  it('deposit', async () => {
     const [lucid, emulator] = await prepareEmulator();
     const poolInfo = await deployPool(
       lucid,
@@ -48,5 +48,28 @@ describe('offchain', () => {
     emulator.awaitBlock(1);
 
     expect(emulator.ledger).toMatchSnapshot('deposit ledger');
+  });
+
+  it('double deposit', async () => {
+    const [lucid, emulator] = await prepareEmulator();
+    const poolInfo = await deployPool(
+      lucid,
+      100,
+      treeHeight,
+      zeroValue,
+      'Tree',
+      'Vault'
+    );
+    emulator.awaitBlock(1);
+
+    await deposit(lucid, poolInfo, hash('commitment1'));
+
+    emulator.awaitBlock(1);
+
+    await deposit(lucid, poolInfo, hash('commitment2'));
+
+    emulator.awaitBlock(1);
+
+    expect(emulator.ledger).toMatchSnapshot('double deposit ledger');
   });
 });

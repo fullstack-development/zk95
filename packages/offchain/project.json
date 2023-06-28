@@ -18,8 +18,7 @@
     "test": {
       "executor": "nx:run-commands",
       "options": {
-        "cwd": "packages/offchain",
-        "command": "node --no-warnings --experimental-vm-modules run-test.js"
+        "command": "node --no-warnings --experimental-vm-modules tools/run-test.js packages/offchain/jest.config.cjs"
       }
     }
   },

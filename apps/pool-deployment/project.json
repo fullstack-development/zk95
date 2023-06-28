@@ -33,7 +33,10 @@
       ]
     },
     "deploy-prod": {
-      "command": "npx dotenv -e apps/pool-deployment/.env node dist/apps/pool-deployment/apps/pool-deployment/src/main.js",
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npx dotenv -e apps/pool-deployment/.env node dist/apps/pool-deployment/apps/pool-deployment/src/main.js"
+      },
       "dependsOn": [
         "build",
         {

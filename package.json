@@ -4,9 +4,9 @@
   "license": "MIT",
   "scripts": {
     "frontend": "npx nx serve mixer",
+    "deploy": "npx nx run mixer:deploy",
     "build-onchain": "npx nx build mixer",
-    "deploy-pool": "npx nx deploy pool-deployment",
-    "deploy": "npx nx run mixer:deploy"
+    "deploy-pool": "npx nx deploy pool-deployment"
   },
   "private": true,
   "devDependencies": {

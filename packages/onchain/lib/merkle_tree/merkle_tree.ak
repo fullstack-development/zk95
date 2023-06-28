@@ -1,6 +1,6 @@
-use aiken/bytearray.{concat, drop}
+use aiken/bytearray as bytearray
 use aiken/hash.{Hash, Sha2_256, sha2_256}
-use aiken/list.{length, map, push, repeat}
+use aiken/list as list
 use aiken/math.{pow}
 
 pub type MerkleHash =
@@ -21,10 +21,10 @@ pub fn insert_leaf(
   config: MerkleTreeConfig,
   leaf: MerkleHash,
 ) -> MerkleTree {
-  if length(self.leafs) < pow(2, config.height) {
-    let new_leafs = self.leafs |> push(leaf)
+  if list.length(self.leafs) < pow(2, config.height) {
+    let new_leafs = self.leafs |> list.concat([leaf])
     let root_hash = calc_root_hash(new_leafs, config.height, config.zero_hash)
-    MerkleTree { root: drop(root_hash, 1), leafs: new_leafs }
+    MerkleTree { root: bytearray.drop(root_hash, 1), leafs: new_leafs }
   } else {
     error @"Tree is full"
   }
@@ -51,13 +51,13 @@ fn hash_layers(
     h ->
       self
         |> pairwise(layer_zero_hash)
-        |> map(hash_pair)
+        |> list.map(hash_pair)
         |> hash_layers(h - 1, hash_pair((layer_zero_hash, layer_zero_hash)))
   }
 }
 
 fn hash_pair(self: (MerkleHash, MerkleHash)) -> MerkleHash {
-  concat(self.1st, self.2nd) |> sha2_256
+  bytearray.concat(self.1st, self.2nd) |> sha2_256
 }
 
 fn pairwise(self: List<a>, filler: a) -> List<(a, a)> {
@@ -74,14 +74,14 @@ fn pairwise(self: List<a>, filler: a) -> List<(a, a)> {
 // tests
 
 // root
-// #24640b8b79e329ca31601c7e0dabcb1996f76cd14def32ba3e6864ce7f3c9ceb
+// #e6a48ea87e085ff9da119e62b0e3d1b3ecc5d2a5d5a7c1e3c4bdeed085741126
 
 // leyer 2
-// #b16453bd26015165569436b466151395f86b103426c863e6f696f5c3c036c4aa
+// #14906ebe72476ddb9eb4ef558e9d06d6ec12650e328a0db06165f86b9775bbb7
 // #32a7b13eff6836a40fd4f2b9e1da47de280f371b0ff3ef361828e0d88814a7f9
 
 //leafs
-// #688787d8ff144c502c7f5cffaafe2cc588d86079f9de88304c26b0cb99ce91c6
+// #e1587401f42aa18899004e6b313f62b1732dd9860ac4085f4790f62b24b7dec3
 // #6e045b8f5eaa4bdc8f8a44797255d03f4e2aac366e32859c5d07cd8de46c2ea3
 // #6e045b8f5eaa4bdc8f8a44797255d03f4e2aac366e32859c5d07cd8de46c2ea3
 // #6e045b8f5eaa4bdc8f8a44797255d03f4e2aac366e32859c5d07cd8de46c2ea3
@@ -92,10 +92,45 @@ test insert_leaf_spec_1() {
   let config = MerkleTreeConfig { height: 2, zero_hash }
   let merkle_tree = MerkleTree { root: #"ff", leafs: [] }
   let leaf_to_add =
-    #"688787d8ff144c502c7f5cffaafe2cc588d86079f9de88304c26b0cb99ce91c6"
+    #"e1587401f42aa18899004e6b313f62b1732dd9860ac4085f4790f62b24b7dec3"
   let new_merkle_tree = merkle_tree |> insert_leaf(config, leaf_to_add)
-  new_merkle_tree.root == drop(
-    #"24640b8b79e329ca31601c7e0dabcb1996f76cd14def32ba3e6864ce7f3c9ceb",
+  new_merkle_tree.root == bytearray.drop(
+    #"e6a48ea87e085ff9da119e62b0e3d1b3ecc5d2a5d5a7c1e3c4bdeed085741126",
+    1,
+  )
+}
+
+// tests
+
+// root
+// #70ddc1c3831bc1f083b64e3a3e51d56872f99bb1495c2a31651b09f087c3c0fa
+
+// leyer 2
+// #e5327ec300702c40c3f92fb21b90616de54d249f8082bc962b0a60483d7e03c1
+// #32a7b13eff6836a40fd4f2b9e1da47de280f371b0ff3ef361828e0d88814a7f9
+
+//leafs
+// #e1587401f42aa18899004e6b313f62b1732dd9860ac4085f4790f62b24b7dec3
+// #bdde83d5b26cd7677153640af3ce94739df8d51443024f2933abf843b8c1b009
+// #6e045b8f5eaa4bdc8f8a44797255d03f4e2aac366e32859c5d07cd8de46c2ea3
+// #6e045b8f5eaa4bdc8f8a44797255d03f4e2aac366e32859c5d07cd8de46c2ea3
+
+test insert_leaf_spec_2() {
+  let zero_value = "tornado.cash on cardano"
+  let zero_hash = sha2_256(zero_value)
+  let config = MerkleTreeConfig { height: 2, zero_hash }
+  let merkle_tree = MerkleTree { root: #"ff", leafs: [] }
+  let leaf_to_add_1 =
+    #"e1587401f42aa18899004e6b313f62b1732dd9860ac4085f4790f62b24b7dec3"
+  let leaf_to_add_2 =
+    #"bdde83d5b26cd7677153640af3ce94739df8d51443024f2933abf843b8c1b009"
+
+  let new_merkle_tree =
+    merkle_tree
+      |> insert_leaf(config, leaf_to_add_1)
+      |> insert_leaf(config, leaf_to_add_2)
+  new_merkle_tree.root == bytearray.drop(
+    #"70ddc1c3831bc1f083b64e3a3e51d56872f99bb1495c2a31651b09f087c3c0fa",
     1,
   )
 }
@@ -143,7 +178,7 @@ test calc_root_hash_spec_4() {
   let zero_value = "tornado.cash on cardano"
   let zero_hash = sha2_256(zero_value)
   let leafs =
-    repeat(
+    list.repeat(
       #"688787d8ff144c502c7f5cffaafe2cc588d86079f9de88304c26b0cb99ce91c6",
       1024,
     )

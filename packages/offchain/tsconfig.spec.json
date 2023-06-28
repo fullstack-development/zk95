@@ -16,7 +16,7 @@
     ]
   },
   "include": [
-    "jest.config.js",
+    "jest.config.cjs",
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
     "src/**/*.d.ts"
