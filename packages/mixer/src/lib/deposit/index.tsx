@@ -4,7 +4,7 @@ import { useProperties } from '@frp-ts/react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 
 import { Modal } from '@mixer/components';
-import { injectable } from '@mixer/injectable';
+import { injectable, token } from '@mixer/injectable';
 import { combineEff } from '@mixer/eff';
 
 import { mkDepositModel } from './model';
@@ -16,19 +16,24 @@ import {
   NoteField,
   PoolsBox,
 } from './styled';
+import { POOLS_CONFIG_KEY, PoolInfo } from '@mixer/offchain';
 
 export const mkDepositForm = injectable(
+  token(POOLS_CONFIG_KEY)<Record<number, PoolInfo>>(),
   mkDepositModel,
   combineEff(
-    ({
-        poolSize$,
-        note$,
-        depositing$,
-        submitDeposit,
-        rejectDeposit,
-        deposit,
-        setPoolSize,
-      }) =>
+    (
+        poolsConfig,
+        {
+          poolSize$,
+          note$,
+          depositing$,
+          submitDeposit,
+          rejectDeposit,
+          deposit,
+          setPoolSize,
+        }
+      ) =>
       () => {
         const [poolSize, note, depositing] = useProperties(
           poolSize$,
@@ -39,41 +44,16 @@ export const mkDepositForm = injectable(
         return (
           <DepositFormContent>
             <PoolsBox label="Pools" disabled={depositing}>
-              <Radio
-                checked={poolSize === 1}
-                onChange={(event) => setPoolSize(Number(event.target.value))}
-                value={1}
-                label="₳1"
-                disabled
-                name="1"
-              />
-              <br />
-              <Radio
-                checked={poolSize === 10}
-                onChange={(event) => setPoolSize(Number(event.target.value))}
-                value={10}
-                label="₳10"
-                disabled
-                name="10"
-              />
-              <br />
-              <Radio
-                checked={poolSize === 100}
-                onChange={(event) => setPoolSize(Number(event.target.value))}
-                value={100}
-                label="₳100"
-                disabled={depositing}
-                name="100"
-              />
-              <br />
-              <Radio
-                checked={poolSize === 1000}
-                onChange={(event) => setPoolSize(Number(event.target.value))}
-                value={1000}
-                label="₳1000"
-                disabled
-                name="fruits"
-              />
+              {Object.values(poolsConfig).map((pool) => (
+                <Radio
+                  key={pool.nominal}
+                  checked={poolSize === pool.nominal}
+                  onChange={() => setPoolSize(pool.nominal)}
+                  value={pool.nominal}
+                  label={`₳${pool.nominal}`}
+                  name={pool.nominal.toString()}
+                />
+              ))}
             </PoolsBox>
             <Footer>
               <Button onClick={deposit} disabled={depositing}>

@@ -1,10 +1,4 @@
-import {
-  Constr,
-  Lucid,
-  applyDoubleCborEncoding,
-  applyParamsToScript,
-  type Script,
-} from 'lucid-cardano';
+import { Constr, Lucid, applyParamsToScript, type Script } from 'lucid-cardano';
 
 import { readValidator } from '../../utils';
 
@@ -31,7 +25,7 @@ export async function createMintingPolicy(
   return {
     script: {
       type: 'PlutusV2',
-      script: applyDoubleCborEncoding(mintingPolicy),
+      script: mintingPolicy,
     },
     policyId,
   };

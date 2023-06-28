@@ -9,10 +9,10 @@ import {
 import { Lucid, TxHash } from 'lucid-cardano';
 
 import { chainIndexProvider } from '@mixer/chain-index-provider';
-import { injectable } from '@mixer/injectable';
+import { injectable, token } from '@mixer/injectable';
 import { combineEff } from '@mixer/eff';
 import { mkWalletModel } from '@mixer/wallet';
-import { deposit } from '@mixer/offchain';
+import { PoolInfo, POOLS_CONFIG_KEY, deposit } from '@mixer/offchain';
 
 import { mkProviderAdapter } from './provider/adapter';
 
@@ -25,9 +25,10 @@ export type Offchain = {
 };
 
 export const mkOffchainConsumer = injectable(
+  token(POOLS_CONFIG_KEY)<Record<number, PoolInfo>>(),
   mkWalletModel,
   chainIndexProvider,
-  combineEff((walletModel, provider): Offchain => {
+  combineEff((poolsConfig, walletModel, provider): Offchain => {
     const lucidProvider = mkProviderAdapter(provider);
 
     const lucid$ = combineLatest([
@@ -43,7 +44,9 @@ export const mkOffchainConsumer = injectable(
     const deposit$ = (poolSize: number, commitmentHash: Uint8Array) =>
       lucid$.pipe(
         first(),
-        switchMap((lucid) => '') //deposit(lucid, poolSize, commitmentHash)
+        switchMap((lucid) =>
+          deposit(lucid, poolsConfig[poolSize], commitmentHash)
+        )
       );
 
     const withdraw$ = (note: string, address: string) =>

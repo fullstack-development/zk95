@@ -4,7 +4,7 @@ import { createMintingPolicy } from './create-minting-policy';
 
 import { MerkleTree } from '@mixer/merkletree';
 import { MintRedeemer, MixerDatum } from '../../scheme';
-import { PoolInfo } from '../types';
+import { PoolInfo } from '../../types';
 
 export async function deployPool(
   lucid: Lucid,

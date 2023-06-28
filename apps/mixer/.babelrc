@@ -7,5 +7,13 @@
       }
     ]
   ],
-  "plugins": ["babel-plugin-styled-components"]
+  "plugins": [
+    "babel-plugin-styled-components",
+    [
+      "@babel/plugin-syntax-import-attributes",
+      {
+        "deprecatedAssertSyntax": true
+      }
+    ]
+  ]
 }

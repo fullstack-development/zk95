@@ -1,16 +1,8 @@
-import {
-  Address,
-  Constr,
-  Data,
-  Lucid,
-  Script,
-  addAssets,
-  toHex,
-} from 'lucid-cardano';
+import { Address, Data, Lucid, addAssets, toHex } from 'lucid-cardano';
 import { MerkleTree } from '@mixer/merkletree';
 import { assert } from '@mixer/utils';
 import { MixerDatum, MixerRedeemer } from '../scheme';
-import { PoolInfo } from './types';
+import { PoolInfo } from '../types';
 
 export async function deposit(
   lucid: Lucid,

@@ -10,6 +10,7 @@ import ms_sans_serif_bold from 'react95/dist/fonts/ms_sans_serif_bold.woff2';
 import { createGlobalStyle, ThemeProvider } from 'styled-components';
 import { useProperties } from '@frp-ts/react';
 
+import { PoolInfo } from '@mixer/offchain';
 import { ModalBackground } from '@mixer/components';
 import { mkCustomizeModel } from '@mixer/customizer';
 import { injectable } from '@mixer/injectable';
@@ -45,6 +46,24 @@ const GlobalStyles = createGlobalStyle`
   }
 `;
 
+const poolsConfig = (() => {
+  try {
+    const context = require.context('../../../pools', false, /\.json$/);
+    return context
+      .keys()
+      .map(context)
+      .filter(
+        (config): config is PoolInfo => PoolInfo.safeParse(config).success
+      )
+      .reduce<Record<number, PoolInfo>>((acc, pool) => {
+        acc[pool.nominal] = pool;
+        return acc;
+      }, {});
+  } catch {
+    return {};
+  }
+})();
+
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
@@ -70,6 +89,7 @@ const mkRoot = injectable(
 );
 
 const Root = mkRoot({
+  poolsConfig,
   zKeyConfig: {
     url: 'https://media.githubusercontent.com/media/prodderman/storage/main/withdraw.gz',
     version: 1,

@@ -1,5 +1,4 @@
 import {
-  applyDoubleCborEncoding,
   applyParamsToScript,
   sha256,
   toHex,
@@ -37,7 +36,7 @@ export function createMixerValidator(
 
   const script: Script = {
     type: 'PlutusV2',
-    script: applyDoubleCborEncoding(mixerValidator),
+    script: mixerValidator,
   };
 
   return {
