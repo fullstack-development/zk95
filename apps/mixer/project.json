@@ -14,7 +14,7 @@
         "compiler": "babel",
         "outputPath": "dist/apps/mixer",
         "index": "apps/mixer/src/index.html",
-        "baseHref": "/",
+        "baseHref": "/cardano-mixer-frontend/",
         "main": "apps/mixer/src/main.tsx",
         "tsConfig": "apps/mixer/tsconfig.app.json",
         "assets": [
@@ -77,10 +77,13 @@
         ]
       }
     },
-    "serve-static": {
-      "executor": "@nx/web:file-server",
+    "deploy": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        "build"
+      ],
       "options": {
-        "buildTarget": "mixer:build"
+        "command": "gh-pages -d dist/apps/mixer"
       }
     },
     "test": {

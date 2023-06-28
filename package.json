@@ -6,7 +6,7 @@
     "frontend": "npx nx serve mixer",
     "build-onchain": "npx nx build mixer",
     "deploy-pool": "npx nx deploy pool-deployment",
-    "deploy": "gh-pages -d dist/apps/mixer"
+    "deploy": "npx nx run mixer:deploy"
   },
   "private": true,
   "devDependencies": {
