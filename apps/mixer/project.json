@@ -14,7 +14,7 @@
         "compiler": "babel",
         "outputPath": "dist/apps/mixer",
         "index": "apps/mixer/src/index.html",
-        "baseHref": "/cardano-mixer-frontend/",
+        "baseHref": "/zk95//",
         "main": "apps/mixer/src/main.tsx",
         "tsConfig": "apps/mixer/tsconfig.app.json",
         "assets": [
