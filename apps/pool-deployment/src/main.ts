@@ -7,7 +7,7 @@ const MNEMONIC = process.env.MNEMONIC_PHRASE ?? '';
 const PROVIDER_URL = process.env.PROVIDER_URL ?? '';
 const PROVIDER_API_KEY = process.env.PROVIDER_API_KEY ?? '';
 
-const NOMINAL = 300;
+const NOMINAL = 400;
 const TREE_HEIGHT = 7;
 const ZERO_VALUE = 'tornado.cash on cardano';
 

@@ -59,8 +59,8 @@
       "@mixer/pools/*": [
         "pools/*"
       ],
-      "@mixer/offchain-consumer": [
-        "packages/offchain-consumer/src/index.ts"
+      "@mixer/offchain-manager": [
+        "packages/offchain-manager/src/index.ts"
       ],
       "@mixer/onchain": [
         "packages/onchain/plutus.json"
@@ -82,6 +82,9 @@
       ]
     }
   },
+  "files": [
+    "./global.d.ts"
+  ],
   "exclude": [
     "node_modules",
     "tmp"

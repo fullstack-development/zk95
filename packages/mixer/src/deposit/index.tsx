@@ -7,7 +7,7 @@ import { Modal } from '@mixer/components';
 import { injectable, token } from '@mixer/injectable';
 import { combineEff } from '@mixer/eff';
 
-import { mkDepositModel } from './model';
+import { mkDepositService } from './service';
 import {
   DepositFormContent,
   Footer,
@@ -20,7 +20,7 @@ import { POOLS_CONFIG_KEY, PoolInfo } from '@mixer/offchain';
 
 export const mkDepositForm = injectable(
   token(POOLS_CONFIG_KEY)<Record<number, PoolInfo>>(),
-  mkDepositModel,
+  mkDepositService,
   combineEff(
     (
         poolsConfig,

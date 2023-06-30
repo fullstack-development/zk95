@@ -1,20 +1,22 @@
-import { Button, TextInput } from 'react95';
+import { Button, Hourglass, TextInput } from 'react95';
 import { useProperties } from '@frp-ts/react';
 
 import { injectable } from '@mixer/injectable';
 import { useRunEff } from '@mixer/eff';
 
-import { mkWithdrawFromViewModel } from './view-model';
+import { mkWithdrawFormViewModel } from './view-model';
 import { Field, Fieldset, Footer, WithdrawForm } from './styled';
 
 export const mkWithdrawForm = injectable(
-  mkWithdrawFromViewModel,
+  mkWithdrawFormViewModel,
   (vm) => () => {
-    const { note$, address$, setNote, setAddress, withdraw } = useRunEff(
-      vm,
-      []
+    const { note$, address$, withdrawing$, setNote, setAddress, withdraw } =
+      useRunEff(vm, []);
+    const [note, address, withdrawing] = useProperties(
+      note$,
+      address$,
+      withdrawing$
     );
-    const [note, address] = useProperties(note$, address$);
 
     return (
       <WithdrawForm
@@ -48,7 +50,9 @@ export const mkWithdrawForm = injectable(
           </Field>
         </Fieldset>
         <Footer>
-          <Button type="submit">Withdraw</Button>
+          <Button type="submit">
+            {withdrawing ? <Hourglass /> : 'Withdraw'}
+          </Button>
         </Footer>
       </WithdrawForm>
     );

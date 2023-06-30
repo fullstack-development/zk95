@@ -64,12 +64,12 @@ export function combineEffFactory(
     const values = targets.map((target) =>
       isEff(target) ? target[valueSymbol] : target
     );
-    const effects = targets.filter(isEff).map((eff) => eff[effectSymbol]);
 
     const project = memoizedMkFactory(...values);
 
     return (...args: unknown[]) => {
       const value = project(...args);
+      const effects = targets.filter(isEff).map((eff) => eff[effectSymbol]);
 
       if (isEff(value)) {
         return {

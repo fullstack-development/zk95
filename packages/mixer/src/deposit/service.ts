@@ -1,8 +1,8 @@
 import { Property, newAtom } from '@frp-ts/core';
 import { injectable } from '@mixer/injectable';
-import { mkOffchainConsumer } from '@mixer/offchain-consumer';
-import { getRandomValues, hash, concatHashes, toHex } from '@mixer/crypto';
-import { mkTransactionWatcherModel } from '@mixer/transaction-watcher';
+import { mkOffchainManager } from 'packages/offchain-manager/src';
+import { getRandomValues, hashConcat, toHex } from '@mixer/crypto';
+import { mkTransactionWatcherService } from '@mixer/transaction-watcher';
 import { combineEff, withEff } from '@mixer/eff';
 import {
   EMPTY,
@@ -17,6 +17,7 @@ import {
   catchError,
   throwError,
   defer,
+  share,
 } from 'rxjs';
 
 export type DepositModel = {
@@ -29,9 +30,9 @@ export type DepositModel = {
   rejectDeposit: () => void;
 };
 
-export const mkDepositModel = injectable(
-  mkTransactionWatcherModel,
-  mkOffchainConsumer,
+export const mkDepositService = injectable(
+  mkTransactionWatcherService,
+  mkOffchainManager,
   combineEff((watcherModel, { deposit$ }) => {
     const depositAction$ = new Subject();
     const submitDepositAction$ = new Subject<boolean>();
@@ -41,11 +42,7 @@ export const mkDepositModel = injectable(
     const note$ = newAtom<string | null>(null);
 
     const depositFlow$ = defer(() =>
-      of([
-        hash(getRandomValues(31)),
-        hash(getRandomValues(31)),
-        poolSize$.get(),
-      ] as const)
+      of([getRandomValues(31), getRandomValues(31), poolSize$.get()] as const)
     ).pipe(
       tap(() => depositing$.set(true)),
       tap(([nullifier, secret, poolSize]) => {
@@ -54,7 +51,7 @@ export const mkDepositModel = injectable(
       switchMap(([nullifier, secret, poolSize]) =>
         forkJoin([
           submitDepositAction$.pipe(first()),
-          of(concatHashes(secret, nullifier)),
+          of(hashConcat(nullifier, secret)),
           of(poolSize),
         ])
       ),
@@ -70,7 +67,8 @@ export const mkDepositModel = injectable(
         console.log(error);
         return EMPTY;
       }),
-      finalize(() => depositing$.set(false))
+      finalize(() => depositing$.set(false)),
+      share({ resetOnRefCountZero: false })
     );
 
     const depositEffect$ = depositAction$.pipe(

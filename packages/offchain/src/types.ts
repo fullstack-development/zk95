@@ -8,7 +8,8 @@ export const PoolInfo = z.object({
   vaultTokenUnit: z.string(),
   zeroValue: z.string(),
   treeHeight: z.number(),
-  mixerScript: z
+  address: z.string(),
+  script: z
     .object({
       type: z
         .literal('PlutusV1')

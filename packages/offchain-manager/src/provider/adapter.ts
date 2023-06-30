@@ -1,14 +1,13 @@
 import { ChainIndexProvider } from '@mixer/chain-index-provider';
-import { Address, Credential, C, Provider, Blockfrost } from 'lucid-cardano';
-import { firstValueFrom } from 'rxjs';
+import { Provider, Blockfrost } from 'lucid-cardano';
 const noop = () => {
   throw new Error('not implemented');
 };
 
 export function mkProviderAdapter(_provider: ChainIndexProvider): Provider {
   const provider = new Blockfrost(
-    'https://cardano-preprod.blockfrost.io/api/v0',
-    'preprodZpZ9X9GL1xL5vajWd8VNxHxcTyYoMePJ'
+    process.env['NX_PROVIDER_URL'] ?? '',
+    process.env['NX_PROVIDER_API_KEY']
   );
 
   return {

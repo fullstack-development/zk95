@@ -8,42 +8,54 @@ export function getRandomValues(bytes: number): Uint8Array {
   return crypto.getRandomValues(new Uint8Array(bytes));
 }
 
-export function concatHashes(hash1: Uint8Array, hash2: Uint8Array): Uint8Array {
-  return hash(Buffer.concat([hash1, hash2]));
+export function hashConcat(...values: Uint8Array[]): Uint8Array {
+  return hash(Buffer.concat(values));
 }
 
 export function toHex(value: Uint8Array): string {
   return Buffer.from(value).toString('hex');
 }
 
+export function toBigInt(value: Uint8Array): bigint {
+  return BigInt('0x' + toHex(value));
+}
+
 export function fromHex(value: string): Uint8Array {
   return Buffer.from(value, 'hex');
 }
 
-export function reverseBits(
-  value: Uint8Array,
-  from?: number,
-  to?: number
-): Uint8Array {
-  return Buffer.from(
-    Buffer.from(value)
-      .subarray(from, to)
-      .reduce<number[][]>((acc, x) => {
-        acc.push(toBits(x, 8));
-        return acc;
-      }, [])
-      .flat()
-      .reverse()
-      .join('')
-      .match(/.{8}/g)
-      ?.map((x) => parseInt(x, 2)) ?? []
-  );
+export function fromText(value: string): Uint8Array {
+  return Buffer.from(value, 'utf-8');
 }
 
-function toBits(n: number, size = 0) {
-  const bitmask = new Array(size + 1).join('0');
-  const binaryString = n.toString(2);
-  return (bitmask.slice(0, -binaryString.length) + n.toString(2))
-    .split('')
-    .map(Number);
+export function toBits(value: Uint8Array): number[] {
+  const bits = [];
+
+  for (let i = 0; i < value.length; i++) {
+    const byte = value[i];
+
+    for (let j = 7; j >= 0; j--) {
+      const bit = (byte >> j) & 1;
+      bits.push(bit);
+    }
+  }
+
+  return bits;
+}
+
+export function fromBits(bits: number[]): Uint8Array {
+  const buffer = new Uint8Array(Math.ceil(bits.length / 8));
+
+  for (let i = 0; i < bits.length; i++) {
+    const bit = bits[i];
+    const byteIndex = Math.floor(i / 8);
+    const bitIndex = 7 - (i % 8);
+    buffer[byteIndex] |= bit << bitIndex;
+  }
+
+  return buffer;
+}
+
+export function reverseBitsOrder(value: Uint8Array) {
+  return fromBits(toBits(value).reverse());
 }

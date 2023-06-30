@@ -2,7 +2,7 @@ import { Property, combine, newAtom } from '@frp-ts/core';
 
 import {
   ChainIndexProvider,
-  chainIndexProvider,
+  mkChainIndexProvider,
 } from '@mixer/chain-index-provider';
 import { injectable } from '@mixer/injectable';
 import { filter, from, interval, switchMap, tap, throttle } from 'rxjs';
@@ -19,9 +19,9 @@ export type TransactionWatcher = {
   watchTx: (txHash: string) => void;
 };
 
-const MAX_ATTEMPTS = 12
+const MAX_ATTEMPTS = 12;
 
-export function transactionWatcherModel(
+export function transactionWatcherService(
   provider: ChainIndexProvider
 ): Eff<TransactionWatcher> {
   const txHashesInfo$ = newAtom<TxHashesInfo>({});
@@ -85,7 +85,7 @@ export function transactionWatcherModel(
   );
 }
 
-export const mkTransactionWatcherModel = injectable(
-  chainIndexProvider,
-  transactionWatcherModel
+export const mkTransactionWatcherService = injectable(
+  mkChainIndexProvider,
+  transactionWatcherService
 );

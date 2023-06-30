@@ -1,5 +1,5 @@
 import { Address, Data, Lucid, addAssets, toHex } from 'lucid-cardano';
-import { MerkleTree } from '@mixer/merkletree';
+import { makeMerkleTree } from '@mixer/merkletree';
 import { assert } from '@mixer/utils';
 import { MixerDatum, MixerRedeemer } from '../scheme';
 import { PoolInfo } from '../types';
@@ -7,7 +7,7 @@ import { PoolInfo } from '../types';
 export async function deposit(
   lucid: Lucid,
   {
-    mixerScript,
+    script,
     treeTokenUnit,
     vaultTokenUnit,
     nominal,
@@ -17,8 +17,7 @@ export async function deposit(
 
   commitmentHash: Uint8Array
 ) {
-  const depositScriptAddress: Address =
-    lucid.utils.validatorToAddress(mixerScript);
+  const depositScriptAddress: Address = lucid.utils.validatorToAddress(script);
 
   const depositUTxOs = await lucid.utxosAt(depositScriptAddress);
 
@@ -61,7 +60,7 @@ export async function deposit(
 
   assert(`Wrong datum in the merkle tree utxo`, inputDatum !== 'Vault');
 
-  const merkleTree = MerkleTree.make({
+  const merkleTree = makeMerkleTree({
     height: treeHeight,
     leafs: inputDatum.Tree[0].leafs,
     zeroValue,

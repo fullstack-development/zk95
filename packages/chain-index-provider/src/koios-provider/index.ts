@@ -7,8 +7,8 @@ import {
   ProtocolParametersResponse,
   TxStatusResponse,
 } from './types';
-import { Observable, from, map, switchMap } from 'rxjs';
-import { ChainIndexProvider, UTxO } from '../types';
+
+import { ChainIndexProvider } from '../types';
 
 export function mkKoiosProvider(baseURL: string): ChainIndexProvider {
   const http = axios.create({
@@ -19,39 +19,31 @@ export function mkKoiosProvider(baseURL: string): ChainIndexProvider {
     },
   });
 
-  const getTip = () =>
-    from(http.get('/tip')).pipe(map((res) => ChainTip.parse(res.data)));
+  const getTip = () => http.get('/tip').then((res) => ChainTip.parse(res.data));
 
-  const getUTxOs = (address: string): Observable<UTxO[]> => {
-    return from(http.post('address_info', { _addresses: [address] })).pipe(
-      map((res) => GetUTxOsResponse.parse(res.data))
-    );
-  };
+  const getUTxOs = (address: string) =>
+    http
+      .post('address_info', { _addresses: [address] })
+      .then((res) => GetUTxOsResponse.parse(res.data));
   return {
     getProtocolParameters: () =>
-      getTip().pipe(
-        switchMap(({ epoch }) =>
-          from(http.get(`/epoch_params?_epoch_no=${epoch}`))
-        ),
-        map((res) => ProtocolParametersResponse.parse(res.data))
-      ),
+      getTip()
+        .then(({ epoch }) => http.get(`/epoch_params?_epoch_no=${epoch}`))
+        .then((res) => ProtocolParametersResponse.parse(res.data)),
     getUTxOs,
-    getDatum: (datumHash: string): Observable<string> =>
-      from(
-        http
-          .post('datum_info', { _datum_hashes: [datumHash] })
-          .then((value) => DatumResponse.parse(value.data))
-      ),
+    getDatum: (datumHash: string) =>
+      http
+        .post('datum_info', { _datum_hashes: [datumHash] })
+        .then((value) => DatumResponse.parse(value.data)),
     getTxsInfo: (txHashes: string[]) =>
-      from(http.post('tx_status', { _tx_hashes: txHashes })).pipe(
-        map((res) => TxStatusResponse.parse(res.data))
-      ),
+      http
+        .post('tx_status', { _tx_hashes: txHashes })
+        .then((res) => TxStatusResponse.parse(res.data)),
     submitTx: (tx: string) => {
       const headers = { 'Content-Type': 'application/cbor' };
-
-      return from(http.post('submittx', toBytes(tx), { headers })).pipe(
-        map((res) => z.string().parse(res.data))
-      );
+      return http
+        .post('submittx', toBytes(tx), { headers })
+        .then((res) => z.string().parse(res.data));
     },
   };
 }

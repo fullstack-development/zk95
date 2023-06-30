@@ -1,7 +1,6 @@
 const { composePlugins, withNx } = require('@nx/webpack');
 const { ProvidePlugin } = require('webpack');
 const { withReact } = require('@nx/react');
-const fs = require('fs');
 
 module.exports = composePlugins(withNx(), withReact(), (config) => {
   config.experiments = {
@@ -23,10 +22,18 @@ module.exports = composePlugins(withNx(), withReact(), (config) => {
   config.resolve.fallback['stream'] = require.resolve('stream');
   config.resolve.fallback['buffer'] = require.resolve('buffer');
 
-  config.module.rules.push({
-    test: /\.(mp3|mp4|ogg|wav|eot|ttf|woff|woff2|zip|otf)$/,
-    type: 'asset/resource',
-  });
+  config.module.rules.push(
+    {
+      test: /\.(mp3|mp4|ogg|wav|eot|ttf|woff|woff2|zip|otf)$/,
+      type: 'asset/resource',
+    },
+    {
+      test: /\.wasm$/,
+      type: 'javascript/auto',
+      use: ['arraybuffer-loader'],
+      exclude: /node_modules/,
+    }
+  );
   config.ignoreWarnings = [/Failed to parse source map/];
   return config;
 });

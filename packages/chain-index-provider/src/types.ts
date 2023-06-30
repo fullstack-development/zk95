@@ -43,9 +43,9 @@ export type Script = {
 };
 
 export type ChainIndexProvider = {
-  getProtocolParameters: () => Observable<ProtocolParameters>;
-  getTxsInfo: (txHashes: string[]) => Observable<TxStatuses>;
-  getUTxOs: (address: string) => Observable<UTxO[]>;
-  getDatum: (datumHash: string) => Observable<string>;
-  submitTx: (tx: string) => Observable<string>;
+  getProtocolParameters: () => Promise<ProtocolParameters>;
+  getTxsInfo: (txHashes: string[]) => Promise<TxStatuses>;
+  getUTxOs: (address: string) => Promise<UTxO[]>;
+  getDatum: (datumHash: string) => Promise<string>;
+  submitTx: (tx: string) => Promise<string>;
 };

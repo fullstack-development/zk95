@@ -1,8 +1,13 @@
 export const groth16: {
   fullProve(
-    input: object,
+    input: any,
     wasmFile: Uint8Array,
     zkeyFile: Uint8Array,
-    logger?: unknown
-  );
+    logger?: {
+      error: (msg: string) => void;
+      info: (msg: string) => void;
+      log: (msg: string) => void;
+      debug: (msg: string) => void;
+    }
+  ): Promise<{ proof: any; publicSignals: any[] }>;
 };

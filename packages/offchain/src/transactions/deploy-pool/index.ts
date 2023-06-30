@@ -2,7 +2,7 @@ import { Lucid, Data, Assets, toHex, fromText } from 'lucid-cardano';
 import { createMixerValidator } from './create-mixer-validator';
 import { createMintingPolicy } from './create-minting-policy';
 
-import { MerkleTree } from '@mixer/merkletree';
+import { makeMerkleTree } from '@mixer/merkletree';
 import { MintRedeemer, MixerDatum } from '../../scheme';
 import { PoolInfo } from '../../types';
 
@@ -45,7 +45,7 @@ export async function deployPool(
     [vaultTokenUnit]: BigInt(1),
   };
 
-  const emptyMerkleTree = MerkleTree.make({
+  const emptyMerkleTree = makeMerkleTree({
     height: treeHeight,
     leafs: [],
     zeroValue,
@@ -119,6 +119,7 @@ export async function deployPool(
     treeTokenUnit,
     vaultTokenUnit,
     zeroValue,
-    mixerScript: mixerValidator,
+    address: mixerAddress,
+    script: mixerValidator,
   };
 }

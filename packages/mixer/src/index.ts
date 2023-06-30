@@ -1,3 +1,3 @@
-export * from './lib/mixer';
-export * from './lib/deposit/model';
-export * from './lib/withdraw/model';
+export * from './mixer';
+export * from './deposit/service';
+export * from './withdraw/service';

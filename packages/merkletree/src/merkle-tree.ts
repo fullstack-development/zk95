@@ -1,20 +1,26 @@
-import { concatHashes, hash } from '@mixer/crypto';
+import { hashConcat, hash, toHex } from '@mixer/crypto';
 import { fromHex } from '@mixer/crypto';
 
 export type MerkleHash = Uint8Array;
 
-export interface UncompletedMerkleTree {
-  completed: false;
+export type MerkleProof = { nodes: Uint8Array[]; path: number[] };
+
+interface MerkleTreeBase {
   leafs: MerkleHash[];
   root: MerkleHash;
-  insert(leaf: MerkleHash): CompletedMerkleTree | UncompletedMerkleTree;
+  buildProof(leaf: MerkleHash | string): MerkleProof;
 }
 
-export interface CompletedMerkleTree {
-  completed: true;
-  leafs: MerkleHash[];
-  root: MerkleHash;
+export interface UncompletedMerkleTree extends MerkleTreeBase {
+  completed: false;
+  insert(leaf: MerkleHash): MerkleTree;
 }
+
+export interface CompletedMerkleTree extends MerkleTreeBase {
+  completed: true;
+}
+
+export type MerkleTree = UncompletedMerkleTree | CompletedMerkleTree;
 
 type MerkleTreeConfig = {
   leafs: (MerkleHash | string)[];
@@ -22,60 +28,71 @@ type MerkleTreeConfig = {
   zeroValue?: string;
 };
 
-export class MerkleTree {
-  public completed: boolean;
-  private _leafs: MerkleHash[];
-  private _height: number;
-  private _zeroValue: string;
+export function makeMerkleTree(config: MerkleTreeConfig): MerkleTree {
+  const leafs = config.leafs.map(toMerkleHash);
+  const zeroHash = hash(config.zeroValue ?? '');
+  const completed = leafs.length >= 2 ** config.height;
 
-  static make({
+  const merkleTreeBase: MerkleTreeBase = {
     leafs,
-    height,
-    zeroValue,
-  }: MerkleTreeConfig): UncompletedMerkleTree | CompletedMerkleTree {
-    return new MerkleTree(
-      leafs.map(MerkleTree.toMerkleHash),
-      height,
-      zeroValue ?? '',
-      leafs.length >= 2 ** height
-    );
-  }
+    get root(): Uint8Array {
+      return hashLayers(
+        leafs.length === 0 ? [zeroHash] : leafs,
+        config.height,
+        zeroHash
+      )[0];
+    },
+    buildProof: (leaf) =>
+      buildProof(leafs, [], [], toMerkleHash(leaf), config.height, zeroHash),
+  };
 
-  private constructor(
-    leafs: MerkleHash[],
-    height: number,
-    zeroValue: string,
-    completed: boolean
+  return completed
+    ? {
+        completed: true,
+        ...merkleTreeBase,
+      }
+    : {
+        completed: false,
+        insert: (leaf) =>
+          makeMerkleTree({
+            leafs: leafs.concat(toMerkleHash(leaf)),
+            height: config.height,
+            zeroValue: config.zeroValue,
+          }),
+        ...merkleTreeBase,
+      };
+}
+
+function buildProof(
+  leafs: MerkleHash[],
+  nodes: Uint8Array[],
+  path: number[],
+  leafToProof: MerkleHash,
+  currentHeight: number,
+  layerZeroHash: MerkleHash
+): MerkleProof {
+  const leafIdx = leafs.findIndex((leaf) => toHex(leaf) === toHex(leafToProof));
+  if (
+    currentHeight === 0 ||
+    leafIdx === -1 ||
+    toHex(leafToProof) === toHex(layerZeroHash)
   ) {
-    this._leafs = leafs;
-    this._height = height;
-    this._zeroValue = zeroValue;
-    this.completed = completed;
+    return { nodes, path };
   }
 
-  get leafs() {
-    return this._leafs;
-  }
-
-  get root() {
-    const zeroHash = hash(this._zeroValue);
-    return hashLayers(
-      this._leafs.length === 0 ? [zeroHash] : this._leafs,
-      this._height,
-      zeroHash
-    )[0];
-  }
-
-  public insert(leaf: MerkleHash | string) {
-    return MerkleTree.make({
-      leafs: this._leafs.concat(MerkleTree.toMerkleHash(leaf)),
-      height: this._height,
-      zeroValue: this._zeroValue,
-    });
-  }
-
-  static toMerkleHash = (value: Uint8Array | string) =>
-    typeof value === 'string' ? fromHex(value) : value;
+  const pairIdx = Math.floor(leafIdx / 2);
+  const pairs = pairwise(leafs, layerZeroHash);
+  const nextLayer = pairs.map(hashPair);
+  const oppositeIdx = leafIdx % 2 === 0 ? 1 : 0;
+  const oppositeHash = pairs[pairIdx][oppositeIdx];
+  return buildProof(
+    nextLayer,
+    [...nodes, oppositeHash],
+    [...path, leafIdx % 2],
+    nextLayer[pairIdx],
+    currentHeight - 1,
+    hashPair([layerZeroHash, layerZeroHash])
+  );
 }
 
 function hashLayers(
@@ -92,8 +109,8 @@ function hashLayers(
       );
 }
 
-function hashPair([left, right]: [MerkleHash, MerkleHash]): MerkleHash {
-  return concatHashes(left, right);
+function hashPair(pair: [MerkleHash, MerkleHash]): MerkleHash {
+  return hashConcat(...pair);
 }
 
 function pairwise<A>(list: A[], filler: A): [A, A][] {
@@ -106,4 +123,8 @@ function pairwise<A>(list: A[], filler: A): [A, A][] {
   }
 
   return result;
+}
+
+function toMerkleHash(value: MerkleHash | string) {
+  return typeof value === 'string' ? fromHex(value) : value;
 }

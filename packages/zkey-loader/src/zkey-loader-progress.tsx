@@ -1,8 +1,10 @@
-import { injectable } from '@mixer/injectable';
 import { ProgressBar } from 'react95';
-import { mkZKeyLoader } from './model';
 import { useProperty } from '@frp-ts/react';
+
+import { injectable } from '@mixer/injectable';
 import { combineEff } from '@mixer/eff';
+
+import { mkZKeyLoader } from './service';
 
 export const zKeyLoadingProgressBar = injectable(
   mkZKeyLoader,
