@@ -52,9 +52,11 @@ const poolsConfig = (() => {
     return context
       .keys()
       .map(context)
-      .filter(
-        (config): config is PoolInfo => PoolInfo.safeParse(config).success
-      )
+      .filter((config): config is PoolInfo => {
+        const validation = PoolInfo.safeParse(config);
+
+        return validation.success && validation.data.network === 'Custom';
+      })
       .reduce<Record<string, PoolInfo>>((acc, pool) => {
         acc[pool.nominal] = pool;
         return acc;

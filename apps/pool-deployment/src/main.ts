@@ -31,6 +31,6 @@ if (!fs.existsSync('pools')) {
 }
 
 fs.writeFileSync(
-  `pools/ada-${poolInfo.nominal}-config.json`,
+  `pools/ada-${lucid.network}-${poolInfo.nominal}.json`,
   JSON.stringify(poolInfo, null, 2)
 );

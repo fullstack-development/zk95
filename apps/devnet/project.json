@@ -1,0 +1,37 @@
+{
+  "name": "devnet",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/devnet/src",
+  "projectType": "application",
+  "targets": {
+    "compile": {
+      "executor": "@nx/js:tsc",
+      "options": {
+        "rootDir": ".",
+        "outputPath": "dist/apps/devnet",
+        "main": "apps/devnet/main.ts",
+        "tsConfig": "apps/devnet/tsconfig.app.json"
+      }
+    },
+    "build": {
+      "command": "npx resolve-tspaths --project ./tsconfig.base.json --out ./dist/apps/devnet",
+      "dependsOn": [
+        "compile"
+      ]
+    },
+    "serve": {
+      "command": "node --no-warnings --experimental-vm-modules dist/apps/devnet/apps/devnet/src/main.js",
+      "dependsOn": [
+        {
+          "projects": "self",
+          "target": "build"
+        },
+        {
+          "projects": "onchain",
+          "target": "build:dev"
+        }
+      ]
+    }
+  },
+  "tags": []
+}

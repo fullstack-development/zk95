@@ -24,6 +24,7 @@ export async function deposit(
   >,
   commitmentHash: Uint8Array
 ) {
+  // console.log({ utxos: await lucid.utxosAt(await lucid.wallet.address()) });
   const depositUTxOs = await lucid.utxosAt(address);
   const utxoWithScriptRef = depositUTxOs.find(
     ({ scriptRef }) =>

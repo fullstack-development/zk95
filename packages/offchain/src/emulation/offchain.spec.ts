@@ -6,7 +6,6 @@ import {
   Data,
   generatePrivateKey,
   Provider,
-  generateSeedPhrase,
 } from 'lucid-cardano';
 import { jest } from '@jest/globals';
 

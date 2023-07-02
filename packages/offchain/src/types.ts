@@ -1,7 +1,10 @@
-import { Script, applyDoubleCborEncoding } from 'lucid-cardano';
+import { Script, applyDoubleCborEncoding, Network } from 'lucid-cardano';
 import z from 'zod';
 
+const networks = ['Custom', 'Mainnet', 'Preprod', 'Preview'];
+
 export const PoolInfo = z.object({
+  network: z.string().refine((v): v is Network => networks.includes(v)),
   txHash: z.string(),
   nominal: z.string(),
   treeTokenUnit: z.string(),

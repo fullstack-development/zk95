@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import axios from 'axios';
 import {
-  GetUTxOsResponse,
   ChainTip,
   DatumResponse,
   ProtocolParametersResponse,
@@ -21,16 +20,32 @@ export function mkKoiosProvider(baseURL: string): ChainIndexProvider {
 
   const getTip = () => http.get('/tip').then((res) => ChainTip.parse(res.data));
 
-  const getUTxOs = (address: string) =>
+  const getUtxos = (address: string) =>
     http
       .post('address_info', { _addresses: [address] })
-      .then((res) => GetUTxOsResponse.parse(res.data));
+      .then((res) => res.data);
+
   return {
     getProtocolParameters: () =>
       getTip()
         .then(({ epoch }) => http.get(`/epoch_params?_epoch_no=${epoch}`))
         .then((res) => ProtocolParametersResponse.parse(res.data)),
-    getUTxOs,
+    getUtxos,
+    getDelegation: () => {
+      throw new Error('not implemented');
+    },
+    awaitTx(txHash, checkInterval) {
+      throw new Error('not implemented');
+    },
+    getUtxoByUnit(unit) {
+      throw new Error('not implemented');
+    },
+    getUtxosByOutRef(outRefs) {
+      throw new Error('not implemented');
+    },
+    getUtxosWithUnit(addressOrCredential, unit) {
+      throw new Error('not implemented');
+    },
     getDatum: (datumHash: string) =>
       http
         .post('datum_info', { _datum_hashes: [datumHash] })

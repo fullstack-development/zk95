@@ -130,6 +130,7 @@ export async function deployPool(
 
   return {
     txHash,
+    network: lucid.network,
     nominal: nominal.toString(),
     treeHeight,
     treeTokenUnit,

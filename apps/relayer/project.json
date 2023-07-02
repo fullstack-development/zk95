@@ -1,0 +1,33 @@
+{
+  "name": "relayer",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/relayer/src",
+  "projectType": "application",
+  "targets": {
+    "compile": {
+      "executor": "@nx/js:tsc",
+      "options": {
+        "rootDir": ".",
+        "outputPath": "dist/apps/relayer",
+        "main": "apps/relayer/main.ts",
+        "tsConfig": "apps/relayer/tsconfig.app.json"
+      }
+    },
+    "build": {
+      "command": "npx resolve-tspaths --project ./tsconfig.base.json --out ./dist/apps/relayer",
+      "dependsOn": [
+        "compile"
+      ]
+    },
+    "serve": {
+      "command": "node --experimental-vm-modules dist/apps/relayer/apps/relayer/src/main.js",
+      "dependsOn": [
+        {
+          "projects": "self",
+          "target": "build"
+        }
+      ]
+    }
+  },
+  "tags": []
+}

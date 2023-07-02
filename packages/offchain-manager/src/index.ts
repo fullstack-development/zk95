@@ -21,7 +21,6 @@ import {
 } from '@mixer/offchain';
 import { MerkleTree, makeMerkleTree } from '@mixer/merkletree';
 
-import { mkProviderAdapter } from './provider/adapter';
 import { assert } from '@mixer/utils';
 
 export type Offchain = {
@@ -32,24 +31,24 @@ export type Offchain = {
   ) => Observable<TxHash>;
 };
 
+const mainMnemonicPhrase =
+  'edge shadow topple brush online kid quit north muffin donate accident endorse other grant sleep';
+
 export const mkOffchainManager = injectable(
   token(POOLS_CONFIG_KEY)<Record<string, PoolInfo>>(),
   mkWalletModel,
   mkChainIndexProvider,
   combineEff((poolsConfig, walletModel, provider): Offchain => {
-    const lucidProvider = mkProviderAdapter(provider);
+    // const lucidProvider = mkProviderAdapter(provider);
 
     const lucid$ = combineLatest([
-      from(Lucid.new(lucidProvider, 'Preprod')).pipe(shareReplay(1)),
+      from(Lucid.new(provider, 'Custom')).pipe(shareReplay(1)),
       walletModel.wallet$,
     ]).pipe(
-      map(([lucid, wallet]) =>
-        wallet ? lucid.selectWallet(wallet.api) : lucid
-      )
+      map(([lucid, wallet]) => lucid.selectWalletFromSeed(mainMnemonicPhrase))
     );
 
     const getPoolTree = (poolSize: string) => async (lucid: Lucid) => {
-      console.log(poolSize, poolsConfig);
       const config = poolsConfig[poolSize];
       assert("Couldn't find pool config", config);
 
