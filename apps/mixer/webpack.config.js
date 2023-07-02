@@ -3,7 +3,6 @@ const { ProvidePlugin } = require('webpack');
 const { withReact } = require('@nx/react');
 
 module.exports = composePlugins(withNx(), withReact(), (config) => {
-  console.log(config);
   config.experiments = {
     asyncWebAssembly: true,
     layers: true,

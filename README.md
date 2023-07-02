@@ -1,4 +1,4 @@
-# cardano_mixer
+# zk95
 
 ## Requirements
 
