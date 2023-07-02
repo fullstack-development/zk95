@@ -1,4 +1,4 @@
-import { Address, Data, Lucid, addAssets, toHex } from 'lucid-cardano';
+import { Data, Lucid, addAssets, toHex } from 'lucid-cardano';
 import { makeMerkleTree } from '@mixer/merkletree';
 import { assert } from '@mixer/utils';
 import { MixerDatum, MixerRedeemer } from '../scheme';
@@ -7,24 +7,27 @@ import { PoolInfo } from '../types';
 export async function deposit(
   lucid: Lucid,
   {
-    script,
+    address,
     treeTokenUnit,
     vaultTokenUnit,
     nominal,
     treeHeight,
     zeroValue,
-  }: PoolInfo,
-
+  }: Pick<
+    PoolInfo,
+    | 'address'
+    | 'treeTokenUnit'
+    | 'vaultTokenUnit'
+    | 'nominal'
+    | 'treeHeight'
+    | 'zeroValue'
+  >,
   commitmentHash: Uint8Array
 ) {
-  const depositScriptAddress: Address = lucid.utils.validatorToAddress(script);
-
-  const depositUTxOs = await lucid.utxosAt(depositScriptAddress);
-
+  const depositUTxOs = await lucid.utxosAt(address);
   const utxoWithScriptRef = depositUTxOs.find(
     ({ scriptRef }) =>
-      scriptRef &&
-      lucid.utils.validatorToAddress(scriptRef) === depositScriptAddress
+      scriptRef && lucid.utils.validatorToAddress(scriptRef) === address
   );
 
   assert(
@@ -33,14 +36,14 @@ export async function deposit(
   );
 
   const vaultUTxO = depositUTxOs.find(
-    ({ assets }) => assets[vaultTokenUnit] !== undefined
+    ({ assets }) => assets[vaultTokenUnit] === BigInt(1)
   );
 
   assert(`Cannot find a utxo with the vault`, vaultUTxO);
   assert(`Cannot find a vault datum`, vaultUTxO.datum);
 
   const merkleTreeUTxO = depositUTxOs.find(
-    ({ assets }) => assets[treeTokenUnit] !== undefined
+    ({ assets }) => assets[treeTokenUnit] === BigInt(1)
   );
 
   assert(`Cannot find a utxo with the merkle tree`, merkleTreeUTxO);
@@ -58,7 +61,10 @@ export async function deposit(
     MixerDatum as never
   );
 
-  assert(`Wrong datum in the merkle tree utxo`, inputDatum !== 'Vault');
+  assert(
+    `Wrong datum in the merkle tree utxo`,
+    inputDatum !== 'Vault' && 'Tree' in inputDatum
+  );
 
   const merkleTree = makeMerkleTree({
     height: treeHeight,
@@ -86,17 +92,13 @@ export async function deposit(
     .newTx()
     .readFrom([utxoWithScriptRef])
     .collectFrom([merkleTreeUTxO], redeemer)
-    .payToContract(
-      depositScriptAddress,
-      { inline: outputDatum },
-      merkleTreeUTxO.assets
-    )
+    .payToContract(address, { inline: outputDatum }, merkleTreeUTxO.assets)
     .collectFrom([vaultUTxO], redeemer)
     .payToContract(
-      depositScriptAddress,
+      address,
       { inline: vaultUTxO.datum },
       addAssets(vaultUTxO.assets, {
-        lovelace: BigInt(nominal) * BigInt(1000000),
+        lovelace: BigInt(nominal),
       })
     )
     .complete();

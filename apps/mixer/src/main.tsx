@@ -55,7 +55,7 @@ const poolsConfig = (() => {
       .filter(
         (config): config is PoolInfo => PoolInfo.safeParse(config).success
       )
-      .reduce<Record<number, PoolInfo>>((acc, pool) => {
+      .reduce<Record<string, PoolInfo>>((acc, pool) => {
         acc[pool.nominal] = pool;
         return acc;
       }, {});
@@ -90,8 +90,9 @@ const mkRoot = injectable(
 
 const Root = mkRoot({
   poolsConfig,
+  relayerEndpoint: process.env['NX_RELAYER_ENDPOINT'] ?? '',
   zKeyConfig: {
-    url: 'https://media.githubusercontent.com/media/prodderman/storage/main/withdraw.gz',
+    url: process.env['NX_ZKEY_STORAGE_URL'] ?? '',
     version: 1,
   },
 });

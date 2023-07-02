@@ -1,4 +1,4 @@
-import { Button, Hourglass, TextInput } from 'react95';
+import { Button, Hourglass, TextInput, ProgressBar } from 'react95';
 import { useProperties } from '@frp-ts/react';
 
 import { injectable } from '@mixer/injectable';
@@ -10,12 +10,20 @@ import { Field, Fieldset, Footer, WithdrawForm } from './styled';
 export const mkWithdrawForm = injectable(
   mkWithdrawFormViewModel,
   (vm) => () => {
-    const { note$, address$, withdrawing$, setNote, setAddress, withdraw } =
-      useRunEff(vm, []);
-    const [note, address, withdrawing] = useProperties(
+    const {
       note$,
       address$,
-      withdrawing$
+      withdrawing$,
+      generationProgress$,
+      setNote,
+      setAddress,
+      withdraw,
+    } = useRunEff(vm, []);
+    const [note, address, withdrawing, generationProgress] = useProperties(
+      note$,
+      address$,
+      withdrawing$,
+      generationProgress$
     );
 
     return (
@@ -29,7 +37,6 @@ export const mkWithdrawForm = injectable(
           <Field>
             <label>Note</label>
             <TextInput
-              variant="flat"
               value={note}
               placeholder="Note"
               width={150}
@@ -40,7 +47,6 @@ export const mkWithdrawForm = injectable(
           <Field>
             <label>Recipient Address</label>
             <TextInput
-              variant="flat"
               value={address}
               placeholder="Paste address here"
               width={150}
@@ -50,6 +56,7 @@ export const mkWithdrawForm = injectable(
           </Field>
         </Fieldset>
         <Footer>
+          <ProgressBar variant="tile" value={generationProgress} />
           <Button type="submit">
             {withdrawing ? <Hourglass /> : 'Withdraw'}
           </Button>

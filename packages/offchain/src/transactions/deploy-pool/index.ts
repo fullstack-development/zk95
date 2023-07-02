@@ -5,44 +5,47 @@ import { createMintingPolicy } from './create-minting-policy';
 import { makeMerkleTree } from '@mixer/merkletree';
 import { MintRedeemer, MixerDatum } from '../../scheme';
 import { PoolInfo } from '../../types';
+import { assert } from '@mixer/utils';
 
 export async function deployPool(
   lucid: Lucid,
-  nominal: number,
+  nominal: bigint,
   treeHeight: number,
   zeroValue: string,
   treeTokenName: string,
-  vaultTokenName: string
+  vaultTokenName: string,
+  nullifiersTokenName: string
 ): Promise<PoolInfo> {
-  console.info('creating token minting policy...');
   const { script: mintingPolicyScript, policyId } = await createMintingPolicy(
     lucid
   );
-  console.info(
-    `tree minting policy is created successfully with policy id: ${policyId}`
-  );
 
-  console.info('creating deposit script...');
+  const ownAddress = await lucid.wallet.address();
+  const paymentCredential =
+    lucid.utils.getAddressDetails(ownAddress).paymentCredential;
+
+  assert('Could not get payment key hash', paymentCredential?.type === 'Key');
+
   const { script: mixerValidator, address: mixerAddress } =
     createMixerValidator(
       lucid,
       policyId,
       fromText(treeTokenName),
+      fromText(nullifiersTokenName),
       fromText(vaultTokenName),
-      BigInt(nominal),
+      paymentCredential.hash,
+      nominal,
       BigInt(treeHeight),
       zeroValue
     );
-  console.info(
-    `deposit script is created successfully with address: ${mixerAddress}`
-  );
 
-  console.info('data preparation...');
   const treeTokenUnit = policyId + fromText(treeTokenName);
   const vaultTokenUnit = policyId + fromText(vaultTokenName);
+  const nullifiersTokenUnit = policyId + fromText(nullifiersTokenName);
   const mixerAsset: Assets = {
     [treeTokenUnit]: BigInt(1),
     [vaultTokenUnit]: BigInt(1),
+    [nullifiersTokenUnit]: BigInt(1),
   };
 
   const emptyMerkleTree = makeMerkleTree({
@@ -63,15 +66,24 @@ export async function deployPool(
     MixerDatum as never
   );
 
+  const nullifiersDatum = Data.to<MixerDatum>(
+    {
+      Nullifiers: [[]],
+    },
+    MixerDatum as never
+  );
+
   const vaultDatum = Data.to<MixerDatum>('Vault', MixerDatum as never);
 
   const mintRedeemer = Data.to<MintRedeemer>(
-    [fromText(treeTokenName), fromText(vaultTokenName)],
+    [
+      fromText(treeTokenName),
+      fromText(vaultTokenName),
+      fromText(nullifiersTokenName),
+    ],
     MintRedeemer as never
   );
 
-  console.group('transaction');
-  console.info('creating transaction...');
   const tx = await lucid
     .newTx()
     .attachMintingPolicy(mintingPolicyScript)
@@ -83,7 +95,17 @@ export async function deployPool(
       },
       {
         [treeTokenUnit]: BigInt(1),
-        lovelace: BigInt(10000000),
+        lovelace: BigInt(2000000),
+      }
+    )
+    .payToContract(
+      mixerAddress,
+      {
+        inline: nullifiersDatum,
+      },
+      {
+        [nullifiersTokenUnit]: BigInt(1),
+        lovelace: BigInt(2000000),
       }
     )
     .payToContract(
@@ -101,23 +123,18 @@ export async function deployPool(
       {}
     )
     .complete();
-  console.info('transaction has been created');
 
-  console.info('signing transaction...');
   const signedTx = await tx.sign().complete();
-  console.info('transaction has been signed');
 
-  console.info('submitting tx...');
   const txHash = await signedTx.submit();
-  console.info(`transaction has been submitted with tx hash: ${txHash}`);
-  console.groupEnd();
 
   return {
     txHash,
-    nominal,
+    nominal: nominal.toString(),
     treeHeight,
     treeTokenUnit,
     vaultTokenUnit,
+    nullifiersTokenUnit,
     zeroValue,
     address: mixerAddress,
     script: mixerValidator,

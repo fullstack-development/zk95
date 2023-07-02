@@ -3,9 +3,10 @@ import z from 'zod';
 
 export const PoolInfo = z.object({
   txHash: z.string(),
-  nominal: z.number(),
+  nominal: z.string(),
   treeTokenUnit: z.string(),
   vaultTokenUnit: z.string(),
+  nullifiersTokenUnit: z.string(),
   zeroValue: z.string(),
   treeHeight: z.number(),
   address: z.string(),

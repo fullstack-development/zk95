@@ -27,12 +27,10 @@ export type ProofGeneratorService = {
   ): Observable<Proof>;
 };
 
-// ada-100-139fadfc00cc0e256c51cc890c2b84ca733576816a11bdb820381ac84af7270594546f1e9572b803a3f6bb44aaada319abc024e54189bd72d5f4a7b8ae1d
-
 export const mkProofGenerator = injectable(
   mkZKeyLoader,
   combineEff(({ getZKey }): ProofGeneratorService => {
-    const generationStep$ = newAtom<number>(0); // max 918
+    const generationStep$ = newAtom<number>(0); // max 918 steps
 
     const generationHooks = {
       error: console.error,

@@ -10,7 +10,9 @@ export const MixerConfig = Data.Object({
   policyId: Data.Bytes(),
   treeTokenName: Data.Bytes(),
   vaultTokenName: Data.Bytes(),
+  nullifiers_token_name: Data.Bytes(),
   poolNominal: Data.Integer(),
+  relayerPkh: Data.Bytes(),
   merkleTreeConfig: MerkleTreeConfig,
 });
 
@@ -25,6 +27,9 @@ export const MixerDatum = Data.Enum([
   Data.Object({
     Tree: Data.Tuple([MerkleTree]),
   }),
+  Data.Object({
+    Nullifiers: Data.Tuple([Data.Array(Data.Bytes())]),
+  }),
   Data.Literal('Vault'),
 ]);
 
@@ -33,7 +38,9 @@ export const MixerRedeemer = Data.Enum([
   Data.Object({
     Deposit: Data.Tuple([Data.Bytes()]),
   }),
-  Data.Literal('Withdraw'),
+  Data.Object({
+    Withdraw: Data.Tuple([Data.Bytes()]),
+  }),
 ]);
 
 export type MintRedeemer = Data.Static<typeof MintRedeemer>;

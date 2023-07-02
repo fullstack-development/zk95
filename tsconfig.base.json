@@ -12,10 +12,7 @@
     "target": "esnext",
     "strict": true,
     "module": "esnext",
-    "lib": [
-      "es2020",
-      "dom"
-    ],
+    "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
@@ -23,70 +20,29 @@
       "@mixer/chain-index-provider": [
         "packages/chain-index-provider/src/index.ts"
       ],
-      "@mixer/components": [
-        "packages/shared/src/components/index.ts"
-      ],
-      "@mixer/crypto": [
-        "packages/crypto/src/index.ts"
-      ],
-      "@mixer/customizer": [
-        "packages/customizer/src/index.ts"
-      ],
-      "@mixer/desktop": [
-        "packages/desktop/src/index.ts"
-      ],
-      "@mixer/eff": [
-        "packages/shared/src/eff/index.ts"
-      ],
-      "@mixer/icons": [
-        "packages/shared/src/icons/index.ts"
-      ],
-      "@mixer/injectable": [
-        "packages/shared/src/injectable/index.ts"
-      ],
-      "@mixer/merkletree": [
-        "packages/merkletree/src/index.ts"
-      ],
-      "@mixer/mixer": [
-        "packages/mixer/src/index.ts"
-      ],
-      "@mixer/notifier": [
-        "packages/notifier/src/index.ts"
-      ],
-      "@mixer/offchain": [
-        "packages/offchain/src/index.ts"
-      ],
-      "@mixer/pools/*": [
-        "pools/*"
-      ],
-      "@mixer/offchain-manager": [
-        "packages/offchain-manager/src/index.ts"
-      ],
-      "@mixer/onchain": [
-        "packages/onchain/plutus.json"
-      ],
-      "@mixer/proof-generator": [
-        "packages/proof-generator/src/index.ts"
-      ],
+      "@mixer/components": ["packages/shared/src/components/index.ts"],
+      "@mixer/crypto": ["packages/crypto/src/index.ts"],
+      "@mixer/customizer": ["packages/customizer/src/index.ts"],
+      "@mixer/desktop": ["packages/desktop/src/index.ts"],
+      "@mixer/eff": ["packages/shared/src/eff/index.ts"],
+      "@mixer/icons": ["packages/shared/src/icons/index.ts"],
+      "@mixer/injectable": ["packages/shared/src/injectable/index.ts"],
+      "@mixer/merkletree": ["packages/merkletree/src/index.ts"],
+      "@mixer/mixer": ["packages/mixer/src/index.ts"],
+      "@mixer/notifier": ["packages/notifier/src/index.ts"],
+      "@mixer/offchain": ["packages/offchain/src/index.ts"],
+      "@mixer/offchain-manager": ["packages/offchain-manager/src/index.ts"],
+      "@mixer/onchain": ["packages/onchain/plutus.json"],
+      "@mixer/pools/*": ["pools/*"],
+      "@mixer/proof-generator": ["packages/proof-generator/src/index.ts"],
       "@mixer/transaction-watcher": [
         "packages/transaction-watcher/src/index.ts"
       ],
-      "@mixer/utils": [
-        "packages/shared/src/utils/index.ts"
-      ],
-      "@mixer/wallet": [
-        "packages/wallet/src/index.ts"
-      ],
-      "@mixer/zkey-loader": [
-        "packages/zkey-loader/src/index.ts"
-      ]
+      "@mixer/utils": ["packages/shared/src/utils/index.ts"],
+      "@mixer/wallet": ["packages/wallet/src/index.ts"],
+      "@mixer/zkey-loader": ["packages/zkey-loader/src/index.ts"]
     }
   },
-  "files": [
-    "./global.d.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "tmp"
-  ]
+  "files": ["./global.d.ts"],
+  "exclude": ["node_modules", "tmp"]
 }

@@ -14,7 +14,9 @@ export function createMixerValidator(
   lucid: Lucid,
   policyId: string,
   treeTokenNameHash: string,
+  nullifiersTokenNameHash: string,
   vaultTokenNameHash: string,
+  relayerPkh: string,
   nominal: bigint,
   treeHeight: bigint,
   zeroValue: string
@@ -26,7 +28,9 @@ export function createMixerValidator(
     policyId,
     treeTokenNameHash,
     vaultTokenNameHash,
+    nullifiersTokenNameHash,
     nominal,
+    relayerPkh,
     new Constr(0, [treeHeight, zeroHashHex]),
   ]);
 

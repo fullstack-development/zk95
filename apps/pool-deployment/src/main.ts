@@ -7,7 +7,7 @@ const MNEMONIC = process.env.MNEMONIC_PHRASE ?? '';
 const PROVIDER_URL = process.env.PROVIDER_URL ?? '';
 const PROVIDER_API_KEY = process.env.PROVIDER_API_KEY ?? '';
 
-const NOMINAL = 400;
+const NOMINAL = BigInt(200_000_000);
 const TREE_HEIGHT = 7;
 const ZERO_VALUE = 'tornado.cash on cardano';
 
@@ -22,7 +22,8 @@ const poolInfo = await deployPool(
   TREE_HEIGHT,
   ZERO_VALUE,
   'Tree',
-  'Vault'
+  'Vault',
+  'Nullifiers'
 );
 
 if (!fs.existsSync('pools')) {

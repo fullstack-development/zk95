@@ -41,6 +41,8 @@ export const mkDepositForm = injectable(
           depositing$
         );
 
+        const toAda = (lovelace: string) => Number(lovelace) / 1000000;
+
         return (
           <DepositFormContent>
             <PoolsBox label="Pools" disabled={depositing}>
@@ -50,7 +52,7 @@ export const mkDepositForm = injectable(
                   checked={poolSize === pool.nominal}
                   onChange={() => setPoolSize(pool.nominal)}
                   value={pool.nominal}
-                  label={`₳${pool.nominal}`}
+                  label={`₳${toAda(pool.nominal)}`}
                   name={pool.nominal.toString()}
                 />
               ))}

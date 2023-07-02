@@ -37,7 +37,7 @@ export const mkDepositService = injectable(
     const depositAction$ = new Subject();
     const submitDepositAction$ = new Subject<boolean>();
 
-    const poolSize$ = newAtom<number>(100);
+    const poolSize$ = newAtom<string>('100000000');
     const depositing$ = newAtom<boolean>(false);
     const note$ = newAtom<string | null>(null);
 

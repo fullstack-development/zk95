@@ -10,4 +10,5 @@ export const groth16: {
       debug: (msg: string) => void;
     }
   ): Promise<{ proof: any; publicSignals: any[] }>;
+  verify(vKey: object, publicSignals: any, proof: any): Promise<any>;
 };

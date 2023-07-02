@@ -25,15 +25,15 @@ import { mkProviderAdapter } from './provider/adapter';
 import { assert } from '@mixer/utils';
 
 export type Offchain = {
-  getPoolTree$: (poolSize: number) => Observable<MerkleTree>;
+  getPoolTree$: (poolSize: string) => Observable<MerkleTree>;
   deposit$: (
-    poolSize: number,
+    poolSize: string,
     commitmentHash: Uint8Array
   ) => Observable<TxHash>;
 };
 
 export const mkOffchainManager = injectable(
-  token(POOLS_CONFIG_KEY)<Record<number, PoolInfo>>(),
+  token(POOLS_CONFIG_KEY)<Record<string, PoolInfo>>(),
   mkWalletModel,
   mkChainIndexProvider,
   combineEff((poolsConfig, walletModel, provider): Offchain => {
@@ -48,7 +48,8 @@ export const mkOffchainManager = injectable(
       )
     );
 
-    const getPoolTree = (poolSize: number) => async (lucid: Lucid) => {
+    const getPoolTree = (poolSize: string) => async (lucid: Lucid) => {
+      console.log(poolSize, poolsConfig);
       const config = poolsConfig[poolSize];
       assert("Couldn't find pool config", config);
 
@@ -65,7 +66,7 @@ export const mkOffchainManager = injectable(
         MixerDatum as never
       );
 
-      assert('Wrong datum', parsedDatum !== 'Vault');
+      assert('Wrong datum', parsedDatum !== 'Vault' && 'Tree' in parsedDatum);
 
       return makeMerkleTree({
         leafs: parsedDatum.Tree[0].leafs,
