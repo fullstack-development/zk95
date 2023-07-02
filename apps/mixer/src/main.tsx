@@ -55,7 +55,7 @@ const poolsConfig = (() => {
       .filter((config): config is PoolInfo => {
         const validation = PoolInfo.safeParse(config);
 
-        return validation.success && validation.data.network === 'Custom';
+        return validation.success && validation.data.network === 'Preprod';
       })
       .reduce<Record<string, PoolInfo>>((acc, pool) => {
         acc[pool.nominal] = pool;

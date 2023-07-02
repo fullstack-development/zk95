@@ -8,7 +8,7 @@ export type WithdrawFromViewModel = {
   note$: Property<string>;
   address$: Property<string>;
   withdrawing$: Property<boolean>;
-  generationProgress$: Property<number>;
+  generationProgress$: Property<number | null>;
   setNote: (note: string) => void;
   setAddress: (address: string) => void;
   withdraw: () => void;
@@ -28,7 +28,7 @@ export const mkWithdrawFormViewModel = injectable(
           address$,
           withdrawing$,
           generationProgress$: combine(generationStep$, (step) =>
-            Number(((step * 100) / 918).toFixed(2))
+            step ? Number(((step * 100) / 918).toFixed(2)) : null
           ),
           setNote: note$.set,
           setAddress: address$.set,

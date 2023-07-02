@@ -24,7 +24,7 @@ pub fn insert_leaf(
   if list.length(self.leafs) < pow(2, config.height) {
     let new_leafs = self.leafs |> list.concat([leaf])
     let root_hash = calc_root_hash(new_leafs, config.height, config.zero_hash)
-    MerkleTree { root: bytearray.drop(root_hash, 1), leafs: new_leafs }
+    MerkleTree { root: root_hash, leafs: new_leafs }
   } else {
     error @"Tree is full"
   }
@@ -71,6 +71,17 @@ fn pairwise(self: List<a>, filler: a) -> List<(a, a)> {
   }
 }
 
+fn group_bits_to_word(self: List<Int>, acc: List<List<Int>>) -> List<List<Int>> {
+  when self is {
+    [] -> acc
+    [b1, b2, b3, b4, b5, b6, b7, b8, ..tail] ->
+      group_bits_to_word(
+        tail,
+        list.concat(acc, [[b1, b2, b3, b4, b5, b6, b7, b8]]),
+      )
+  }
+}
+
 // tests
 
 // root
@@ -94,10 +105,7 @@ test insert_leaf_spec_1() {
   let leaf_to_add =
     #"e1587401f42aa18899004e6b313f62b1732dd9860ac4085f4790f62b24b7dec3"
   let new_merkle_tree = merkle_tree |> insert_leaf(config, leaf_to_add)
-  new_merkle_tree.root == bytearray.drop(
-    #"e6a48ea87e085ff9da119e62b0e3d1b3ecc5d2a5d5a7c1e3c4bdeed085741126",
-    1,
-  )
+  new_merkle_tree.root == #"e6a48ea87e085ff9da119e62b0e3d1b3ecc5d2a5d5a7c1e3c4bdeed085741126"
 }
 
 // tests
@@ -129,10 +137,7 @@ test insert_leaf_spec_2() {
     merkle_tree
       |> insert_leaf(config, leaf_to_add_1)
       |> insert_leaf(config, leaf_to_add_2)
-  new_merkle_tree.root == bytearray.drop(
-    #"70ddc1c3831bc1f083b64e3a3e51d56872f99bb1495c2a31651b09f087c3c0fa",
-    1,
-  )
+  new_merkle_tree.root == #"70ddc1c3831bc1f083b64e3a3e51d56872f99bb1495c2a31651b09f087c3c0fa"
 }
 
 test calc_root_hash_spec_1() {

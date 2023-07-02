@@ -81,7 +81,7 @@ export async function deposit(
     {
       Tree: [
         {
-          root: toHex(nextMerkleTree.root.slice(1)),
+          root: toHex(nextMerkleTree.root),
           leafs: nextMerkleTree.leafs.map(toHex),
         },
       ],

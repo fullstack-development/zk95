@@ -2,7 +2,6 @@ import {
   Subject,
   catchError,
   finalize,
-  map,
   switchMap,
   tap,
   EMPTY,
@@ -11,13 +10,15 @@ import {
   iif,
 } from 'rxjs';
 import { Property, newAtom } from '@frp-ts/core';
+import axios from 'axios';
+import { getAddressDetails } from 'lucid-cardano';
 
 import { injectable, token } from '@mixer/injectable';
 import { combineEff, withEff } from '@mixer/eff';
 import { mkProofGenerator } from '@mixer/proof-generator';
 import { mkOffchainManager } from '@mixer/offchain-manager';
+import { mkTransactionWatcherService } from '@mixer/transaction-watcher';
 import { parseNote } from '../utils';
-import axios from 'axios';
 
 export type WithdrawModel = {
   withdrawing$: Property<boolean>;
@@ -28,42 +29,77 @@ export const mkWithdrawService = injectable(
   token('relayerEndpoint')<string>(),
   mkProofGenerator,
   mkOffchainManager,
-  combineEff((relayerEndpoint, { generate$ }, { getPoolTree$ }) => {
-    const withdrawing$ = newAtom<boolean>(false);
-    const withdrawAction$ = new Subject<{ note: string; address: string }>();
+  mkTransactionWatcherService,
+  combineEff(
+    (
+      relayerEndpoint,
+      { generate$ },
+      { getPoolConfig, getPoolTree$ },
+      { watchTx }
+    ) => {
+      const withdrawing$ = newAtom<boolean>(false);
+      const withdrawAction$ = new Subject<{ note: string; address: string }>();
 
-    const withdrawFlow$ = (value: { note: string; address: string }) =>
-      of(value).pipe(
-        tap(() => withdrawing$.set(true)),
-        switchMap(({ note, address }) => {
-          const [nominal, nullifier, secret] = parseNote(note);
-          return getPoolTree$(nominal).pipe(
-            switchMap((tree) => generate$(nullifier, secret, tree, address)),
-            switchMap((proof) => {
-              return axios.post(relayerEndpoint, { nominal, proof });
-            })
-          );
-        }),
-        catchError((error) => {
-          console.log(error);
-          return EMPTY;
-        }),
-        finalize(() => withdrawing$.set(false)),
-        share({ resetOnRefCountZero: false })
+      const withdrawFlow$ = (value: { note: string; address: string }) =>
+        of(value).pipe(
+          tap(() => withdrawing$.set(true)),
+          switchMap(({ note, address }) => {
+            const [nominal, nullifier, secret] = parseNote(note);
+            const details = getAddressDetails(address);
+
+            return getPoolTree$(nominal).pipe(
+              switchMap((tree) =>
+                generate$(
+                  nullifier,
+                  secret,
+                  tree,
+                  details.paymentCredential?.hash ?? ''
+                )
+              ),
+              switchMap((fullProof) => {
+                const {
+                  address,
+                  nullifiersTokenUnit,
+                  treeTokenUnit,
+                  vaultTokenUnit,
+                } = getPoolConfig(nominal);
+                return axios
+                  .post(relayerEndpoint, {
+                    fullProof,
+                    poolInfo: {
+                      address,
+                      treeTokenUnit,
+                      nullifiersTokenUnit,
+                      vaultTokenUnit,
+                      nominal,
+                    },
+                  })
+                  .then((res) => res.data as string);
+              }),
+              tap((txHash) => watchTx(txHash))
+            );
+          }),
+          catchError((error) => {
+            console.log(error);
+            return EMPTY;
+          }),
+          finalize(() => withdrawing$.set(false)),
+          share({ resetOnRefCountZero: false })
+        );
+
+      const withdrawEffect$ = withdrawAction$.pipe(
+        switchMap((value) =>
+          iif(() => withdrawing$.get() === false, withdrawFlow$(value), EMPTY)
+        )
       );
 
-    const withdrawEffect$ = withdrawAction$.pipe(
-      switchMap((value) =>
-        iif(() => withdrawing$.get() === false, withdrawFlow$(value), EMPTY)
-      )
-    );
-
-    return withEff<WithdrawModel>(
-      {
-        withdrawing$,
-        withdraw: (note, address) => withdrawAction$.next({ note, address }),
-      },
-      withdrawEffect$
-    );
-  })
+      return withEff<WithdrawModel>(
+        {
+          withdrawing$,
+          withdraw: (note, address) => withdrawAction$.next({ note, address }),
+        },
+        withdrawEffect$
+      );
+    }
+  )
 );

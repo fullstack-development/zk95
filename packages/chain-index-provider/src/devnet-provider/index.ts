@@ -5,7 +5,6 @@ import {
   Datum,
   DatumHash,
   Delegation,
-  Lucid,
   OutRef,
   RewardAddress,
   Transaction,

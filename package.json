@@ -5,6 +5,7 @@
   "scripts": {
     "frontend": "npx nx serve mixer",
     "deploy": "npx nx run mixer:deploy",
+    "relayer": "npx nx run relayer:serve",
     "build-onchain": "npx nx build mixer",
     "deploy-pool": "npx nx deploy pool-deployment"
   },

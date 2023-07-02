@@ -7,9 +7,8 @@ import {
   Observable,
   from,
 } from 'rxjs';
-import { Data, Lucid, TxHash } from 'lucid-cardano';
+import { Blockfrost, Data, Lucid, TxHash } from 'lucid-cardano';
 
-import { mkChainIndexProvider } from '@mixer/chain-index-provider';
 import { injectable, token } from '@mixer/injectable';
 import { combineEff } from '@mixer/eff';
 import { mkWalletModel } from '@mixer/wallet';
@@ -24,6 +23,7 @@ import { MerkleTree, makeMerkleTree } from '@mixer/merkletree';
 import { assert } from '@mixer/utils';
 
 export type Offchain = {
+  getPoolConfig: (nominal: string) => PoolInfo;
   getPoolTree$: (poolSize: string) => Observable<MerkleTree>;
   deposit$: (
     poolSize: string,
@@ -31,21 +31,25 @@ export type Offchain = {
   ) => Observable<TxHash>;
 };
 
-const mainMnemonicPhrase =
-  'edge shadow topple brush online kid quit north muffin donate accident endorse other grant sleep';
-
 export const mkOffchainManager = injectable(
   token(POOLS_CONFIG_KEY)<Record<string, PoolInfo>>(),
   mkWalletModel,
-  mkChainIndexProvider,
-  combineEff((poolsConfig, walletModel, provider): Offchain => {
-    // const lucidProvider = mkProviderAdapter(provider);
-
+  combineEff((poolsConfig, walletModel): Offchain => {
     const lucid$ = combineLatest([
-      from(Lucid.new(provider, 'Custom')).pipe(shareReplay(1)),
+      from(
+        Lucid.new(
+          new Blockfrost(
+            process.env['NX_PROVIDER_URL'] ?? '',
+            process.env['NX_PROVIDER_API_KEY']
+          ),
+          'Custom'
+        )
+      ).pipe(shareReplay(1)),
       walletModel.wallet$,
     ]).pipe(
-      map(([lucid, wallet]) => lucid.selectWalletFromSeed(mainMnemonicPhrase))
+      map(([lucid, wallet]) =>
+        wallet ? lucid.selectWallet(wallet.api) : lucid
+      )
     );
 
     const getPoolTree = (poolSize: string) => async (lucid: Lucid) => {
@@ -74,15 +78,22 @@ export const mkOffchainManager = injectable(
       });
     };
 
+    const getPoolConfig = (nominal: string) => {
+      assert('Could not find pool config', poolsConfig[nominal]);
+      return poolsConfig[nominal];
+    };
+
     return {
-      getPoolTree$: (poolSize) =>
-        lucid$.pipe(first(), switchMap(getPoolTree(poolSize))),
-      deposit$: (poolSize, commitmentHash) =>
+      getPoolConfig,
+      getPoolTree$: (nominal) =>
+        lucid$.pipe(first(), switchMap(getPoolTree(nominal))),
+      deposit$: (nominal, commitmentHash) =>
         lucid$.pipe(
           first(),
-          switchMap((lucid) =>
-            deposit(lucid, poolsConfig[poolSize], commitmentHash)
-          )
+          switchMap((lucid) => {
+            assert('Could not find pool config', poolsConfig[nominal]);
+            return deposit(lucid, getPoolConfig(nominal), commitmentHash);
+          })
         ),
     };
   })

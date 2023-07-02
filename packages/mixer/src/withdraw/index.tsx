@@ -5,7 +5,14 @@ import { injectable } from '@mixer/injectable';
 import { useRunEff } from '@mixer/eff';
 
 import { mkWithdrawFormViewModel } from './view-model';
-import { Field, Fieldset, Footer, WithdrawForm } from './styled';
+import {
+  Field,
+  Fieldset,
+  Footer,
+  ProgressContainer,
+  WithdrawForm,
+  ProgressValue,
+} from './styled';
 
 export const mkWithdrawForm = injectable(
   mkWithdrawFormViewModel,
@@ -56,9 +63,15 @@ export const mkWithdrawForm = injectable(
           </Field>
         </Fieldset>
         <Footer>
-          <ProgressBar variant="tile" value={generationProgress} />
+          {generationProgress && <ProgressBar value={generationProgress} />}
           <Button type="submit">
-            {withdrawing ? <Hourglass /> : 'Withdraw'}
+            {withdrawing ? (
+              <>
+                {generationProgress && 'Generating proof...'} <Hourglass />
+              </>
+            ) : (
+              'Withdraw'
+            )}
           </Button>
         </Footer>
       </WithdrawForm>

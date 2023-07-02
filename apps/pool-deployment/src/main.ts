@@ -13,7 +13,7 @@ const ZERO_VALUE = 'tornado.cash on cardano';
 
 const lucid = await Lucid.new(
   new Blockfrost(PROVIDER_URL, PROVIDER_API_KEY),
-  'Preview'
+  'Preprod'
 ).then((lucid) => lucid.selectWalletFromSeed(MNEMONIC));
 
 const poolInfo = await deployPool(

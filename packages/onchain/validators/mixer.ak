@@ -65,7 +65,6 @@ fn validate_deposit(
   expect Some(tree_input) =
     ctx.transaction.inputs |> tx.find_input(own_input_ref)
 
-  trace @"Here 1"
   expect Some(tree_output) =
     get_output_by(
       config.policy_id,
@@ -97,7 +96,7 @@ fn validate_deposit(
       |> merge(vault_input.output.value)
 
   trace_if_false(
-    "input tree value is not equal to output one",
+    "input tree value is not equal to output value",
     tree_input.output.value == tree_output.value,
   ) && trace_if_false(
     "commitment is already in the tree",

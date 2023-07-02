@@ -1,18 +1,10 @@
-import {
-  Lucid,
-  Emulator,
-  fromUnit,
-  toText,
-  Data,
-  generatePrivateKey,
-  Provider,
-} from 'lucid-cardano';
+import { Lucid, Emulator, generatePrivateKey, Provider } from 'lucid-cardano';
 import { jest } from '@jest/globals';
 
-import { hash, hashConcat } from '@mixer/crypto';
+import { hash, hashConcat, toHex } from '@mixer/crypto';
 
 import { deployPool, deposit, withdraw } from '../transactions';
-import { MixerDatum } from '../scheme';
+import { printLedger } from '../utils';
 
 const mainMnemonicPhrase =
   'edge shadow topple brush online kid quit north muffin donate accident endorse other grant sleep';
@@ -109,7 +101,7 @@ describe('offchain', () => {
       poolInfo,
       recipientAddress,
       BigInt(2000000),
-      nullifier1
+      toHex(nullifier1)
     );
     emulator.awaitBlock(1);
 
@@ -140,7 +132,7 @@ describe('offchain', () => {
       poolInfo,
       recipientAddress,
       BigInt(2000000),
-      nullifier1
+      toHex(nullifier1.slice(0, 31))
     );
     emulator.awaitBlock(1);
 
@@ -151,7 +143,7 @@ describe('offchain', () => {
         poolInfo,
         recipientAddress,
         BigInt(2000000),
-        nullifier1
+        toHex(nullifier1.slice(0, 31))
       );
       emulator.awaitBlock(1);
     } catch (error) {
@@ -188,7 +180,7 @@ describe('offchain', () => {
         poolInfo,
         await fakeLucid.wallet.address(),
         BigInt(2000000),
-        nullifier1
+        toHex(nullifier1.slice(0, 31))
       );
       emulator.awaitBlock(1);
     } catch (error) {
@@ -219,43 +211,4 @@ async function mkLucid(seed?: string, provider?: Provider) {
 async function getAddress(seed?: string) {
   const lucid = await mkLucid(seed);
   return lucid.wallet.address();
-}
-
-function printLedger(ledger: Emulator['ledger']) {
-  return Object.keys(ledger).reduce((newLedger, txHash) => {
-    const { address, assets, datum, datumHash, scriptRef, outputIndex } =
-      ledger[txHash].utxo;
-
-    const newAssets = Object.keys(assets).reduce((newAssets, unit) => {
-      const assetDetails = fromUnit(unit);
-
-      newAssets[assetDetails.policyId] = {
-        tokenName: assetDetails.name ? toText(assetDetails.name) : null,
-        quantity: assets[unit],
-      };
-
-      return newAssets;
-    }, {} as any);
-
-    const parsedDatum = datum
-      ? (() => {
-          try {
-            return Data.from(datum, MixerDatum as never);
-          } catch (error) {
-            return datum;
-          }
-        })()
-      : undefined;
-
-    newLedger[txHash] = {
-      address,
-      assets: newAssets,
-      datum: parsedDatum,
-      datumHash,
-      hasScriptRef: Boolean(scriptRef),
-      outputIndex,
-    };
-
-    return newLedger;
-  }, {} as any);
 }

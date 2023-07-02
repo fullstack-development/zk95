@@ -1,4 +1,4 @@
-import { Address, Data, Lucid, addAssets, toHex } from 'lucid-cardano';
+import { Address, Data, Lucid, addAssets } from 'lucid-cardano';
 import { assert } from '@mixer/utils';
 import { MixerDatum, MixerRedeemer } from '../../scheme';
 import { PoolInfo } from '../../types';
@@ -16,7 +16,7 @@ export async function withdraw(
   >,
   recipient: Address,
   feeLovelace: bigint,
-  nullifier: Uint8Array
+  nullifierHashHex: string
 ) {
   const depositUTxOs = await lucid.utxosAt(address);
 
@@ -46,7 +46,7 @@ export async function withdraw(
 
   const redeemer = Data.to<MixerRedeemer>(
     {
-      Withdraw: [toHex(nullifier)],
+      Withdraw: [nullifierHashHex],
     },
     MixerRedeemer as never
   );
@@ -60,7 +60,7 @@ export async function withdraw(
 
   const outputDatum = Data.to<MixerDatum>(
     {
-      Nullifiers: [inputDatum.Nullifiers[0].concat([toHex(nullifier)])],
+      Nullifiers: [inputDatum.Nullifiers[0].concat([nullifierHashHex])],
     },
     MixerDatum as never
   );

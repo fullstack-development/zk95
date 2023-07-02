@@ -48,7 +48,7 @@ export function transactionWatcherService(
 
   const watchEffect$ = from(txHashesToWatch$).pipe(
     filter((txHashes) => txHashes.length > 0),
-    throttle(() => interval(5000), { leading: true, trailing: true }),
+    throttle(() => interval(6000), { leading: true, trailing: true }),
     switchMap((txHashes) => provider.getTxsInfo(txHashes)),
     tap((responseTxStatuses) => {
       txHashesInfo$.modify((txHashesInfo) => {

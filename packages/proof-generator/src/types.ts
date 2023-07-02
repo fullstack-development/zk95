@@ -1,4 +1,13 @@
-export type Proof = object;
+export type Proof = {
+  proof: object;
+  publicSignals: [
+    string, // signal input root // *SHA-ARRAY-TRUNK* // base10-String 31 bytes little-indean
+    string, // signal input nullifierHash; // *SHA-ARRAY-TRUNK* // base10-String 31 bytes little-indean
+    string, //signal input recipient;
+    string, // signal input relayer;
+    string //signal input fee;
+  ];
+};
 
 export type CircuitInput = {
   root: string; //bigint-String 31 bytes little-endian

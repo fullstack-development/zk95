@@ -43,9 +43,9 @@ export async function deployPool(
   const vaultTokenUnit = policyId + fromText(vaultTokenName);
   const nullifiersTokenUnit = policyId + fromText(nullifiersTokenName);
   const mixerAsset: Assets = {
-    [treeTokenUnit]: BigInt(1),
-    [vaultTokenUnit]: BigInt(1),
-    [nullifiersTokenUnit]: BigInt(1),
+    [treeTokenUnit]: 1n,
+    [vaultTokenUnit]: 1n,
+    [nullifiersTokenUnit]: 1n,
   };
 
   const emptyMerkleTree = makeMerkleTree({
@@ -58,7 +58,7 @@ export async function deployPool(
     {
       Tree: [
         {
-          root: toHex(emptyMerkleTree.root.slice(1)),
+          root: toHex(emptyMerkleTree.root),
           leafs: [],
         },
       ],
@@ -94,8 +94,8 @@ export async function deployPool(
         inline: treeDatum,
       },
       {
-        [treeTokenUnit]: BigInt(1),
-        lovelace: BigInt(2000000),
+        [treeTokenUnit]: 1n,
+        lovelace: 5_000_000n,
       }
     )
     .payToContract(
@@ -104,8 +104,8 @@ export async function deployPool(
         inline: nullifiersDatum,
       },
       {
-        [nullifiersTokenUnit]: BigInt(1),
-        lovelace: BigInt(2000000),
+        [nullifiersTokenUnit]: 1n,
+        lovelace: 5_000_000n,
       }
     )
     .payToContract(
@@ -113,7 +113,7 @@ export async function deployPool(
       {
         inline: vaultDatum,
       },
-      { [vaultTokenUnit]: BigInt(1) }
+      { [vaultTokenUnit]: 1n }
     )
     .payToAddressWithData(
       mixerAddress,

@@ -16,8 +16,12 @@ export function toHex(value: Uint8Array): string {
   return Buffer.from(value).toString('hex');
 }
 
-export function toBigInt(value: Uint8Array): bigint {
-  return BigInt('0x' + toHex(value));
+export function toBigInt(value: Uint8Array | string): bigint {
+  return BigInt('0x' + (typeof value === 'string' ? value : toHex(value)));
+}
+
+export function fromBigInt(value: bigint): Uint8Array {
+  return Buffer.from(value.toString(16), 'hex');
 }
 
 export function fromHex(value: string): Uint8Array {

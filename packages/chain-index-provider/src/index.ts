@@ -4,8 +4,9 @@ import { mkDevnetProvider } from './devnet-provider';
 import type { ChainIndexProvider } from './types';
 
 export * from './types';
+export { mkKoiosProvider, mkDevnetProvider };
 export const CHAIN_INDEX_PROVIDE_KEY = 'chainIndexProvider';
 export const mkChainIndexProvider = injectable(
   CHAIN_INDEX_PROVIDE_KEY,
-  (): ChainIndexProvider => mkDevnetProvider('http://localhost:3001')
+  (): ChainIndexProvider => mkKoiosProvider('https://preprod.koios.rest/api/v0')
 );

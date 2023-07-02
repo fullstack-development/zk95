@@ -1,9 +1,9 @@
 import fs from 'node:fs';
-import { Emulator, Lucid, getAddressDetails } from 'lucid-cardano';
+import { Emulator, Lucid } from 'lucid-cardano';
 import cors from 'cors';
 import express from 'express';
 
-import { deployPool } from '@mixer/offchain';
+import { deployPool, printLedger } from '@mixer/offchain';
 
 const host = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ? Number(process.env.PORT) : 3001;
@@ -101,6 +101,10 @@ app.post('/submit', async (req, res, next) => {
     const txHash = await emulator.submitTx(tx);
     emulator.awaitBlock(1);
     res.json(txHash);
+    fs.writeFileSync(
+      './tmp/devnet-state.json',
+      serialize(printLedger(emulator.ledger), 2)
+    );
   } catch (error) {
     next(error);
   }
@@ -113,9 +117,9 @@ app.listen(port, host, () => {
 async function setupDevnet() {
   const poolsNominals = [
     100_000_000n,
-    200_000_000n,
-    300_000_000n,
-    400_000_000n,
+    // 200_000_000n,
+    // 300_000_000n,
+    // 400_000_000n,
   ];
   const lucid = (await Lucid.new(emulator, 'Custom')).selectWalletFromSeed(
     mainMnemonicPhrase
@@ -133,6 +137,11 @@ async function setupDevnet() {
     );
     emulator.awaitBlock(1);
 
+    fs.writeFileSync(
+      './tmp/devnet-state.json',
+      serialize(printLedger(emulator.ledger), 2)
+    );
+
     if (!fs.existsSync('pools')) {
       fs.mkdirSync('pools');
     }
@@ -144,7 +153,11 @@ async function setupDevnet() {
   }
 }
 
-const serialize = (data: unknown) =>
-  JSON.stringify(data, (key, value) =>
-    typeof value === 'bigint' ? value.toString() + 'n' : value
+function serialize(data: unknown, space?: string | number) {
+  return JSON.stringify(
+    data,
+    (key, value) =>
+      typeof value === 'bigint' ? value.toString() + 'n' : value,
+    space
   );
+}

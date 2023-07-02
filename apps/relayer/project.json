@@ -20,7 +20,7 @@
       ]
     },
     "serve": {
-      "command": "node --experimental-vm-modules dist/apps/relayer/apps/relayer/src/main.js",
+      "command": "npx dotenv -e apps/relayer/.env node dist/apps/relayer/apps/relayer/src/main.js",
       "dependsOn": [
         {
           "projects": "self",

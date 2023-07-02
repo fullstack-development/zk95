@@ -2,8 +2,8 @@
 
 exports[`offchain deploy pool: deployment ledger 1`] = `
 {
-  "a20bd421af51eb92cb3000fa8423e9d5124ec238583e39cdafec944b62750c340": {
-    "address": "addr_test1wrfygkz4zfg466ne68mezx240zj28098l33zxqld2s2u79slxrwq0",
+  "07015648fba33386ee13528cb5334329adfa333ce9c844717a0ddf90d83b61070": {
+    "address": "addr_test1wptjzydqe8zl2yl797w94t00khurwk5dujdrr2k4sh4xqvq39f38k",
     "assets": {
       "516feef38e451685a9043aa91b26191f8d4c1cb20c6d93f00e9c8368": {
         "quantity": 1n,
@@ -18,7 +18,7 @@ exports[`offchain deploy pool: deployment ledger 1`] = `
       "Tree": [
         {
           "leafs": [],
-          "root": "6e4171d3e3e1c7f39a7b4b0d94509bdd3e3ef44ce3c0d2f3e9d43aaf160b28",
+          "root": "4f6e4171d3e3e1c7f39a7b4b0d94509bdd3e3ef44ce3c0d2f3e9d43aaf160b28",
         },
       ],
     },
@@ -26,8 +26,8 @@ exports[`offchain deploy pool: deployment ledger 1`] = `
     "hasScriptRef": false,
     "outputIndex": 0,
   },
-  "a20bd421af51eb92cb3000fa8423e9d5124ec238583e39cdafec944b62750c341": {
-    "address": "addr_test1wrfygkz4zfg466ne68mezx240zj28098l33zxqld2s2u79slxrwq0",
+  "07015648fba33386ee13528cb5334329adfa333ce9c844717a0ddf90d83b61071": {
+    "address": "addr_test1wptjzydqe8zl2yl797w94t00khurwk5dujdrr2k4sh4xqvq39f38k",
     "assets": {
       "516feef38e451685a9043aa91b26191f8d4c1cb20c6d93f00e9c8368": {
         "quantity": 1n,
@@ -47,8 +47,8 @@ exports[`offchain deploy pool: deployment ledger 1`] = `
     "hasScriptRef": false,
     "outputIndex": 1,
   },
-  "a20bd421af51eb92cb3000fa8423e9d5124ec238583e39cdafec944b62750c342": {
-    "address": "addr_test1wrfygkz4zfg466ne68mezx240zj28098l33zxqld2s2u79slxrwq0",
+  "07015648fba33386ee13528cb5334329adfa333ce9c844717a0ddf90d83b61072": {
+    "address": "addr_test1wptjzydqe8zl2yl797w94t00khurwk5dujdrr2k4sh4xqvq39f38k",
     "assets": {
       "516feef38e451685a9043aa91b26191f8d4c1cb20c6d93f00e9c8368": {
         "quantity": 1n,
@@ -64,11 +64,11 @@ exports[`offchain deploy pool: deployment ledger 1`] = `
     "hasScriptRef": false,
     "outputIndex": 2,
   },
-  "a20bd421af51eb92cb3000fa8423e9d5124ec238583e39cdafec944b62750c343": {
-    "address": "addr_test1wrfygkz4zfg466ne68mezx240zj28098l33zxqld2s2u79slxrwq0",
+  "07015648fba33386ee13528cb5334329adfa333ce9c844717a0ddf90d83b61073": {
+    "address": "addr_test1wptjzydqe8zl2yl797w94t00khurwk5dujdrr2k4sh4xqvq39f38k",
     "assets": {
       "lovelace": {
-        "quantity": 24067040n,
+        "quantity": 24011010n,
         "tokenName": null,
       },
     },
@@ -77,11 +77,11 @@ exports[`offchain deploy pool: deployment ledger 1`] = `
     "hasScriptRef": true,
     "outputIndex": 3,
   },
-  "a20bd421af51eb92cb3000fa8423e9d5124ec238583e39cdafec944b62750c344": {
+  "07015648fba33386ee13528cb5334329adfa333ce9c844717a0ddf90d83b61074": {
     "address": "addr_test1qpuks2fj3l0umdy8h828zkz25sslwnrtzs7weed04lma8dkj7fmpe62uxcuwe5anz4kks022pj6fxa0mcfz52t9a9vysx0qvdu",
     "assets": {
       "lovelace": {
-        "quantity": 2970396466n,
+        "quantity": 2970453024n,
         "tokenName": null,
       },
     },
@@ -95,8 +95,42 @@ exports[`offchain deploy pool: deployment ledger 1`] = `
 
 exports[`offchain deposit: deposit ledger 1`] = `
 {
-  "478298643c4a3abb3d2717ee3e78f38d02dc0262f7740a87f508691d625adea90": {
-    "address": "addr_test1wrfygkz4zfg466ne68mezx240zj28098l33zxqld2s2u79slxrwq0",
+  "07015648fba33386ee13528cb5334329adfa333ce9c844717a0ddf90d83b61071": {
+    "address": "addr_test1wptjzydqe8zl2yl797w94t00khurwk5dujdrr2k4sh4xqvq39f38k",
+    "assets": {
+      "516feef38e451685a9043aa91b26191f8d4c1cb20c6d93f00e9c8368": {
+        "quantity": 1n,
+        "tokenName": "Nullifiers",
+      },
+      "lovelace": {
+        "quantity": 2000000n,
+        "tokenName": null,
+      },
+    },
+    "datum": {
+      "Nullifiers": [
+        [],
+      ],
+    },
+    "datumHash": undefined,
+    "hasScriptRef": false,
+    "outputIndex": 1,
+  },
+  "07015648fba33386ee13528cb5334329adfa333ce9c844717a0ddf90d83b61073": {
+    "address": "addr_test1wptjzydqe8zl2yl797w94t00khurwk5dujdrr2k4sh4xqvq39f38k",
+    "assets": {
+      "lovelace": {
+        "quantity": 24011010n,
+        "tokenName": null,
+      },
+    },
+    "datum": undefined,
+    "datumHash": undefined,
+    "hasScriptRef": true,
+    "outputIndex": 3,
+  },
+  "c39cdcfced317d0e9989a23ef5292a1ca20f8061e5be85c451645956dd430a0a0": {
+    "address": "addr_test1wptjzydqe8zl2yl797w94t00khurwk5dujdrr2k4sh4xqvq39f38k",
     "assets": {
       "516feef38e451685a9043aa91b26191f8d4c1cb20c6d93f00e9c8368": {
         "quantity": 1n,
@@ -113,7 +147,7 @@ exports[`offchain deposit: deposit ledger 1`] = `
           "leafs": [
             "6a19f0fb4be54511524bcd5b0c98b38da1ee049a39735c39311e10336024436f",
           ],
-          "root": "2ff91aa4bc7c37075ff1c4911fe6fef7a3df5496cdb5e1767b1998db3c7489",
+          "root": "572ff91aa4bc7c37075ff1c4911fe6fef7a3df5496cdb5e1767b1998db3c7489",
         },
       ],
     },
@@ -121,8 +155,8 @@ exports[`offchain deposit: deposit ledger 1`] = `
     "hasScriptRef": false,
     "outputIndex": 0,
   },
-  "478298643c4a3abb3d2717ee3e78f38d02dc0262f7740a87f508691d625adea91": {
-    "address": "addr_test1wrfygkz4zfg466ne68mezx240zj28098l33zxqld2s2u79slxrwq0",
+  "c39cdcfced317d0e9989a23ef5292a1ca20f8061e5be85c451645956dd430a0a1": {
+    "address": "addr_test1wptjzydqe8zl2yl797w94t00khurwk5dujdrr2k4sh4xqvq39f38k",
     "assets": {
       "516feef38e451685a9043aa91b26191f8d4c1cb20c6d93f00e9c8368": {
         "quantity": 1n,
@@ -138,11 +172,11 @@ exports[`offchain deposit: deposit ledger 1`] = `
     "hasScriptRef": false,
     "outputIndex": 1,
   },
-  "478298643c4a3abb3d2717ee3e78f38d02dc0262f7740a87f508691d625adea92": {
+  "c39cdcfced317d0e9989a23ef5292a1ca20f8061e5be85c451645956dd430a0a2": {
     "address": "addr_test1qpuks2fj3l0umdy8h828zkz25sslwnrtzs7weed04lma8dkj7fmpe62uxcuwe5anz4kks022pj6fxa0mcfz52t9a9vysx0qvdu",
     "assets": {
       "lovelace": {
-        "quantity": 2870130410n,
+        "quantity": 2870187048n,
         "tokenName": null,
       },
     },
@@ -151,8 +185,13 @@ exports[`offchain deposit: deposit ledger 1`] = `
     "hasScriptRef": false,
     "outputIndex": 2,
   },
-  "a20bd421af51eb92cb3000fa8423e9d5124ec238583e39cdafec944b62750c341": {
-    "address": "addr_test1wrfygkz4zfg466ne68mezx240zj28098l33zxqld2s2u79slxrwq0",
+}
+`;
+
+exports[`offchain double deposit: double deposit ledger 1`] = `
+{
+  "07015648fba33386ee13528cb5334329adfa333ce9c844717a0ddf90d83b61071": {
+    "address": "addr_test1wptjzydqe8zl2yl797w94t00khurwk5dujdrr2k4sh4xqvq39f38k",
     "assets": {
       "516feef38e451685a9043aa91b26191f8d4c1cb20c6d93f00e9c8368": {
         "quantity": 1n,
@@ -172,11 +211,11 @@ exports[`offchain deposit: deposit ledger 1`] = `
     "hasScriptRef": false,
     "outputIndex": 1,
   },
-  "a20bd421af51eb92cb3000fa8423e9d5124ec238583e39cdafec944b62750c343": {
-    "address": "addr_test1wrfygkz4zfg466ne68mezx240zj28098l33zxqld2s2u79slxrwq0",
+  "07015648fba33386ee13528cb5334329adfa333ce9c844717a0ddf90d83b61073": {
+    "address": "addr_test1wptjzydqe8zl2yl797w94t00khurwk5dujdrr2k4sh4xqvq39f38k",
     "assets": {
       "lovelace": {
-        "quantity": 24067040n,
+        "quantity": 24011010n,
         "tokenName": null,
       },
     },
@@ -185,13 +224,8 @@ exports[`offchain deposit: deposit ledger 1`] = `
     "hasScriptRef": true,
     "outputIndex": 3,
   },
-}
-`;
-
-exports[`offchain double deposit: double deposit ledger 1`] = `
-{
-  "0b9d09dfb9f5e8b968e2632f1da37c247b3598a5b5c73a1ae32ad169d2b89cd10": {
-    "address": "addr_test1wrfygkz4zfg466ne68mezx240zj28098l33zxqld2s2u79slxrwq0",
+  "91e1edd94e99356529e7261f53d0dcf9a49caa511003c233e6e5fc72e57415ff0": {
+    "address": "addr_test1wptjzydqe8zl2yl797w94t00khurwk5dujdrr2k4sh4xqvq39f38k",
     "assets": {
       "516feef38e451685a9043aa91b26191f8d4c1cb20c6d93f00e9c8368": {
         "quantity": 1n,
@@ -209,7 +243,7 @@ exports[`offchain double deposit: double deposit ledger 1`] = `
             "e1587401f42aa18899004e6b313f62b1732dd9860ac4085f4790f62b24b7dec3",
             "bdde83d5b26cd7677153640af3ce94739df8d51443024f2933abf843b8c1b009",
           ],
-          "root": "1c4b51b53c4ed72deafb6f3e9ebca853bc9f6db6828fad536d20d1fa84b3f1",
+          "root": "f41c4b51b53c4ed72deafb6f3e9ebca853bc9f6db6828fad536d20d1fa84b3f1",
         },
       ],
     },
@@ -217,8 +251,8 @@ exports[`offchain double deposit: double deposit ledger 1`] = `
     "hasScriptRef": false,
     "outputIndex": 0,
   },
-  "0b9d09dfb9f5e8b968e2632f1da37c247b3598a5b5c73a1ae32ad169d2b89cd11": {
-    "address": "addr_test1wrfygkz4zfg466ne68mezx240zj28098l33zxqld2s2u79slxrwq0",
+  "91e1edd94e99356529e7261f53d0dcf9a49caa511003c233e6e5fc72e57415ff1": {
+    "address": "addr_test1wptjzydqe8zl2yl797w94t00khurwk5dujdrr2k4sh4xqvq39f38k",
     "assets": {
       "516feef38e451685a9043aa91b26191f8d4c1cb20c6d93f00e9c8368": {
         "quantity": 1n,
@@ -234,11 +268,11 @@ exports[`offchain double deposit: double deposit ledger 1`] = `
     "hasScriptRef": false,
     "outputIndex": 1,
   },
-  "0b9d09dfb9f5e8b968e2632f1da37c247b3598a5b5c73a1ae32ad169d2b89cd12": {
+  "91e1edd94e99356529e7261f53d0dcf9a49caa511003c233e6e5fc72e57415ff2": {
     "address": "addr_test1qpuks2fj3l0umdy8h828zkz25sslwnrtzs7weed04lma8dkj7fmpe62uxcuwe5anz4kks022pj6fxa0mcfz52t9a9vysx0qvdu",
     "assets": {
       "lovelace": {
-        "quantity": 2769861218n,
+        "quantity": 2769917937n,
         "tokenName": null,
       },
     },
@@ -247,32 +281,16 @@ exports[`offchain double deposit: double deposit ledger 1`] = `
     "hasScriptRef": false,
     "outputIndex": 2,
   },
-  "a20bd421af51eb92cb3000fa8423e9d5124ec238583e39cdafec944b62750c341": {
-    "address": "addr_test1wrfygkz4zfg466ne68mezx240zj28098l33zxqld2s2u79slxrwq0",
-    "assets": {
-      "516feef38e451685a9043aa91b26191f8d4c1cb20c6d93f00e9c8368": {
-        "quantity": 1n,
-        "tokenName": "Nullifiers",
-      },
-      "lovelace": {
-        "quantity": 2000000n,
-        "tokenName": null,
-      },
-    },
-    "datum": {
-      "Nullifiers": [
-        [],
-      ],
-    },
-    "datumHash": undefined,
-    "hasScriptRef": false,
-    "outputIndex": 1,
-  },
-  "a20bd421af51eb92cb3000fa8423e9d5124ec238583e39cdafec944b62750c343": {
-    "address": "addr_test1wrfygkz4zfg466ne68mezx240zj28098l33zxqld2s2u79slxrwq0",
+}
+`;
+
+exports[`offchain withdraw: withdraw ledger 1`] = `
+{
+  "07015648fba33386ee13528cb5334329adfa333ce9c844717a0ddf90d83b61073": {
+    "address": "addr_test1wptjzydqe8zl2yl797w94t00khurwk5dujdrr2k4sh4xqvq39f38k",
     "assets": {
       "lovelace": {
-        "quantity": 24067040n,
+        "quantity": 24011010n,
         "tokenName": null,
       },
     },
@@ -281,13 +299,8 @@ exports[`offchain double deposit: double deposit ledger 1`] = `
     "hasScriptRef": true,
     "outputIndex": 3,
   },
-}
-`;
-
-exports[`offchain withdraw: withdraw ledger 1`] = `
-{
-  "0110cfe24e5c84ad373443ba6f25ecb831912fbd14f99d5e80228d17ae5ea3d90": {
-    "address": "addr_test1wrfygkz4zfg466ne68mezx240zj28098l33zxqld2s2u79slxrwq0",
+  "c95224e21035fa2fd214b1e92872b394186f90c32a783d6420990de2cd2fd4360": {
+    "address": "addr_test1wptjzydqe8zl2yl797w94t00khurwk5dujdrr2k4sh4xqvq39f38k",
     "assets": {
       "516feef38e451685a9043aa91b26191f8d4c1cb20c6d93f00e9c8368": {
         "quantity": 1n,
@@ -309,8 +322,8 @@ exports[`offchain withdraw: withdraw ledger 1`] = `
     "hasScriptRef": false,
     "outputIndex": 0,
   },
-  "0110cfe24e5c84ad373443ba6f25ecb831912fbd14f99d5e80228d17ae5ea3d91": {
-    "address": "addr_test1wrfygkz4zfg466ne68mezx240zj28098l33zxqld2s2u79slxrwq0",
+  "c95224e21035fa2fd214b1e92872b394186f90c32a783d6420990de2cd2fd4361": {
+    "address": "addr_test1wptjzydqe8zl2yl797w94t00khurwk5dujdrr2k4sh4xqvq39f38k",
     "assets": {
       "516feef38e451685a9043aa91b26191f8d4c1cb20c6d93f00e9c8368": {
         "quantity": 1n,
@@ -326,7 +339,7 @@ exports[`offchain withdraw: withdraw ledger 1`] = `
     "hasScriptRef": false,
     "outputIndex": 1,
   },
-  "0110cfe24e5c84ad373443ba6f25ecb831912fbd14f99d5e80228d17ae5ea3d92": {
+  "c95224e21035fa2fd214b1e92872b394186f90c32a783d6420990de2cd2fd4362": {
     "address": "addr_test1qz4m06a7vfrlxecwz9cq5d85htr0h8qzkglse39e02xd790q0lh95wfaeym84qw5th90mhw0uanx2sxdxzpwhl9eq2csk66908",
     "assets": {
       "lovelace": {
@@ -339,11 +352,11 @@ exports[`offchain withdraw: withdraw ledger 1`] = `
     "hasScriptRef": false,
     "outputIndex": 2,
   },
-  "0110cfe24e5c84ad373443ba6f25ecb831912fbd14f99d5e80228d17ae5ea3d93": {
+  "c95224e21035fa2fd214b1e92872b394186f90c32a783d6420990de2cd2fd4363": {
     "address": "addr_test1qpuks2fj3l0umdy8h828zkz25sslwnrtzs7weed04lma8dkj7fmpe62uxcuwe5anz4kks022pj6fxa0mcfz52t9a9vysx0qvdu",
     "assets": {
       "lovelace": {
-        "quantity": 2871871885n,
+        "quantity": 2871932301n,
         "tokenName": null,
       },
     },
@@ -352,8 +365,8 @@ exports[`offchain withdraw: withdraw ledger 1`] = `
     "hasScriptRef": false,
     "outputIndex": 3,
   },
-  "8e14b76f36d8ce0ac065403907749f18f31ce6c70bb2ec7c74178d58192d6f560": {
-    "address": "addr_test1wrfygkz4zfg466ne68mezx240zj28098l33zxqld2s2u79slxrwq0",
+  "f4205fd1dd09178a283846cb836c52a88f2dd0ece8ae7856ef92234414ff2ff60": {
+    "address": "addr_test1wptjzydqe8zl2yl797w94t00khurwk5dujdrr2k4sh4xqvq39f38k",
     "assets": {
       "516feef38e451685a9043aa91b26191f8d4c1cb20c6d93f00e9c8368": {
         "quantity": 1n,
@@ -370,26 +383,13 @@ exports[`offchain withdraw: withdraw ledger 1`] = `
           "leafs": [
             "e9e19a86818cb673ece879e6727cfaaa9495a08337738f697025ea5263e847c4",
           ],
-          "root": "80e7f99be3734e72d5e68710b0c35573db6c08ce21166d47cce9dbbe544353",
+          "root": "8d80e7f99be3734e72d5e68710b0c35573db6c08ce21166d47cce9dbbe544353",
         },
       ],
     },
     "datumHash": undefined,
     "hasScriptRef": false,
     "outputIndex": 0,
-  },
-  "a20bd421af51eb92cb3000fa8423e9d5124ec238583e39cdafec944b62750c343": {
-    "address": "addr_test1wrfygkz4zfg466ne68mezx240zj28098l33zxqld2s2u79slxrwq0",
-    "assets": {
-      "lovelace": {
-        "quantity": 24067040n,
-        "tokenName": null,
-      },
-    },
-    "datum": undefined,
-    "datumHash": undefined,
-    "hasScriptRef": true,
-    "outputIndex": 3,
   },
 }
 `;
