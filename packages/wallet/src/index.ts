@@ -1,3 +1,3 @@
 export { mkWalletConnect } from './lib/wallet-connect';
-export { mkWalletModel, SUPPORTED_WALLETS } from './lib/model';
-export type { WalletModel } from './lib/model';
+export { mkWalletService as mkWalletModel } from './lib/service';
+export type { WalletService as WalletModel } from './lib/service';

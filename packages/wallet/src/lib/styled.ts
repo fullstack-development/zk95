@@ -13,7 +13,7 @@ export const Menu = styled(MenuList)`
   position: absolute;
   left: 0;
   display: grid;
-  grid-template-columns: 25px 1fr;
+  grid-template-columns: 30px 1fr;
   width: 300px;
   bottom: 100%;
 `;
@@ -41,7 +41,31 @@ export const MenuItem = styled(MenuListItem)`
 `;
 
 export const MenuSideBar = styled.div`
+  display: grid;
+  align-content: center;
+  grid-template-columns: max-content max-content;
+  grid-template-rows: 100%;
+  column-gap: 6px;
   height: 100%;
   width: 100%;
-  background-color: ${({ theme }) => theme.hoverBackground};
+  writing-mode: vertical-lr;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  padding: 8px 0;
+  font-family: Aharoni, Helvetica, sans-serif;
+  font-weight: 900;
+  font-size: 28px;
+  color: ${({ theme }) => theme.flatLight};
+  background-color: ${({ theme }) => theme.flatDark};
+
+  & > span {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+
+  & > span:last-child {
+    letter-spacing: -2px;
+    font-weight: 200;
+  }
 `;

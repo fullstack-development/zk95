@@ -3,11 +3,11 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "frontend": "npx nx serve mixer",
-    "deploy": "npx nx run mixer:deploy",
-    "relayer": "npx nx run relayer:serve",
-    "build-onchain": "npx nx build mixer",
-    "deploy-pool": "npx nx deploy pool-deployment"
+    "frontend:serve": "npx nx serve mixer",
+    "frontend:deploy": "npx nx run mixer:deploy",
+    "relayer:serve": "npx nx run relayer:serve",
+    "onchain:build": "npx nx build mixer",
+    "pool:deploy": "npx nx deploy pool-deployment"
   },
   "private": true,
   "devDependencies": {

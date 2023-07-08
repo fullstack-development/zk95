@@ -56,7 +56,7 @@ const WithdrawRequestBody = z.object({
 });
 
 const lucid = (
-  await Lucid.new(new Blockfrost(PROVIDER_URL, PROVIDER_API_KEY), 'Custom')
+  await Lucid.new(new Blockfrost(PROVIDER_URL, PROVIDER_API_KEY), 'Preprod')
 ).selectWalletFromSeed(MNEMONIC);
 
 const app = express();
@@ -124,6 +124,10 @@ app.post('/withdraw', async (req, res, next) => {
   } catch (error) {
     next((error as Error).message);
   }
+});
+
+app.get('/ping', (req, res) => {
+  res.send();
 });
 
 app.listen(PORT, HOST, () => {

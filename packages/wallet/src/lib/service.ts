@@ -1,45 +1,27 @@
-import {
-  EMPTY,
-  defer,
-  filter,
-  first,
-  from,
-  map,
-  mergeMap,
-  of,
-  switchMap,
-} from 'rxjs';
+import { EMPTY, filter, first, from, map, mergeMap, of, switchMap } from 'rxjs';
 import { newAtom, Property } from '@frp-ts/core';
 import { WalletApi, Cardano, C, fromHex } from 'lucid-cardano';
 
 import { injectable } from '@mixer/injectable';
 import { fromObservable } from '@mixer/utils';
 import { withEff } from '@mixer/eff';
+import { SUPPORTED_WALLETS, WalletKey } from './supported-wallets';
 
-export const SUPPORTED_WALLETS = [
-  'begin',
-  'eternl',
-  'flint',
-  'lace',
-  'nami',
-  'nufi',
-  'gerowallet',
-  'typhoncip30',
-];
+export type WalletInfo = Pick<
+  Cardano[string],
+  'apiVersion' | 'icon' | 'name'
+> & { key: WalletKey };
 
-type WalletInfo = Pick<Cardano[string], 'apiVersion' | 'icon' | 'name'> & {
-  key: string;
-};
-
-export type WalletModel = {
+export type WalletService = {
   wallet$: Property<{ api: WalletApi; info: WalletInfo } | null>;
   adaBalance$: Property<bigint>;
   address$: Property<string | null>;
-  availableWallets$: Property<WalletInfo[]>;
-  connectWallet: (walletName: string) => Promise<void>;
+  supportedWallets: typeof SUPPORTED_WALLETS;
+  installedWallets: Partial<Record<WalletKey, WalletInfo>>;
+  connectWallet: (walletKey: WalletKey) => Promise<void>;
 };
 
-export const mkWalletModel = injectable(() => {
+export const mkWalletService = injectable(() => {
   const wallet$ = newAtom<{ api: WalletApi; info: WalletInfo } | null>(null);
 
   const adaBalance$ = from(wallet$).pipe(
@@ -59,11 +41,11 @@ export const mkWalletModel = injectable(() => {
     )
   );
 
-  const connectWallet = async (key: string) => {
+  const connectWallet = async (key: WalletKey) => {
     if (window.cardano === undefined) return;
 
     const installedWallets = getInstalledWallets();
-    const info = installedWallets.find((w) => w.key === key);
+    const info = installedWallets[key];
 
     if (info) {
       try {
@@ -80,21 +62,27 @@ export const mkWalletModel = injectable(() => {
     }
   };
 
-  const getInstalledWallets = (): WalletInfo[] => {
-    if (window.cardano === undefined) return [];
+  const getInstalledWallets = (): Partial<Record<WalletKey, WalletInfo>> => {
+    if (window.cardano === undefined) return {};
 
     return SUPPORTED_WALLETS.filter(
-      (key) => window.cardano[key] !== undefined
-    ).map((key) => ({
-      key,
-      name: window.cardano[key].name,
-      icon: window.cardano[key].icon,
-      apiVersion: window.cardano[key].apiVersion,
-    }));
+      ([key]) => window.cardano[key] !== undefined
+    ).reduce<Partial<Record<WalletKey, WalletInfo>>>(
+      (acc, [key, name, , icon]) => {
+        acc[key] = {
+          key,
+          name,
+          icon,
+          apiVersion: window.cardano[key].apiVersion,
+        };
+        return acc;
+      },
+      {}
+    );
   };
 
   const connectEnabledWalletEffect$ = from(SUPPORTED_WALLETS).pipe(
-    mergeMap((key) =>
+    mergeMap(([key]) =>
       window?.cardano?.[key]
         ? from(
             window.cardano[key]
@@ -103,26 +91,22 @@ export const mkWalletModel = injectable(() => {
           )
         : EMPTY
     ),
-    filter((key): key is string => !!key),
+    filter((key): key is WalletKey => !!key),
     first(null, null),
     switchMap((key) => (key ? connectWallet(key) : EMPTY))
   );
 
   function deserializeValue(value: string): bigint {
-    return BigInt(
-      C.Value.from_bytes(fromHex(value)).coin().to_str()
-    );
+    return BigInt(C.Value.from_bytes(fromHex(value)).coin().to_str());
   }
 
-  return withEff<WalletModel>(
+  return withEff<WalletService>(
     {
       wallet$,
       adaBalance$: fromObservable(adaBalance$, BigInt(0)),
       address$: fromObservable(address$, null),
-      availableWallets$: fromObservable(
-        defer(() => of(getInstalledWallets())),
-        []
-      ),
+      supportedWallets: SUPPORTED_WALLETS,
+      installedWallets: getInstalledWallets(),
       connectWallet,
     },
     connectEnabledWalletEffect$

@@ -9,7 +9,8 @@
     "composite": true
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.ts",
+    "src/verification_key.json"
   ],
   "exclude": [
     "jest.config.ts",

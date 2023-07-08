@@ -7,13 +7,11 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
+    "resolveJsonModule": true,
     "noFallthroughCasesInSwitch": true
   },
   "files": [
-    "../../global.d.ts"
-  ],
-  "include": [
-    "../../global.d.ts"
+    "../../global/modules.d.ts"
   ],
   "references": [
     {

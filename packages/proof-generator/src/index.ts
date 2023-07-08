@@ -12,11 +12,14 @@ import {
 import { Property, newAtom } from '@frp-ts/core';
 import { combineEff } from '@mixer/eff';
 import { mkZKeyLoader } from '@mixer/zkey-loader';
+import { assert } from '@mixer/utils';
 
 import snarkjs from './snarkjs';
 import circuit from './circuit.wasm';
-import { CircuitInput, Proof } from './types';
-import { assert } from '@mixer/utils';
+import vkey from './verification_key.json';
+import type { CircuitInput, Proof } from './types';
+
+export type { Proof };
 
 export type ProofGeneratorService = {
   generationStep$: Property<number | null>;
@@ -26,6 +29,7 @@ export type ProofGeneratorService = {
     tree: MerkleTree,
     recipientAddressHex: string
   ): Observable<Proof>;
+  verify(proof: Proof): Promise<boolean>;
 };
 
 export const mkProofGenerator = injectable(
@@ -39,8 +43,12 @@ export const mkProofGenerator = injectable(
       log: () => generationStep$.modify((v) => (v ?? 0) + 1),
       debug: () => generationStep$.modify((v) => (v ?? 0) + 1),
     };
+
     return {
       generationStep$,
+      verify: ({ proof, publicSignals }) => {
+        return snarkjs.groth16.verify(vkey, publicSignals, proof);
+      },
       generate$: (nullifier, secret, tree, recipientAddressHex) => {
         const commitment = hashConcat(nullifier, secret);
         const merkleProof = tree.buildProof(commitment);

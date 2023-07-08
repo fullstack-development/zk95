@@ -92,7 +92,6 @@ const mkRoot = injectable(
 
 const Root = mkRoot({
   poolsConfig,
-  relayerEndpoint: process.env['NX_RELAYER_ENDPOINT'] ?? '',
   zKeyConfig: {
     url: process.env['NX_ZKEY_STORAGE_URL'] ?? '',
     version: 1,

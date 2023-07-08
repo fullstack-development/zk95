@@ -6,12 +6,13 @@ import { WindowsIcon, UserIcon } from '@mixer/icons';
 import { combineEff } from '@mixer/eff';
 import { useClickOutside } from '@mixer/utils';
 
-import { WalletModel, mkWalletModel } from './model';
+import { WalletService, mkWalletService } from './service';
 import { Root, Menu, MenuItem, MenuSideBar, UserItem } from './styled';
 import { injectable } from '@mixer/injectable';
+import { WalletKey } from './supported-wallets';
 
 export const mkWalletConnect = injectable(
-  mkWalletModel,
+  mkWalletService,
   combineEff((model) => () => {
     const [open, setOpen] = useState(false);
     const wallet = useProperty(model.wallet$);
@@ -37,32 +38,49 @@ export const mkWalletConnect = injectable(
 );
 
 type WalletsListProps = {
-  model: WalletModel;
+  model: WalletService;
   onClose: () => void;
 };
 
 const WalletsList = ({
-  model: { availableWallets$, wallet$, address$, adaBalance$, connectWallet },
+  model: {
+    installedWallets,
+    supportedWallets,
+    wallet$,
+    address$,
+    adaBalance$,
+    connectWallet,
+  },
   onClose,
 }: WalletsListProps) => {
-  const [wallets, address, adaBalance, connectedWallet] = useProperties(
-    availableWallets$,
+  const [address, adaBalance, connectedWallet] = useProperties(
     address$,
     adaBalance$,
     wallet$
   );
   const ref = useClickOutside<HTMLUListElement>(onClose);
-  const isWalletConnected = (name: string) =>
-    connectedWallet?.info.name === name;
+  const isWalletConnected = (key: WalletKey) =>
+    connectedWallet?.info.key === key;
 
-  const handleMenuItemClick = (walletKey: string) => {
-    connectWallet(walletKey);
+  const isWalletInstalled = (key: WalletKey) =>
+    installedWallets[key] !== undefined;
+
+  const handleMenuItemClick = (key: WalletKey) => {
+    connectWallet(key);
+    onClose();
+  };
+
+  const handleWalletInstall = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
     onClose();
   };
 
   return (
     <Menu ref={ref}>
-      <MenuSideBar />
+      <MenuSideBar>
+        <span>Mixuper</span>
+        <span>95</span>
+      </MenuSideBar>
       <div>
         {connectedWallet && (
           <>
@@ -86,23 +104,25 @@ const WalletsList = ({
             <Separator />
           </>
         )}
-        {wallets.map((w) => (
+        {supportedWallets.map(([key, name, url, icon]) => (
           <MenuItem
-            key={w.name}
-            onClick={() => handleMenuItemClick(w.key)}
-            disabled={isWalletConnected(w.name)}
+            key={name}
+            onClick={() =>
+              isWalletInstalled(key)
+                ? handleMenuItemClick(key)
+                : handleWalletInstall(url)
+            }
+            disabled={isWalletConnected(key)}
           >
             <Avatar
               square
               noBorder
-              src={w.icon}
+              src={icon}
               style={
-                isWalletConnected(w.name)
-                  ? { filter: 'grayscale(1)' }
-                  : undefined
+                isWalletConnected(key) ? { filter: 'grayscale(1)' } : undefined
               }
             />
-            {w.name} {isWalletConnected(w.name) && '(Connected)'}
+            {name} {isWalletConnected(key) && '(Connected)'}
           </MenuItem>
         ))}
       </div>
